@@ -1,0 +1,98 @@
+<project name="Account Manager" default="jarfile">
+    <description>
+        Account Manager
+    </description>
+
+  <property environment="env"/>
+
+  <property name="classes" location="classes"/>
+  <property name="source.list" location="source-list"/>
+  <property name="jarfile" location="accounts.jar"/>
+
+  <property name="test.classes" location="test-classes"/>
+  <property name="tests.list" location="tests-list"/>
+
+  <property name="private.docs" location="private-docs"/>
+  <property name="public.docs" location="public-docs"/>
+  <property name="package.docs" location="package-docs"/>
+
+  <target name="jarfile" depends="compile">
+    <jar destfile="${jarfile}" basedir="${classes}"
+	 manifest="manifest.mf"/>
+  </target>
+
+  <target name="compile"
+	description="compile the sources"
+	depends="source-list">
+    <mkdir dir="${classes}"/>
+    <javac srcdir="${basedir}" includesfile="${source.list}"
+	destdir="${classes}" includeantruntime="false"/>
+  </target>
+
+  <target name="tests"
+	description="compile the tests"
+	depends="tests-list,jarfile">
+    <mkdir dir="${test.classes}"/>
+    <javac srcdir="${basedir}" includesfile="${tests.list}"
+	    destdir="${test.classes}" includeantruntime="false">
+	<classpath>
+	    <pathelement location="${classes}"/>
+	    <pathelement path="${env.CLASSPATH}"/>
+	</classpath>
+    </javac>
+  </target>
+
+  <target name="private-docs"
+        description="generate javadoc for private members"
+	depends="source-list">
+    <delete dir="${private.docs}"/>
+    <javadoc destdir="${private.docs}" private="true">
+	<fileset dir="${basedir}" includesfile="${source.list}"/>
+    </javadoc>
+  </target>
+
+  <target name="public-docs"
+          description="generate javadoc for public members only">
+    <delete dir="${public.docs}"/>
+    <javadoc destdir="${public.docs}" public="true">
+	<fileset dir="${basedir}" includesfile="${source.list}"/>
+    </javadoc>
+  </target>
+
+  <target name="package-docs"
+          description="generate javadoc for package-visible members">
+    <delete dir="${package.docs}"/>
+    <javadoc destdir="${package.docs}" package="true">
+	<fileset dir="${basedir}" includesfile="${source.list}"/>
+    </javadoc>
+  </target>
+
+  <target name="source-list"
+          description="find all Java sources under source control">
+    <exec executable="git" output="${source.list}">
+      <arg value="ls-files"/>
+      <arg value="src/jrb"/>
+    </exec>
+  </target>
+
+  <target name="tests-list"
+          description="find all Java tests under hg">
+    <exec executable="hg" output="${tests.list}">
+      <arg value="locate"/>
+      <arg value="--include"/>
+      <arg value="tests/jrb"/>
+      <arg value="*.java"/>
+    </exec>
+  </target>
+
+  <target name="clean" description="remove generated files">
+    <delete dir="${classes}"/>
+    <delete dir="${test.classes}"/>
+    <delete dir="${private.docs}"/>
+    <delete dir="${public.docs}"/>
+    <delete dir="${package.docs}"/>
+    <delete file="${jarfile}"/>
+    <delete file="${source.list}"/>
+    <delete file="${tests.list}"/>
+  </target>
+</project>
