@@ -18,20 +18,20 @@ class AccountStorePanel extends JPanel {
     private JTextField usernameText;
     private JPasswordField passwordText;
 
+    private DefaultListModel<String> descriptionsList;
+
+    private AccountStore myAccountStore;
+
     /**
      */
     public AccountStorePanel() {
 	super();
 
+	myAccountStore = new AccountStore();
+
+	descriptionsList = new DefaultListModel<String>();
+	JList<String> accountList = new JList<String>(descriptionsList);
 	JScrollPane aScrollPane = new JScrollPane();
-	JList<String> accountList = new JList<>();
-	accountList.setModel(new javax.swing.AbstractListModel<String>() {
-	    String[] strings = {
-		"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"
-	    };
-	    public int getSize() { return strings.length; }
-	    public String getElementAt(int i) { return strings[i]; }
-	});
 	aScrollPane.setViewportView(accountList);
 	add(aScrollPane);
 
