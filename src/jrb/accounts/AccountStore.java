@@ -10,32 +10,21 @@ import java.util.TreeMap;
 /**
  */
 class AccountStore {
-    static class AccountData {
-	String description;
-	String username;
-	String password;
-
-	AccountData(String description,
-		    String username, String password) {
-	    this.description = description;
-	    this.username = username;
-	    this.password = password;
-	}
-    }
-    Map<String, AccountData> myAccounts;
+    private Map<String, Account> myAccounts;
 
     AccountStore() {
-	myAccounts = new TreeMap<String, AccountData>();
+	myAccounts = new TreeMap<String, Account>();
     }
 
     public void updateAccount(String url, String description,
 			      String username, String password) {
-	AccountData newAccount;
+	Account newAccount;
 	if (myAccounts.containsKey(url)) {
 	    newAccount = myAccounts.get(url);
+	    newAccount.update(description, username, password);
 	} else {
-	    newAccount = new AccountData(description,
-					 username, password);
+	    newAccount = new Account(url, description,
+				     username, password);
 	}
 	myAccounts.put(url, newAccount);
     }
