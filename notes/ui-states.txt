@@ -1,0 +1,118 @@
+states
+    selected
+	whether the item corresponds to a list selection
+	    true -> "Clear" button is valid
+	    true -> "Update/Create" button is "Update"
+	    false -> "Update/Create" button is "Create"
+	    set true after selecting from list
+	    set false after clicking "Clear"
+    valid
+	whether all fields have valid values
+	    "valid" means, at minimum, "not blank"
+	    true -> "Update/Create" button is valid
+	    evaluate after any change to any field
+    changed
+	whether any field has changed
+	    true -> prompt to discard changes on list select
+	    set true after changing any field
+	    set false after clicking "Clear"
+	    set false after selecting from list
+
+events
+    initialize
+	selected = false;
+	valid = false;
+	changed = false;
+	clear all fields
+	clear list selection
+    field action performed
+	valid = validateFields();
+	changed = true;
+    select from list
+	selected = true;
+	valid = true;
+	changed = false;
+    click "Clear"
+	(re-)initialize
+    click "Update"
+	validate that new data matches no other existing entry
+	update data element
+	delete old map entries
+	add new map entries
+	(re-)initialize
+    click "Create"
+	validate that new data matches no existing entry
+	add new entry with new data
+	(re-)initialize
+
+====
+actions
+    (selected & valid & changed) ->
+	(selected & valid & changed)
+	    update any field so that all fields are valid
+	(selected & valid & !changed)
+	    click on list selection
+		(dialog to confirm dropping changes)
+	(selected & !valid)
+	    update any field with an invalid value
+	(!selected & !valid & !changed)
+	    press "Update" - selected item is updated
+		deselect and clear fields
+	    press "Clear" - selected item is updated
+		deselect and clear fields
+
+    (selected & valid & !changed) ->
+	(selected & valid & changed)
+	    update any field so that all fields are valid
+	(selected & valid & !changed)
+	    click on list selection
+	(selected & !valid)
+	    update any field with an invalid value
+	(!selected & !valid & !changed)
+	    press "Clear" - selected item is updated
+		deselect and clear fields
+
+    (selected & !valid) ->
+	(selected & valid & changed)
+	    update any field so that all fields are valid
+	(selected & valid & !changed)
+	    click on list selection
+		(dialog to confirm dropping changes)
+	(selected & !valid)
+	    update any field with an invalid value
+	(!selected & !valid & !changed)
+	    press "Clear" - selected item is updated
+		deselect and clear fields
+
+    (!selected & valid) ->
+	(selected & valid & !changed)
+	    click on list selection
+		(dialog to confirm dropping changes)
+	(!selected & valid)
+	    update any field so that all fields are valid
+	(!selected & !valid & changed)
+	    update any field with an invalid value
+	(!selected & !valid & !changed)
+	    press "Update" - selected item is updated
+		deselect and clear fields
+	    press "Clear" - selected item is updated
+		deselect and clear fields
+
+    (!selected & !valid & changed) ->
+	(selected & valid & !changed)
+	    click on list selection
+		(dialog to confirm dropping changes)
+	(!selected & valid)
+	    update any field so that all fields are valid
+	(!selected & !valid & changed)
+	    update any field so that all fields are valid
+	(!selected & !valid & !changed)
+	    press "Clear" - selected item is updated
+		deselect and clear fields
+
+    (selected & valid & changed)
+    (selected & valid & !changed)
+    (selected & !valid)
+    (!selected & valid)
+    (!selected & !valid & changed)
+    (!selected & !valid & !changed)

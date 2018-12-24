@@ -1,0 +1,35 @@
+find an existing entry
+    scroll through sidebar list, select
+    fill in Description/URL, click corresponding "Search"
+	("Update/Create" button become "Update")
+
+
+create or modify an existing entry
+    for create
+	click "Clear" button
+	("Update/Create" button become "Create")
+    for modify
+	select entry as for "find ..."
+    change/fill in fields
+    click "Update"
+    URL determines action:
+	new URL means create entry
+	existing URL overwrites entry
+
+
+change URL
+    modify entry
+    delete old entry
+
+
+generate a password
+
+
+delete entry
+
+
+copy password
+    click "Copy" by password
+
+
+see password
