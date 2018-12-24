@@ -40,4 +40,8 @@ class Account {
     public String getPassword() {
 	return myPassword;
     }
+
+    public String toString() {
+	return myDescription;
+    }
 }
