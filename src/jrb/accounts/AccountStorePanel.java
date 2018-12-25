@@ -23,10 +23,11 @@ class AccountStorePanel extends JPanel
     static private final String CLEAR = "Clear";
     static private final String UPDATE = "Update";
     static private final String CREATE = "Create";
+    static private final String GENERATE = "Generate ...";
 
-    static private final String PROTOTYPE_TEXT =
-	    "12345678901234567890123456789012";
-    static JLabel prototypeLabel = new JLabel(PROTOTYPE_TEXT);
+    static private final Account PROTOTYPE_ACCOUNT =
+	new Account("url", "12345678901234567890123456789012",
+		    "user", "pw");
 
     static Account[] stubAccountData = {
 	new Account("url1", "desc1", "u1", "p1"),
@@ -40,22 +41,14 @@ class AccountStorePanel extends JPanel
     private JTextField usernameText;
     private JPasswordField passwordText;
 
+    private Account selectedAccount;
+    private boolean valid;
+    private boolean changed;
+
     // private DefaultListModel<Account> accountListModel;
     JList<Account> accountList;
 
     private AccountStore myAccountStore;
-
-    private boolean selected;
-    private boolean valid;
-    private boolean changed;
-
-    private JLabel createFieldLabel(String text) {
-	JLabel label = new JLabel(text);
-	label.setPreferredSize(prototypeLabel.getPreferredSize());
-	label.setMinimumSize(prototypeLabel.getMinimumSize());
-	label.setMaximumSize(prototypeLabel.getMaximumSize());
-	return label;
-    }
 
     private JComponent createAccountDataPanel() {
 	JPanel fieldsPanel = new JPanel();
@@ -98,14 +91,13 @@ class AccountStorePanel extends JPanel
 	fieldsPanel.add(columnPanel);
 
 	JPanel buttonPanel = new JPanel();
-	JPanel aPanel = new JPanel();
+	JPanel aPanel;
 
-	aPanel.getInsets().set(0, 0, 0, 0);
+	aPanel = new JPanel();
 	aPanel.add(new JButton(UPDATE));
 	buttonPanel.add(aPanel);
 	aPanel = new JPanel();
-	aPanel.getInsets().set(0, 0, 0, 0);
-	aPanel.add(new JButton("Generate ..."));
+	aPanel.add(new JButton(GENERATE));
 	buttonPanel.add(aPanel);
 
 	JPanel fullPanel = new JPanel(new BorderLayout());
@@ -125,6 +117,7 @@ class AccountStorePanel extends JPanel
 	// accountListModel = new DefaultListModel<Account>(stubAccountData);
 	accountList = new JList<Account>(stubAccountData);
 	accountList.addListSelectionListener(this);
+	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
 	JScrollPane aScrollPane = new JScrollPane();
 	aScrollPane.setViewportView(accountList);
 	add(aScrollPane);
@@ -140,25 +133,40 @@ class AccountStorePanel extends JPanel
 	}
     }
 
+    private void validateFields() {
+	valid = !descriptionText.getText().isEmpty()
+		&& !urlText.getText().isEmpty()
+		&& !usernameText.getText().isEmpty()
+		&& passwordText.getPassword().length > 0;
+	if (valid) {
+	    // enable update/create button
+	}
+    }
+
     public void valueChanged(ListSelectionEvent e) {
-	Account selectedAccount = accountList.getSelectedValue();
+	selectedAccount = accountList.getSelectedValue();
 	descriptionText.setText(selectedAccount.getDescription());
 	urlText.setText(selectedAccount.getUrl());
 	usernameText.setText(selectedAccount.getUsername());
 	passwordText.setText(selectedAccount.getPassword());
+	// update/create -> "Update"
+
+	validateFields();
+	changed = false;
     }
 
     private void clearAccountData() {
-	selected = false;
-	valid = false;
-	changed = false;
-
+	selectedAccount = null;
 	descriptionText.setText("");
 	urlText.setText("");
 	usernameText.setText("");
 	passwordText.setText("");
+	// update/create -> "Create"
 
 	accountList.clearSelection();
+
+	valid = false;
+	changed = false;
     }
 
     private void updateAccountData() {
