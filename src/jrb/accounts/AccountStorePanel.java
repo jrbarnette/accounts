@@ -50,21 +50,7 @@ class AccountStorePanel extends JPanel
 
     private AccountStore myAccountStore;
 
-    private JComponent createAccountDataPanel() {
-	JPanel fieldsPanel = new JPanel();
-	JPanel columnPanel;
-
-	columnPanel = new JPanel(new GridLayout(0, 1));
-	String[] fieldNames = {
-	    "Description", "URL", "User Name", "Password",
-	};
-	for (String name : fieldNames) {
-	    JPanel panel = new JPanel();
-	    panel.add(new JLabel(name));
-	    columnPanel.add(panel);
-	}
-	fieldsPanel.add(columnPanel);
-
+    private void createTextFields() {
 	descriptionText = new JTextField();
 	descriptionText.setColumns(32);
 	urlText = new JTextField();
@@ -73,22 +59,45 @@ class AccountStorePanel extends JPanel
 	usernameText.setColumns(32);
 	passwordText = new JPasswordField();
 	passwordText.setColumns(32);
+    }
 
-	columnPanel = new JPanel(new GridLayout(0, 1));
-	columnPanel.add(descriptionText);
-	columnPanel.add(urlText);
-	columnPanel.add(usernameText);
-	columnPanel.add(passwordText);
-	fieldsPanel.add(columnPanel);
+    private JComponent createFieldPanels() {
+	JPanel parentPanel = new JPanel();
+	JPanel namesColumn = new JPanel(new GridLayout(0, 1));
+	parentPanel.add(namesColumn);
+	JPanel textBoxColumn = new JPanel(new GridLayout(0, 1));
+	parentPanel.add(textBoxColumn);
+	JPanel buttonColumn = new JPanel(new GridLayout(0, 1));
+	parentPanel.add(buttonColumn);
 
-	columnPanel = new JPanel(new GridLayout(0, 1));
-	columnPanel.add(new JLabel(" "));
+	// Description
+	namesColumn.add((new JPanel()).add(new JLabel("Description")));
+	textBoxColumn.add(descriptionText);
+	buttonColumn.add(new JLabel(" "));
+
+	// URL
+	namesColumn.add((new JPanel()).add(new JLabel("URL")));
+	textBoxColumn.add(urlText);
 	JButton searchButton = new JButton(SEARCH);
 	searchButton.addActionListener(this);
-	columnPanel.add(searchButton);
-	columnPanel.add(new JLabel(" "));
-	columnPanel.add(new JButton("Copy"));
-	fieldsPanel.add(columnPanel);
+	buttonColumn.add(searchButton);
+
+	// User Name
+	namesColumn.add((new JPanel()).add(new JLabel("User Name")));
+	textBoxColumn.add(usernameText);
+	buttonColumn.add(new JLabel(" "));
+
+	// Password
+	namesColumn.add((new JPanel()).add(new JLabel("Password")));
+	textBoxColumn.add(passwordText);
+	buttonColumn.add(new JButton("Copy"));
+
+	return parentPanel;
+    }
+
+    private JComponent createAccountDataPanel() {
+	createTextFields();
+	JComponent fieldsPanel = createFieldPanels();
 
 	JPanel buttonPanel = new JPanel();
 	JPanel aPanel;
@@ -126,10 +135,35 @@ class AccountStorePanel extends JPanel
 	clearAccountData();
     }
 
+    private void clearAccountData() {
+	selectedAccount = null;
+	descriptionText.setText("");
+	urlText.setText("");
+	usernameText.setText("");
+	passwordText.setText("");
+	// update/create -> "Create"
+
+	accountList.clearSelection();
+
+	valid = false;
+	changed = false;
+    }
+
+    private void updateAccountData() {
+	myAccountStore.updateAccount(
+		descriptionText.getText(),
+		urlText.getText(),
+		usernameText.getText(),
+		new String(passwordText.getPassword()));
+    }
+
     public void actionPerformed(ActionEvent e) {
 	String buttonName = e.getActionCommand();
 	if (buttonName.equals(UPDATE)) {
 	    updateAccountData();
+	} else if (buttonName.equals(CREATE)) {
+	} else if (buttonName.equals(CLEAR)) {
+	    clearAccountData();
 	}
     }
 
@@ -153,27 +187,5 @@ class AccountStorePanel extends JPanel
 
 	validateFields();
 	changed = false;
-    }
-
-    private void clearAccountData() {
-	selectedAccount = null;
-	descriptionText.setText("");
-	urlText.setText("");
-	usernameText.setText("");
-	passwordText.setText("");
-	// update/create -> "Create"
-
-	accountList.clearSelection();
-
-	valid = false;
-	changed = false;
-    }
-
-    private void updateAccountData() {
-	myAccountStore.updateAccount(
-		descriptionText.getText(),
-		urlText.getText(),
-		usernameText.getText(),
-		new String(passwordText.getPassword()));
     }
 }
