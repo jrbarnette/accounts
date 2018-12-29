@@ -20,6 +20,7 @@ import javax.swing.event.ListSelectionListener;
 class AccountStorePanel extends JPanel
 	implements ActionListener, ListSelectionListener {
     static private final String SEARCH = "Search";
+    static private final String COPY = "Copy";
     static private final String CLEAR = "Clear";
     static private final String UPDATE = "Update";
     static private final String CREATE = "Create";
@@ -40,6 +41,7 @@ class AccountStorePanel extends JPanel
     private JTextField urlText;
     private JTextField usernameText;
     private JPasswordField passwordText;
+    private JButton updateButton;
 
     private Account selectedAccount;
     private boolean valid;
@@ -80,7 +82,7 @@ class AccountStorePanel extends JPanel
 	textBoxColumn.add(urlText);
 	JButton searchButton = new JButton(SEARCH);
 	searchButton.addActionListener(this);
-	buttonColumn.add(searchButton);
+	buttonColumn.add((new JPanel()).add(searchButton));
 
 	// User Name
 	namesColumn.add((new JPanel()).add(new JLabel("User Name")));
@@ -90,7 +92,7 @@ class AccountStorePanel extends JPanel
 	// Password
 	namesColumn.add((new JPanel()).add(new JLabel("Password")));
 	textBoxColumn.add(passwordText);
-	buttonColumn.add(new JButton("Copy"));
+	buttonColumn.add((new JPanel()).add(new JButton(COPY)));
 
 	return parentPanel;
     }
@@ -100,15 +102,13 @@ class AccountStorePanel extends JPanel
 	JComponent fieldsPanel = createFieldPanels();
 
 	JPanel buttonPanel = new JPanel();
-	JPanel aPanel;
-
-	aPanel = new JPanel();
-	aPanel.add(new JButton(UPDATE));
-	buttonPanel.add(aPanel);
-	aPanel = new JPanel();
-	aPanel.add(new JButton(GENERATE));
-	buttonPanel.add(aPanel);
-
+	String[] buttonNames = { CLEAR, CREATE, GENERATE };
+	for (String name : buttonNames) {
+	    JButton button = new JButton(name);
+	    button.addActionListener(this);
+	    buttonPanel.add((new JPanel()).add(button));
+	}
+	updateButton = (JButton) buttonPanel.getComponent(1);
 	JPanel fullPanel = new JPanel(new BorderLayout());
 	fullPanel.add(fieldsPanel, BorderLayout.CENTER);
 	fullPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -136,15 +136,7 @@ class AccountStorePanel extends JPanel
     }
 
     private void clearAccountData() {
-	selectedAccount = null;
-	descriptionText.setText("");
-	urlText.setText("");
-	usernameText.setText("");
-	passwordText.setText("");
-	// update/create -> "Create"
-
 	accountList.clearSelection();
-
 	valid = false;
 	changed = false;
     }
@@ -157,13 +149,21 @@ class AccountStorePanel extends JPanel
 		new String(passwordText.getPassword()));
     }
 
-    public void actionPerformed(ActionEvent e) {
-	String buttonName = e.getActionCommand();
-	if (buttonName.equals(UPDATE)) {
-	    updateAccountData();
-	} else if (buttonName.equals(CREATE)) {
-	} else if (buttonName.equals(CLEAR)) {
-	    clearAccountData();
+    private void selectAccount() {
+	selectedAccount = accountList.getSelectedValue();
+	if (selectedAccount != null) {
+	    descriptionText.setText(selectedAccount.getDescription());
+	    urlText.setText(selectedAccount.getUrl());
+	    usernameText.setText(selectedAccount.getUsername());
+	    passwordText.setText(selectedAccount.getPassword());
+	    updateButton.setText(UPDATE);
+	    // update/create -> "Update"
+	} else {
+	    descriptionText.setText("");
+	    urlText.setText("");
+	    usernameText.setText("");
+	    passwordText.setText("");
+	    updateButton.setText(CREATE);
 	}
     }
 
@@ -177,14 +177,18 @@ class AccountStorePanel extends JPanel
 	}
     }
 
-    public void valueChanged(ListSelectionEvent e) {
-	selectedAccount = accountList.getSelectedValue();
-	descriptionText.setText(selectedAccount.getDescription());
-	urlText.setText(selectedAccount.getUrl());
-	usernameText.setText(selectedAccount.getUsername());
-	passwordText.setText(selectedAccount.getPassword());
-	// update/create -> "Update"
+    public void actionPerformed(ActionEvent e) {
+	String buttonName = e.getActionCommand();
+	if (buttonName.equals(UPDATE)) {
+	    updateAccountData();
+	} else if (buttonName.equals(CREATE)) {
+	} else if (buttonName.equals(CLEAR)) {
+	    clearAccountData();
+	}
+    }
 
+    public void valueChanged(ListSelectionEvent e) {
+	selectAccount();
 	validateFields();
 	changed = false;
     }
