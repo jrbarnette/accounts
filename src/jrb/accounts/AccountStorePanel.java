@@ -52,6 +52,12 @@ class AccountStorePanel extends JPanel
 
     private AccountStore myAccountStore;
 
+    private static void addInPanel(JComponent p, JComponent c) {
+	JPanel aPanel = new JPanel();
+	aPanel.add(c);
+	p.add(aPanel);
+    }
+
     private void createTextFields() {
 	descriptionText = new JTextField();
 	descriptionText.setColumns(32);
@@ -73,26 +79,26 @@ class AccountStorePanel extends JPanel
 	parentPanel.add(buttonColumn);
 
 	// Description
-	namesColumn.add((new JPanel()).add(new JLabel("Description")));
+	addInPanel(namesColumn, new JLabel("Description"));
 	textBoxColumn.add(descriptionText);
 	buttonColumn.add(new JLabel(" "));
 
 	// URL
-	namesColumn.add((new JPanel()).add(new JLabel("URL")));
+	addInPanel(namesColumn, new JLabel("URL"));
 	textBoxColumn.add(urlText);
 	JButton searchButton = new JButton(SEARCH);
 	searchButton.addActionListener(this);
-	buttonColumn.add((new JPanel()).add(searchButton));
+	buttonColumn.add(searchButton);
 
 	// User Name
-	namesColumn.add((new JPanel()).add(new JLabel("User Name")));
+	addInPanel(namesColumn, new JLabel("User Name"));
 	textBoxColumn.add(usernameText);
 	buttonColumn.add(new JLabel(" "));
 
 	// Password
-	namesColumn.add((new JPanel()).add(new JLabel("Password")));
+	addInPanel(namesColumn, new JLabel("Password"));
 	textBoxColumn.add(passwordText);
-	buttonColumn.add((new JPanel()).add(new JButton(COPY)));
+	buttonColumn.add(new JButton(COPY));
 
 	return parentPanel;
     }
@@ -106,7 +112,7 @@ class AccountStorePanel extends JPanel
 	for (String name : buttonNames) {
 	    JButton button = new JButton(name);
 	    button.addActionListener(this);
-	    buttonPanel.add((new JPanel()).add(button));
+	    buttonPanel.add(button);
 	}
 	updateButton = (JButton) buttonPanel.getComponent(1);
 	JPanel fullPanel = new JPanel(new BorderLayout());
