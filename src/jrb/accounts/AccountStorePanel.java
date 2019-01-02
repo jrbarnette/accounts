@@ -175,11 +175,9 @@ class AccountStorePanel extends JPanel
     }
 
     private void updateAccountData() {
-	myAccountStore.updateAccount(
-		descriptionText.getText(),
-		urlText.getText(),
-		usernameText.getText(),
-		new String(passwordText.getPassword()));
+    }
+
+    private void createAccountData() {
     }
 
     private boolean fieldsAreValid() {
@@ -191,10 +189,8 @@ class AccountStorePanel extends JPanel
 
     public void actionPerformed(ActionEvent e) {
 	String buttonName = e.getActionCommand();
-	if (buttonName.equals(UPDATE)) {
-	    updateAccountData();
-	} else if (buttonName.equals(CREATE)) {
-	} else if (buttonName.equals(CLEAR)) {
+	updateButton.setEnabled(fieldsAreValid());
+	if (buttonName.equals(CLEAR)) {
 	    // If the selection goes from "something" to "null", it will
 	    // trigger "valueChanged()", which will then call
 	    // "clearAccountData()".
@@ -209,8 +205,10 @@ class AccountStorePanel extends JPanel
 	    Clipboard clipboard =
 		Toolkit.getDefaultToolkit().getSystemClipboard();
 	    clipboard.setContents(selection, selection);
-	} else {
-	    updateButton.setEnabled(fieldsAreValid());
+	} else if (buttonName.equals(UPDATE)) {
+	    updateAccount();
+	} else if (buttonName.equals(CREATE)) {
+	    createAccount();
 	}
     }
 
