@@ -4,6 +4,10 @@
 
 package jrb.accounts;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -23,7 +27,7 @@ class AccountStorePanel extends JPanel
     static private final String COPY = "Copy";
     static private final String CLEAR = "Clear";
     static private final String UPDATE = "Update";
-    static private final String CREATE = "Create";
+    static private final String CREATE = "Add";
     static private final String GENERATE = "Generate ...";
 
     static private final Account PROTOTYPE_ACCOUNT =
@@ -41,11 +45,11 @@ class AccountStorePanel extends JPanel
     private JTextField urlText;
     private JTextField usernameText;
     private JPasswordField passwordText;
+
+    private JButton clearButton;
     private JButton updateButton;
 
     private Account selectedAccount;
-    private boolean valid;
-    private boolean changed;
 
     // private DefaultListModel<Account> accountListModel;
     JList<Account> accountList;
@@ -98,7 +102,9 @@ class AccountStorePanel extends JPanel
 	// Password
 	addInPanel(namesColumn, new JLabel("Password"));
 	textBoxColumn.add(passwordText);
-	buttonColumn.add(new JButton(COPY));
+	JButton copyButton = new JButton(COPY);
+	copyButton.addActionListener(this);
+	buttonColumn.add(copyButton);
 
 	return parentPanel;
     }
@@ -114,6 +120,7 @@ class AccountStorePanel extends JPanel
 	    button.addActionListener(this);
 	    buttonPanel.add(button);
 	}
+	clearButton = (JButton) buttonPanel.getComponent(0);
 	updateButton = (JButton) buttonPanel.getComponent(1);
 	JPanel fullPanel = new JPanel(new BorderLayout());
 	fullPanel.add(fieldsPanel, BorderLayout.CENTER);
@@ -142,9 +149,25 @@ class AccountStorePanel extends JPanel
     }
 
     private void clearAccountData() {
-	accountList.clearSelection();
-	valid = false;
-	changed = false;
+	descriptionText.setText("");
+	urlText.setText("");
+	usernameText.setText("");
+	passwordText.setText("");
+
+	clearButton.setEnabled(false);
+	updateButton.setText(CREATE);
+	updateButton.setEnabled(false);
+    }
+
+    private void fillAccountData() {
+	descriptionText.setText(selectedAccount.getDescription());
+	urlText.setText(selectedAccount.getUrl());
+	usernameText.setText(selectedAccount.getUsername());
+	passwordText.setText(selectedAccount.getPassword());
+
+	clearButton.setEnabled(true);
+	updateButton.setText(UPDATE);
+	updateButton.setEnabled(false);
     }
 
     private void updateAccountData() {
@@ -155,32 +178,11 @@ class AccountStorePanel extends JPanel
 		new String(passwordText.getPassword()));
     }
 
-    private void selectAccount() {
-	selectedAccount = accountList.getSelectedValue();
-	if (selectedAccount != null) {
-	    descriptionText.setText(selectedAccount.getDescription());
-	    urlText.setText(selectedAccount.getUrl());
-	    usernameText.setText(selectedAccount.getUsername());
-	    passwordText.setText(selectedAccount.getPassword());
-	    updateButton.setText(UPDATE);
-	    // update/create -> "Update"
-	} else {
-	    descriptionText.setText("");
-	    urlText.setText("");
-	    usernameText.setText("");
-	    passwordText.setText("");
-	    updateButton.setText(CREATE);
-	}
-    }
-
-    private void validateFields() {
-	valid = !descriptionText.getText().isEmpty()
-		&& !urlText.getText().isEmpty()
-		&& !usernameText.getText().isEmpty()
-		&& passwordText.getPassword().length > 0;
-	if (valid) {
-	    // enable update/create button
-	}
+    private boolean fieldsAreValid() {
+	return !descriptionText.getText().isEmpty()
+	       && !urlText.getText().isEmpty()
+	       && !usernameText.getText().isEmpty()
+	       && passwordText.getPassword().length > 0;
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -189,13 +191,33 @@ class AccountStorePanel extends JPanel
 	    updateAccountData();
 	} else if (buttonName.equals(CREATE)) {
 	} else if (buttonName.equals(CLEAR)) {
-	    clearAccountData();
+	    // If the selection goes from "something" to "null", it will
+	    // trigger "valueChanged()", which will then call
+	    // "clearAccountData()".
+	    if (accountList.getSelectedValue() != null) {
+		accountList.clearSelection();
+	    } else {
+		clearAccountData();
+	    }
+	} else if (buttonName.equals(COPY)) {
+	    StringSelection selection =
+                new StringSelection(new String(passwordText.getPassword()));
+	    Clipboard clipboard =
+		Toolkit.getDefaultToolkit().getSystemClipboard();
+	    clipboard.setContents(selection, selection);
+	} else {
+	    updateButton.setEnabled(fieldsAreValid());
 	}
     }
 
     public void valueChanged(ListSelectionEvent e) {
-	selectAccount();
-	validateFields();
-	changed = false;
+	if (e.getValueIsAdjusting())
+	    return;
+	selectedAccount = accountList.getSelectedValue();
+	if (selectedAccount != null) {
+	    fillAccountData();
+	} else {
+	    clearAccountData();
+	}
     }
 }
