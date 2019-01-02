@@ -65,12 +65,16 @@ class AccountStorePanel extends JPanel
     private void createTextFields() {
 	descriptionText = new JTextField();
 	descriptionText.setColumns(32);
+	descriptionText.addActionListener(this);
 	urlText = new JTextField();
 	urlText.setColumns(32);
+	urlText.addActionListener(this);
 	usernameText = new JTextField();
 	usernameText.setColumns(32);
+	usernameText.addActionListener(this);
 	passwordText = new JPasswordField();
 	passwordText.setColumns(32);
+	passwordText.addActionListener(this);
     }
 
     private JComponent createFieldPanels() {
