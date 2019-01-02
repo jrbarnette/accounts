@@ -13,6 +13,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -22,7 +24,7 @@ import javax.swing.event.ListSelectionListener;
 /**
  */
 class AccountStorePanel extends JPanel
-	implements ActionListener, ListSelectionListener {
+	implements ActionListener, ListSelectionListener, FocusListener {
     static private final String SEARCH = "Search";
     static private final String COPY = "Copy";
     static private final String CLEAR = "Clear";
@@ -66,15 +68,22 @@ class AccountStorePanel extends JPanel
 	descriptionText = new JTextField();
 	descriptionText.setColumns(32);
 	descriptionText.addActionListener(this);
+	descriptionText.addFocusListener(this);
+
 	urlText = new JTextField();
 	urlText.setColumns(32);
 	urlText.addActionListener(this);
+	urlText.addFocusListener(this);
+
 	usernameText = new JTextField();
 	usernameText.setColumns(32);
 	usernameText.addActionListener(this);
+	usernameText.addFocusListener(this);
+
 	passwordText = new JPasswordField();
 	passwordText.setColumns(32);
 	passwordText.addActionListener(this);
+	passwordText.addFocusListener(this);
     }
 
     private JComponent createFieldPanels() {
@@ -174,30 +183,67 @@ class AccountStorePanel extends JPanel
 	updateButton.setEnabled(false);
     }
 
-    private void updateAccountData() {
+    private void updateAccount() {
+	// error check: creating a duplicate.
+	/*
+	myAccountStore.updateAccount(
+	    selectedAccount,
+	    descriptionText.getText(),
+	    urlText.getText(),
+	    usernameText.getText(),
+	    new String(passwordText.getPassword()));
+	*/
+	// update accountList UI widget
+	//   get List of accounts, sorted by Description
+	//   setListData(<List of accounts, sorted by Description>)
+	accountList.setListData(stubAccountData);
     }
 
-    private void createAccountData() {
+    private void createAccount() {
+	// error check: creating a duplicate.
+	/*
+	myAccountStore.createAccount(
+	    descriptionText.getText(),
+	    urlText.getText(),
+	    usernameText.getText(),
+	    new String(passwordText.getPassword()));
+	*/
+	// update accountList UI widget
+	//   get List of accounts, sorted by Description
+	//   setListData(<List of accounts, sorted by Description>)
+	accountList.setListData(stubAccountData);
     }
 
-    private boolean fieldsAreValid() {
-	return !descriptionText.getText().isEmpty()
-	       && !urlText.getText().isEmpty()
-	       && !usernameText.getText().isEmpty()
-	       && passwordText.getPassword().length > 0;
+    private void validateFields() {
+	String description = descriptionText.getText();
+	String url = urlText.getText();
+	String username = usernameText.getText();
+	String password = new String(passwordText.getPassword());
+	boolean valid = !description.isEmpty()
+			&& !url.isEmpty()
+			&& !username.isEmpty()
+			&& !password.isEmpty();
+	boolean changed = valid;
+	if (selectedAccount != null) {
+	    changed = description != selectedAccount.getDescription()
+			|| url != selectedAccount.getUrl()
+			|| username != selectedAccount.getUsername()
+			|| password != selectedAccount.getPassword();
+	}
+	updateButton.setEnabled(valid && changed);
     }
 
     public void actionPerformed(ActionEvent e) {
 	String buttonName = e.getActionCommand();
-	updateButton.setEnabled(fieldsAreValid());
+	validateFields();
 	if (buttonName.equals(CLEAR)) {
 	    // If the selection goes from "something" to "null", it will
 	    // trigger "valueChanged()", which will then call
 	    // "clearAccountData()".
-	    if (accountList.getSelectedValue() != null) {
-		accountList.clearSelection();
-	    } else {
+	    if (accountList.isSelectionEmpty()) {
 		clearAccountData();
+	    } else {
+		accountList.clearSelection();
 	    }
 	} else if (buttonName.equals(COPY)) {
 	    StringSelection selection =
@@ -205,10 +251,12 @@ class AccountStorePanel extends JPanel
 	    Clipboard clipboard =
 		Toolkit.getDefaultToolkit().getSystemClipboard();
 	    clipboard.setContents(selection, selection);
-	} else if (buttonName.equals(UPDATE)) {
-	    updateAccount();
-	} else if (buttonName.equals(CREATE)) {
-	    createAccount();
+	} else if (updateButton.isEnabled()) {
+	    if (buttonName.equals(UPDATE)) {
+		updateAccount();
+	    } else if (buttonName.equals(CREATE)) {
+		createAccount();
+	    }
 	}
     }
 
@@ -221,5 +269,12 @@ class AccountStorePanel extends JPanel
 	} else {
 	    clearAccountData();
 	}
+    }
+
+    public void focusGained(FocusEvent e) {
+    }
+
+    public void focusLost(FocusEvent e) {
+	validateFields();
     }
 }
