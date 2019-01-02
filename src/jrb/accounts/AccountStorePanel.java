@@ -223,14 +223,15 @@ class AccountStorePanel extends JPanel
 			&& !url.isEmpty()
 			&& !username.isEmpty()
 			&& !password.isEmpty();
-	boolean changed = valid;
-	if (selectedAccount != null) {
-	    changed = description != selectedAccount.getDescription()
-			|| url != selectedAccount.getUrl()
-			|| username != selectedAccount.getUsername()
-			|| password != selectedAccount.getPassword();
+	if (valid && selectedAccount != null) {
+	    updateButton.setEnabled(
+		    !description.equals(selectedAccount.getDescription())
+		    || !url.equals(selectedAccount.getUrl())
+		    || !username.equals(selectedAccount.getUsername())
+		    || !password.equals(selectedAccount.getPassword()));
+	} else {
+	    updateButton.setEnabled(false);
 	}
-	updateButton.setEnabled(valid && changed);
     }
 
     public void actionPerformed(ActionEvent e) {
