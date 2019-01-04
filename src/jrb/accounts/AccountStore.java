@@ -4,28 +4,41 @@
 
 package jrb.accounts;
 
+import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  */
 class AccountStore {
-    private Map<String, Account> myAccounts;
+    private TreeMap<String, Account> myAccounts;
 
     AccountStore() {
 	myAccounts = new TreeMap<String, Account>();
     }
 
-    public void updateAccount(String url, String description,
+    public void addAccount(Account newAccount) {
+	assert !myAccounts.containsKey(
+		    newAccount.getDescription());
+
+	myAccounts.put(newAccount.getDescription(),
+				    newAccount);
+    }
+
+    public void updateAccount(Account account,
+			      String description, String url,
 			      String username, String password) {
-	Account newAccount;
-	if (myAccounts.containsKey(url)) {
-	    newAccount = myAccounts.get(url);
-	    newAccount.update(description, username, password);
-	} else {
-	    newAccount = new Account(url, description,
-				     username, password);
-	}
-	myAccounts.put(url, newAccount);
+	myAccounts.remove(account.getDescription());
+	account.update(description, url, username, password);
+	addAccount(account);
+    }
+
+    public void createAccount(String description, String url,
+			      String username, String password) {
+	addAccount(new Account(description, url, username, password));
+    }
+
+    public Iterable<Account> allAccounts() {
+	return myAccounts.values();
     }
 }

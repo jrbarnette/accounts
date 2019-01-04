@@ -77,11 +77,9 @@
 
   <target name="tests-list"
           description="find all Java tests under hg">
-    <exec executable="hg" output="${tests.list}">
-      <arg value="locate"/>
-      <arg value="--include"/>
+    <exec executable="git" output="${tests.list}">
+      <arg value="ls-files"/>
       <arg value="tests/jrb"/>
-      <arg value="*.java"/>
     </exec>
   </target>
 

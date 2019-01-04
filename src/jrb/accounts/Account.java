@@ -4,6 +4,8 @@
 
 package jrb.accounts;
 
+import java.net.URL;
+
 /**
  */
 class Account {
@@ -12,17 +14,26 @@ class Account {
     private String myUsername;
     private String myPassword;
 
-    public Account(String url, String description,
+    public Account(String description, String url,
 		   String username, String password) {
-	myUrl = url;
-	update(description, username, password);
+	update(description, url, username, password);
     }
 
-    public void update(String description,
+    public void update(String description, String url,
 		       String username, String password) {
 	myDescription = description;
+	myUrl = url;
 	myUsername = username;
 	myPassword = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+	return o instanceof Account
+	    && myDescription == ((Account) o).myDescription
+	    && myUrl == ((Account) o).myUrl
+	    && myUsername == ((Account) o).myUsername
+	    && myPassword == ((Account) o).myPassword;
     }
 
     public String getUrl() {

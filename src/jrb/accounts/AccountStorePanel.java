@@ -4,6 +4,8 @@
 
 package jrb.accounts;
 
+import java.util.Vector;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -33,15 +35,8 @@ class AccountStorePanel extends JPanel
     static private final String GENERATE = "Generate ...";
 
     static private final Account PROTOTYPE_ACCOUNT =
-	new Account("url", "12345678901234567890123456789012",
-		    "user", "pw");
-
-    static Account[] stubAccountData = {
-	new Account("url1", "desc1", "u1", "p1"),
-	new Account("url2", "desc2", "u2", "p2"),
-	new Account("url3", "desc3", "u3", "p3"),
-	new Account("url4", "desc4", "u4", "p4"),
-    };
+	new Account("12345678901234567890123456789012",
+		    "http://example.com", "user", "pw");
 
     private JTextField descriptionText;
     private JTextField urlText;
@@ -65,23 +60,24 @@ class AccountStorePanel extends JPanel
     }
 
     private void createTextFields() {
+	int nColumns = PROTOTYPE_ACCOUNT.getDescription().length();
 	descriptionText = new JTextField();
-	descriptionText.setColumns(32);
+	descriptionText.setColumns(nColumns);
 	descriptionText.addActionListener(this);
 	descriptionText.addFocusListener(this);
 
 	urlText = new JTextField();
-	urlText.setColumns(32);
+	urlText.setColumns(nColumns);
 	urlText.addActionListener(this);
 	urlText.addFocusListener(this);
 
 	usernameText = new JTextField();
-	usernameText.setColumns(32);
+	usernameText.setColumns(nColumns);
 	usernameText.addActionListener(this);
 	usernameText.addFocusListener(this);
 
 	passwordText = new JPasswordField();
-	passwordText.setColumns(32);
+	passwordText.setColumns(nColumns);
 	passwordText.addActionListener(this);
 	passwordText.addFocusListener(this);
     }
@@ -149,8 +145,7 @@ class AccountStorePanel extends JPanel
 
 	myAccountStore = new AccountStore();
 
-	// accountListModel = new DefaultListModel<Account>(stubAccountData);
-	accountList = new JList<Account>(stubAccountData);
+	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
 	JScrollPane aScrollPane = new JScrollPane();
@@ -183,35 +178,35 @@ class AccountStorePanel extends JPanel
 	updateButton.setEnabled(false);
     }
 
+    private void refillAccountList() {
+	Vector<Account> v = new Vector<Account>();
+	for (Account acct : myAccountStore.allAccounts()) {
+	    v.add(acct);
+	}
+	// This call implicitly clears the selection, forcing a call to
+	// `valueChanged()`.
+	accountList.setListData(v);
+    }
+
     private void updateAccount() {
 	// error check: creating a duplicate.
-	/*
 	myAccountStore.updateAccount(
 	    selectedAccount,
 	    descriptionText.getText(),
 	    urlText.getText(),
 	    usernameText.getText(),
 	    new String(passwordText.getPassword()));
-	*/
-	// update accountList UI widget
-	//   get List of accounts, sorted by Description
-	//   setListData(<List of accounts, sorted by Description>)
-	accountList.setListData(stubAccountData);
+	refillAccountList();
     }
 
     private void createAccount() {
 	// error check: creating a duplicate.
-	/*
 	myAccountStore.createAccount(
 	    descriptionText.getText(),
 	    urlText.getText(),
 	    usernameText.getText(),
 	    new String(passwordText.getPassword()));
-	*/
-	// update accountList UI widget
-	//   get List of accounts, sorted by Description
-	//   setListData(<List of accounts, sorted by Description>)
-	accountList.setListData(stubAccountData);
+	refillAccountList();
     }
 
     private void validateFields() {
@@ -230,8 +225,16 @@ class AccountStorePanel extends JPanel
 		    || !username.equals(selectedAccount.getUsername())
 		    || !password.equals(selectedAccount.getPassword()));
 	} else {
-	    updateButton.setEnabled(false);
+	    updateButton.setEnabled(valid);
 	}
+    }
+
+    private void copyPasswordToClipboard() {
+	StringSelection selection =
+	    new StringSelection(new String(passwordText.getPassword()));
+	Clipboard clipboard =
+	    Toolkit.getDefaultToolkit().getSystemClipboard();
+	clipboard.setContents(selection, selection);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -247,11 +250,7 @@ class AccountStorePanel extends JPanel
 		accountList.clearSelection();
 	    }
 	} else if (buttonName.equals(COPY)) {
-	    StringSelection selection =
-                new StringSelection(new String(passwordText.getPassword()));
-	    Clipboard clipboard =
-		Toolkit.getDefaultToolkit().getSystemClipboard();
-	    clipboard.setContents(selection, selection);
+	    copyPasswordToClipboard();
 	} else if (updateButton.isEnabled()) {
 	    if (buttonName.equals(UPDATE)) {
 		updateAccount();
