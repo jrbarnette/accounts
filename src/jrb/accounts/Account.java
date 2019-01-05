@@ -4,6 +4,9 @@
 
 package jrb.accounts;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.net.URL;
 
 /**
@@ -19,12 +22,8 @@ class Account {
 	update(description, url, username, password);
     }
 
-    public void update(String description, String url,
-		       String username, String password) {
-	myDescription = description;
-	myUrl = url;
-	myUsername = username;
-	myPassword = password;
+    Account(DataInput in) throws IOException {
+	readAccount(in);
     }
 
     @Override
@@ -34,6 +33,28 @@ class Account {
 	    && myUrl == ((Account) o).myUrl
 	    && myUsername == ((Account) o).myUsername
 	    && myPassword == ((Account) o).myPassword;
+    }
+
+    public void update(String description, String url,
+		       String username, String password) {
+	myDescription = description;
+	myUrl = url;
+	myUsername = username;
+	myPassword = password;
+    }
+
+    void readAccount(DataInput in) throws IOException {
+	myDescription = in.readUTF();
+	myUrl = in.readUTF();
+	myUsername = in.readUTF();
+	myPassword = in.readUTF();
+    }
+
+    void writeAccount(DataOutput out) throws IOException {
+	out.writeUTF(myDescription);
+	out.writeUTF(myUrl);
+	out.writeUTF(myUsername);
+	out.writeUTF(myPassword);
     }
 
     public String getUrl() {

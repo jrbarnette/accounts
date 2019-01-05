@@ -6,6 +6,13 @@ package jrb.accounts;
 
 import java.util.Vector;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -47,6 +54,8 @@ class AccountStorePanel extends JPanel
     private JButton updateButton;
 
     private Account selectedAccount;
+    boolean accountsChanged;
+
 
     // private DefaultListModel<Account> accountListModel;
     JList<Account> accountList;
@@ -143,8 +152,6 @@ class AccountStorePanel extends JPanel
     public AccountStorePanel() {
 	super();
 
-	myAccountStore = new AccountStore();
-
 	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
@@ -153,7 +160,7 @@ class AccountStorePanel extends JPanel
 	add(aScrollPane);
 
 	add(createAccountDataPanel());
-	clearAccountData();
+	clearAccounts();
     }
 
     private void clearAccountData() {
@@ -165,6 +172,28 @@ class AccountStorePanel extends JPanel
 	clearButton.setEnabled(false);
 	updateButton.setText(CREATE);
 	updateButton.setEnabled(false);
+    }
+
+    public void clearAccounts() {
+	myAccountStore = new AccountStore();
+	accountsChanged = false;
+	clearAccountData();
+    }
+
+    boolean needSave() {
+        return accountsChanged;
+    }
+
+    void openAccounts(File accountsFile) throws IOException {
+	FileInputStream fis = new FileInputStream(accountsFile);
+	DataInputStream in = new DataInputStream(fis);
+	myAccountStore.readAccounts(in);
+    }
+
+    void saveAccounts(File accountsFile) throws IOException {
+	FileOutputStream fis = new FileOutputStream(accountsFile);
+	DataOutputStream out = new DataOutputStream(fis);
+	myAccountStore.writeAccounts(out);
     }
 
     private void fillAccountData() {

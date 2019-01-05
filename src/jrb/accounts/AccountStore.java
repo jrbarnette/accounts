@@ -4,6 +4,9 @@
 
 package jrb.accounts;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,8 +16,13 @@ import java.util.TreeMap;
 class AccountStore {
     private TreeMap<String, Account> myAccounts;
 
-    AccountStore() {
+    public AccountStore() {
 	myAccounts = new TreeMap<String, Account>();
+    }
+
+    public AccountStore(DataInput in) throws IOException {
+	this();
+	readAccounts(in);
     }
 
     public void addAccount(Account newAccount) {
@@ -40,5 +48,35 @@ class AccountStore {
 
     public Iterable<Account> allAccounts() {
 	return myAccounts.values();
+    }
+
+    private static final byte[] FILEMAGIC = "ACCTS.00".getBytes();
+
+    private void readMagic(DataInput in) throws IOException {
+	byte[] magic = new byte[FILEMAGIC.length];
+        in.readFully(magic);
+	for (int i = 0; i < FILEMAGIC.length; i++) {
+	    if (magic[i] != FILEMAGIC[i]) {
+		String message =
+		    "Unknown file format: " + new String(magic);
+		throw new IOException(message);
+	    }
+	}
+    }
+
+    public void readAccounts(DataInput in) throws IOException {
+	readMagic(in);
+	int nElements = in.readInt();
+	for (int i = 0; i < nElements; i++) {
+	    addAccount(new Account(in));
+	}
+    }
+
+    public void writeAccounts(DataOutput out) throws IOException {
+	out.write(FILEMAGIC);
+	out.writeInt(myAccounts.size());
+	for (Account acct : myAccounts.values()) {
+	    acct.writeAccount(out);
+	}
     }
 }
