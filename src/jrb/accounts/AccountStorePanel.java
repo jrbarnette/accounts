@@ -150,16 +150,16 @@ class AccountStorePanel extends JPanel
     /**
      */
     public AccountStorePanel() {
-	super();
+	super(new BorderLayout());
 
 	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
 	JScrollPane aScrollPane = new JScrollPane();
 	aScrollPane.setViewportView(accountList);
-	add(aScrollPane);
+	add(aScrollPane, BorderLayout.WEST);
 
-	add(createAccountDataPanel());
+	add(createAccountDataPanel(), BorderLayout.CENTER);
 	clearAccounts();
     }
 
@@ -188,6 +188,7 @@ class AccountStorePanel extends JPanel
 	FileInputStream fis = new FileInputStream(accountsFile);
 	DataInputStream in = new DataInputStream(fis);
 	myAccountStore.readAccounts(in);
+	refillAccountList();
     }
 
     void saveAccounts(File accountsFile) throws IOException {
