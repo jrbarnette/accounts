@@ -52,6 +52,7 @@ class AccountStorePanel extends JPanel
 
     private JButton clearButton;
     private JButton updateButton;
+    private JButton copyButton;
 
     private Account selectedAccount;
     boolean accountsChanged;
@@ -97,54 +98,50 @@ class AccountStorePanel extends JPanel
 	parentPanel.add(namesColumn);
 	JPanel textBoxColumn = new JPanel(new GridLayout(0, 1));
 	parentPanel.add(textBoxColumn);
-	JPanel buttonColumn = new JPanel(new GridLayout(0, 1));
-	parentPanel.add(buttonColumn);
 
 	// Description
 	addInPanel(namesColumn, new JLabel("Description"));
 	textBoxColumn.add(descriptionText);
-	buttonColumn.add(new JLabel(" "));
 
 	// URL
 	addInPanel(namesColumn, new JLabel("URL"));
 	textBoxColumn.add(urlText);
-	JButton searchButton = new JButton(SEARCH);
-	searchButton.addActionListener(this);
-	buttonColumn.add(searchButton);
 
 	// User Name
 	addInPanel(namesColumn, new JLabel("User Name"));
 	textBoxColumn.add(usernameText);
-	buttonColumn.add(new JLabel(" "));
 
 	// Password
 	addInPanel(namesColumn, new JLabel("Password"));
 	textBoxColumn.add(passwordText);
-	JButton copyButton = new JButton(COPY);
-	copyButton.addActionListener(this);
-	buttonColumn.add(copyButton);
 
 	return parentPanel;
     }
 
-    private JComponent createAccountDataPanel() {
-	createTextFields();
-	JComponent fieldsPanel = createFieldPanels();
-
-	JPanel buttonPanel = new JPanel();
-	String[] buttonNames = { CLEAR, CREATE, GENERATE };
+    private JComponent createAccountButtons() {
+	JPanel buttonPanel = new JPanel(new GridLayout(1, 0));
+	String[] buttonNames = { CLEAR, CREATE, COPY, GENERATE };
+	JButton[] buttons = new JButton[buttonNames.length];
+	int i = 0;
 	for (String name : buttonNames) {
-	    JButton button = new JButton(name);
-	    button.addActionListener(this);
-	    buttonPanel.add(button);
+	    JPanel aPanel = new JPanel();
+	    buttons[i] = new JButton(name);
+	    buttons[i].addActionListener(this);
+	    aPanel.add(buttons[i]);
+	    buttonPanel.add(aPanel);
+	    i++;
 	}
-	clearButton = (JButton) buttonPanel.getComponent(0);
-	updateButton = (JButton) buttonPanel.getComponent(1);
-	JPanel fullPanel = new JPanel(new BorderLayout());
-	fullPanel.add(fieldsPanel, BorderLayout.CENTER);
-	fullPanel.add(buttonPanel, BorderLayout.SOUTH);
+	clearButton = buttons[0];
+	updateButton = buttons[1];
+	copyButton = buttons[2];
+	return buttonPanel;
+    }
 
-	return fullPanel;
+    private JComponent createAccountDataPanel() {
+	JPanel aPanel = new JPanel(new BorderLayout());
+	aPanel.add(createFieldPanels(), BorderLayout.CENTER);
+	aPanel.add(createAccountButtons(), BorderLayout.SOUTH);
+	return aPanel;
     }
 
     /**
@@ -152,13 +149,16 @@ class AccountStorePanel extends JPanel
     public AccountStorePanel() {
 	super(new BorderLayout());
 
+	createTextFields();
+
 	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
 	JScrollPane aScrollPane = new JScrollPane();
 	aScrollPane.setViewportView(accountList);
+	aScrollPane.setVerticalScrollBarPolicy(
+		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 	add(aScrollPane, BorderLayout.WEST);
-
 	add(createAccountDataPanel(), BorderLayout.CENTER);
 	clearAccounts();
     }
@@ -172,12 +172,14 @@ class AccountStorePanel extends JPanel
 	clearButton.setEnabled(false);
 	updateButton.setText(CREATE);
 	updateButton.setEnabled(false);
+	copyButton.setEnabled(false);
     }
 
     public void clearAccounts() {
 	myAccountStore = new AccountStore();
 	accountsChanged = false;
 	clearAccountData();
+	refillAccountList();
     }
 
     boolean needSave() {
@@ -206,6 +208,7 @@ class AccountStorePanel extends JPanel
 	clearButton.setEnabled(true);
 	updateButton.setText(UPDATE);
 	updateButton.setEnabled(false);
+	copyButton.setEnabled(true);
     }
 
     private void refillAccountList() {
