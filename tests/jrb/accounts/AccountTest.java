@@ -58,10 +58,16 @@ public class AccountTest {
 
     @Test
     public void testEquality() {
-	Account acct1 = new Account(DESCRIPTION[0], URL[0],
-				    USERNAME[0], PASSWORD[0]);
-	Account acct2 = new Account(DESCRIPTION[0], URL[0],
-				    USERNAME[0], PASSWORD[0]);
+	Account acct1 = new Account(
+		DESCRIPTION[0],
+		URL[0],
+		USERNAME[0],
+		PASSWORD[0]);
+	Account acct2 = new Account(
+		new String(acct1.getDescription()),
+		new String(acct1.getUrl()),
+		new String(acct1.getUsername()),
+		new String(acct1.getPassword()));
 	assertEquals("Identical Account objects not equal",
 		     acct1, acct2);
     }
@@ -120,8 +126,11 @@ public class AccountTest {
 				    USERNAME[0], PASSWORD[0]);
 	Account acct2 = new Account(DESCRIPTION[1], URL[1],
 				    USERNAME[1], PASSWORD[1]);
-	acct1.update(acct2.getDescription(), acct2.getUrl(),
-		     acct2.getUsername(), acct2.getPassword());
+	acct2.update(
+		new String(acct1.getDescription()),
+		new String(acct1.getUrl()),
+		new String(acct1.getUsername()),
+		new String(acct1.getPassword()));
 	assertEquals("Accounts not equal after update()",
 		     acct1, acct2);
     }

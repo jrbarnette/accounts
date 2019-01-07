@@ -29,10 +29,10 @@ class Account {
     @Override
     public boolean equals(Object o) {
 	return o instanceof Account
-	    && myDescription == ((Account) o).myDescription
-	    && myUrl == ((Account) o).myUrl
-	    && myUsername == ((Account) o).myUsername
-	    && myPassword == ((Account) o).myPassword;
+	    && myDescription.equals(((Account) o).myDescription)
+	    && myUrl.equals(((Account) o).myUrl)
+	    && myUsername.equals(((Account) o).myUsername)
+	    && myPassword.equals(((Account) o).myPassword);
     }
 
     public void update(String description, String url,
