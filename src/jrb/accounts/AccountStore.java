@@ -5,8 +5,13 @@
 package jrb.accounts;
 
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
@@ -20,9 +25,9 @@ class AccountStore {
 	myAccounts = new TreeMap<String, Account>();
     }
 
-    public AccountStore(DataInput in) throws IOException {
+    public AccountStore(InputStream rawInput) throws IOException {
 	this();
-	readAccounts(in);
+	readAccounts(rawInput);
     }
 
     public void addAccount(Account newAccount) {
@@ -64,7 +69,8 @@ class AccountStore {
 	}
     }
 
-    public void readAccounts(DataInput in) throws IOException {
+    public void readAccounts(InputStream raw) throws IOException {
+	DataInput in = new DataInputStream(raw);
 	readMagic(in);
 	int nElements = in.readInt();
 	for (int i = 0; i < nElements; i++) {
@@ -72,7 +78,8 @@ class AccountStore {
 	}
     }
 
-    public void writeAccounts(DataOutput out) throws IOException {
+    public void writeAccounts(OutputStream raw) throws IOException {
+	DataOutput out = new DataOutputStream(raw);
 	out.write(FILEMAGIC);
 	out.writeInt(myAccounts.size());
 	for (Account acct : myAccounts.values()) {

@@ -6,8 +6,6 @@ package jrb.accounts;
 
 import java.util.Vector;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -187,16 +185,14 @@ class AccountStorePanel extends JPanel
     }
 
     void openAccounts(File accountsFile) throws IOException {
-	FileInputStream fis = new FileInputStream(accountsFile);
-	DataInputStream in = new DataInputStream(fis);
-	myAccountStore.readAccounts(in);
+	myAccountStore.readAccounts(
+	    new FileInputStream(accountsFile));
 	refillAccountList();
     }
 
     void saveAccounts(File accountsFile) throws IOException {
-	FileOutputStream fis = new FileOutputStream(accountsFile);
-	DataOutputStream out = new DataOutputStream(fis);
-	myAccountStore.writeAccounts(out);
+	myAccountStore.writeAccounts(
+	    new FileOutputStream(accountsFile));
     }
 
     private void fillAccountData() {

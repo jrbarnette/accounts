@@ -85,16 +85,14 @@ public class AccountStoreTest {
 	}
 	AccountStore accounts = createTestStore(testAccounts.length, true);
 	try {
-	    FileOutputStream fos = new FileOutputStream(tFile);
-	    DataOutputStream out = new DataOutputStream(fos);
+	    FileOutputStream out = new FileOutputStream(tFile);
 	    accounts.writeAccounts(out);
 	    out.close();
 	} catch (IOException ioe) {
 	    fail("I/O Exception writing: " + ioe.toString());
 	}
 	try {
-	    FileInputStream fis = new FileInputStream(tFile);
-	    DataInputStream in = new DataInputStream(fis);
+	    FileInputStream in = new FileInputStream(tFile);
 	    accounts = new AccountStore(in);
 	    in.close();
 	} catch (IOException ioe) {
