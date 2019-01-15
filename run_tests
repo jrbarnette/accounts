@@ -3,7 +3,13 @@
 ant tests || exit $?
 echo
 export CLASSPATH=test-classes:accounts.jar:$CLASSPATH
-TESTS=( $(sed -e 's=tests/==' -e 's=\.java$==' -e 's=/=.=g' < tests-list) )
+SED='
+    /\/Test[^/]*\.java$/ !d
+    s=tests/==
+    s=\.java$==
+    s=/=.=g
+'
+TESTS=( $(sed "$SED" < tests-list) )
 for t in "${TESTS[@]}"
 do
     echo $t

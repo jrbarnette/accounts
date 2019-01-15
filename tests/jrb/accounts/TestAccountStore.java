@@ -14,7 +14,7 @@ import java.io.IOException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class AccountStoreTest {
+public class TestAccountStore {
     private static final Account[] testAccounts = {
 	new Account("xxx desc", "http://c.com", "u0", "p3"),
 	new Account("yyy desc", "http://b.com", "u0", "p2"),

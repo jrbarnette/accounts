@@ -7,7 +7,7 @@ package jrb.accounts;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class AccountTest {
+public class TestAccount {
     private static final String[] DESCRIPTION = {
 	"a", "b",
     };
