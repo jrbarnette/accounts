@@ -42,11 +42,21 @@ public class AccountStoreTest {
     }
 
     @Test
-    public void testEntryCounts() {
+    public void testReportedSize() {
 	for (int num = 0; num <= testAccounts.length; num++) {
 	    AccountStore accounts = createTestStore(num, true);
-	    assertEquals("Wrong number of elements",
-			 num, countElements(accounts));
+	    assertEquals("AccountStore size() reports wrong value",
+			 num, accounts.size());
+	}
+    }
+
+    @Test
+    public void testActualSize() {
+	for (int num = 0; num <= testAccounts.length; num++) {
+	    AccountStore accounts = createTestStore(num, true);
+	    String msg =
+		"AccountStore iterates through the wrong number of elements";
+	    assertEquals(msg, num, countElements(accounts));
 	}
     }
 

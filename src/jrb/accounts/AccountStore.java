@@ -51,6 +51,10 @@ class AccountStore {
 	addAccount(new Account(description, url, username, password));
     }
 
+    public int size() {
+	return myAccounts.size();
+    }
+
     public Iterable<Account> allAccounts() {
 	return myAccounts.values();
     }
