@@ -23,8 +23,7 @@ class AccountStoreUI extends JFrame {
     private static final String SAVE_AS = "Save As ...";
     private static final String EXIT = "Exit";
 
-    private JDialog			fileChooserDialog;
-    private JFileChooser		fileChooser;
+    private AccountFileDialog		fileChooser;
     private Action			saveAction;
     private File			saveFile;
     private AccountStorePanel		accountsPanel;
@@ -75,7 +74,7 @@ class AccountStoreUI extends JFrame {
 	    saveAction = new AbstractAction(SAVE) {
 		public void actionPerformed(ActionEvent ae) {
 		    if (saveFile != null)
-			saveAccounts(saveFile);
+			saveAccounts(saveFile, null);
 		}
 	    };
 	    saveAction.setEnabled(false);
@@ -109,24 +108,13 @@ class AccountStoreUI extends JFrame {
 	if (fileChooser != null)
 	    return;
 
-	fileChooser = new JFileChooser();
-	fileChooserDialog = new JDialog(this);
-	fileChooserDialog.add(fileChooser, BorderLayout.CENTER);
-	JPanel pwdPanel = new JPanel(); {
-	    JLabel aLabel = new JLabel("File password");
-	    pwdPanel.add(aLabel);
-	    JPasswordField text = new JPasswordField();
-	    aLabel.setLabelFor(text);
-	    pwdPanel.add(text);
-	    JButton openButton = new JButton("Open");
-	    pwdPanel.add(text);
-	}
+	fileChooser = new AccountFileDialog(this);
     }
 
     /**
-     * Allow the user an opportunity to save the current game.  Does
+     * Allow the user an opportunity to save the current accounts.  Does
      * nothing if nothing has changed since the last save.  The user
-     * is allowed to choose saving the game, continuing without
+     * is allowed to choose saving the accounts, continuing without
      * saving, or canceling the operation.
      *
      * @return <code>true</code> indicates the operation may
@@ -140,7 +128,7 @@ class AccountStoreUI extends JFrame {
 	Object[] options = { "Save ...", "Don't Save", "Cancel" };
 	int choice = JOptionPane.showOptionDialog(
 	    this,
-	    "Current game has not been saved.  Save it now?",
+	    "Accounts file has not been saved.  Save it now?",
 	    "Accounts Not Saved",
 	    JOptionPane.DEFAULT_OPTION,
 	    JOptionPane.QUESTION_MESSAGE,
@@ -158,7 +146,7 @@ class AccountStoreUI extends JFrame {
     }
 
     /**
-     * Load a game from a user-selected file for the <i>Load</i>
+     * Load accounts from a user-selected file for the <i>Load</i>
      * file-menu choice.
      */
     private void openAccounts() {
@@ -166,57 +154,59 @@ class AccountStoreUI extends JFrame {
 	    return;
 
 	checkFileChooser();
-	int option = fileChooser.showOpenDialog(this);
-	if (option != JFileChooser.APPROVE_OPTION)
+	int option = fileChooser.showOpenDialog();
+	if (option != AccountFileDialog.APPROVE_OPTION)
 	    return;
 
 	File newFile = fileChooser.getSelectedFile();
+	char[] password = fileChooser.getPassword();
 	try {
-	    accountsPanel.openAccounts(newFile);
+	    accountsPanel.openAccounts(newFile, password);
 	    saveFile = newFile;
 	    saveAction.setEnabled(true);
-	} catch (IOException ioe) {
+	} catch (Exception e) {
 	    JOptionPane.showMessageDialog(
 		this,
 		"Unable to load '"
 		    + newFile.getName() +"': "
-		    + ioe.getMessage(),
+		    + e.getMessage(),
 		"Unable to Load Accounts",
 		JOptionPane.WARNING_MESSAGE);
 	}
     }
 
     /**
-     * Save a game for the <i>Save</i> and <i>Save As</i> file-menu
+     * Save accounts for the <i>Save</i> and <i>Save As</i> file-menu
      * choices.
      */
-    private void saveAccounts(File newFile) {
+    private void saveAccounts(File newFile, char[] password) {
 	try {
-	    accountsPanel.saveAccounts(newFile);
+	    accountsPanel.saveAccounts(newFile, password);
 	    saveFile = newFile;
 	    saveAction.setEnabled(true);
-	} catch (IOException ioe) {
+	} catch (Exception e) {
 	    JOptionPane.showMessageDialog(
 		this,
 		"Unable to save '"
 		    + newFile.getName() +"': "
-		    + ioe.getMessage(),
+		    + e.getMessage(),
 		"Unable to Save Accounts",
 		JOptionPane.WARNING_MESSAGE);
 	}
     }
 
     /**
-     * Save the game to a user-selected file for the <i>Save As</i>
+     * Save accounts to a user-selected file for the <i>Save As</i>
      * file-menu choice.
      */
     private void saveAccountsAs() {
 	checkFileChooser();
-	int option = fileChooser.showSaveDialog(this);
-	if (option != JFileChooser.APPROVE_OPTION)
+	int option = fileChooser.showSaveDialog();
+	if (option != AccountFileDialog.APPROVE_OPTION)
 	    return;
 
 	File file = fileChooser.getSelectedFile();
+	char[] password = fileChooser.getPassword();
 	if (!file.equals(saveFile) && file.exists()) {
 	    Object[] options = { "OK", "Cancel" };
 	    int choice = JOptionPane.showOptionDialog(
@@ -232,12 +222,12 @@ class AccountStoreUI extends JFrame {
 		return;
 	}
 
-	saveAccounts(file);
+	saveAccounts(file, password);
     }
 
     /**
      * Handle "window closing" events so we can ask the user what to
-     * do with an unsaved game.  Forward all other events to our
+     * do with unsaved accounts.  Forward all other events to our
      * superclass.
      */
     protected void processWindowEvent(WindowEvent we) {

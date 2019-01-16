@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -185,19 +187,21 @@ class AccountStorePanel extends JPanel
         return accountsChanged;
     }
 
-    void openAccounts(File accountsFile) throws IOException {
-	/*
+    void openAccounts(File accountsFile, char[] password)
+	    throws IOException, GeneralSecurityException {
 	myAccountStore.readAccounts(
-	    new FileInputStream(accountsFile));
-	*/
+	    new FileInputStream(accountsFile), password);
 	refillAccountList();
     }
 
-    void saveAccounts(File accountsFile) throws IOException {
-	/*
-	myAccountStore.writeAccounts(
-	    new FileOutputStream(accountsFile));
-	*/
+    void saveAccounts(File accountsFile, char[] password)
+	    throws IOException, GeneralSecurityException {
+	if (password != null)
+	    myAccountStore.writeAccounts(
+		new FileOutputStream(accountsFile), password);
+	else
+	    myAccountStore.writeAccounts(
+		new FileOutputStream(accountsFile));
     }
 
     private void fillAccountData() {
