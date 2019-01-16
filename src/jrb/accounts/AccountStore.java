@@ -146,6 +146,7 @@ class AccountStore {
 	    fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 	    in = makeInput(raw, password);
 	} else {
+	    fileKey = new PBEKeySpec(password);
 	    in = new DataInputStream(raw);
 	}
 	int nElements = in.readInt();
