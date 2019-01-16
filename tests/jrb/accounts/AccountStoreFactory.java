@@ -10,9 +10,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.security.GeneralSecurityException;
+
 import static org.junit.Assert.*;
 
 abstract class AccountStoreFactory {
+    private static final String PASSWORD = "password";
+
     protected Account[] testData;
 
     protected AccountStoreFactory(Account[] testData) {
@@ -39,10 +43,11 @@ abstract class AccountStoreFactory {
 	return createTestStore(testData.length);
     }
 
-    protected void writeToFile(File outFile) throws IOException {
+    protected void writeToFile(File outFile)
+	    throws IOException, GeneralSecurityException {
 	AccountStore accounts = createTestStore();
 	FileOutputStream out = new FileOutputStream(outFile);
-	accounts.writeAccounts(out);
+	accounts.writeAccounts(out, PASSWORD.toCharArray());
 	out.close();
     }
 
@@ -55,10 +60,11 @@ abstract class AccountStoreFactory {
 	}
     }
 
-    private void validateStream(InputStream in) throws IOException {
-	    AccountStore accounts = new AccountStore(in);
-	    in.close();
-	    validateContent(accounts);
+    private void validateStream(InputStream in)
+	    throws IOException, GeneralSecurityException {
+	AccountStore accounts = new AccountStore(in, PASSWORD.toCharArray());
+	in.close();
+	validateContent(accounts);
     }
 
     protected void validateFile(File inFile) {
@@ -66,12 +72,14 @@ abstract class AccountStoreFactory {
 	try {
 	    in = new FileInputStream(inFile);
 	} catch (IOException ioe) {
-	    fail("Failed to open accounts file" + ioe.getMessage());
+	    fail("Failed to open accounts file: " + ioe.getMessage());
 	}
 	try {
 	    validateStream(in);
 	} catch (IOException ioe) {
-	    fail("Failed to read accounts from file" + ioe.getMessage());
+	    fail("Failed to read accounts from file: " + ioe.getMessage());
+	} catch (GeneralSecurityException gse) {
+	    fail("Decryption failure: " + gse.getMessage());
 	}
     }
 
@@ -84,7 +92,9 @@ abstract class AccountStoreFactory {
 	try {
 	    validateStream(in);
 	} catch (IOException ioe) {
-	    fail("Failed to read accounts from resource" + ioe.getMessage());
+	    fail("Failed to read accounts from resource: " + ioe.getMessage());
+	} catch (GeneralSecurityException gse) {
+	    fail("Decryption failure: " + gse.getMessage());
 	}
     }
 }

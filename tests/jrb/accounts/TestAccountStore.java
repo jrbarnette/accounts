@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.security.GeneralSecurityException;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -81,6 +83,8 @@ public class TestAccountStore extends AccountStoreFactory {
 	    writeToFile(tFile);
 	} catch (IOException ioe) {
 	    fail("I/O Exception writing: " + ioe.toString());
+	} catch (GeneralSecurityException gse) {
+	    fail("Encryption failure writing: " + gse.toString());
 	}
 
 	validateFile(tFile);
@@ -91,6 +95,8 @@ public class TestAccountStore extends AccountStoreFactory {
 	    (new TestAccountStore()).writeToFile(new File(argv[0]));
 	} catch (IOException ioe) {
 	    System.err.println("Failed to write: " + ioe.getMessage());
+	} catch (GeneralSecurityException gse) {
+	    System.err.println("Encryption failure: " + gse.getMessage());
 	}
     }
 }

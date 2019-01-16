@@ -7,6 +7,7 @@ package jrb.accounts;
 import java.io.File;
 import java.io.IOException;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
@@ -22,6 +23,7 @@ class AccountStoreUI extends JFrame {
     private static final String SAVE_AS = "Save As ...";
     private static final String EXIT = "Exit";
 
+    private JDialog			fileChooserDialog;
     private JFileChooser		fileChooser;
     private Action			saveAction;
     private File			saveFile;
@@ -104,8 +106,21 @@ class AccountStoreUI extends JFrame {
      * is initialized.
      */
     private void checkFileChooser() {
-	if (fileChooser == null)
-	    fileChooser = new JFileChooser();
+	if (fileChooser != null)
+	    return;
+
+	fileChooser = new JFileChooser();
+	fileChooserDialog = new JDialog(this);
+	fileChooserDialog.add(fileChooser, BorderLayout.CENTER);
+	JPanel pwdPanel = new JPanel(); {
+	    JLabel aLabel = new JLabel("File password");
+	    pwdPanel.add(aLabel);
+	    JPasswordField text = new JPasswordField();
+	    aLabel.setLabelFor(text);
+	    pwdPanel.add(text);
+	    JButton openButton = new JButton("Open");
+	    pwdPanel.add(text);
+	}
     }
 
     /**

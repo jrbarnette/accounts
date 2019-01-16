@@ -185,14 +185,18 @@ class AccountStorePanel extends JPanel
     }
 
     void openAccounts(File accountsFile) throws IOException {
+	/*
 	myAccountStore.readAccounts(
 	    new FileInputStream(accountsFile));
+	*/
 	refillAccountList();
     }
 
     void saveAccounts(File accountsFile) throws IOException {
+	/*
 	myAccountStore.writeAccounts(
 	    new FileOutputStream(accountsFile));
+	*/
     }
 
     private void fillAccountData() {
