@@ -60,41 +60,43 @@ abstract class AccountStoreFactory {
 	}
     }
 
-    private void validateStream(InputStream in)
-	    throws IOException, GeneralSecurityException {
-	AccountStore accounts = new AccountStore(in, PASSWORD.toCharArray());
-	in.close();
-	validateContent(accounts);
+    private AccountStore readFromStream(InputStream in) {
+	AccountStore accounts = null;
+	try {
+	    accounts = new AccountStore(in, PASSWORD.toCharArray());
+	    in.close();
+	} catch (IOException ioe) {
+	    fail("Failed to read accounts: " + ioe.getMessage());
+	} catch (GeneralSecurityException gse) {
+	    fail("Decryption failure: " + gse.getMessage());
+	}
+	return accounts;
     }
 
-    protected void validateFile(File inFile) {
+    protected AccountStore readFromFile(File inFile) {
 	FileInputStream in = null;
 	try {
 	    in = new FileInputStream(inFile);
 	} catch (IOException ioe) {
 	    fail("Failed to open accounts file: " + ioe.getMessage());
 	}
-	try {
-	    validateStream(in);
-	} catch (IOException ioe) {
-	    fail("Failed to read accounts from file: " + ioe.getMessage());
-	} catch (GeneralSecurityException gse) {
-	    fail("Decryption failure: " + gse.getMessage());
-	}
+	return readFromStream(in);
     }
 
-    protected void validateResource(String resource) {
+    protected AccountStore readFromResource(String resource) {
 	InputStream in =
 	    getClass().getClassLoader().getResourceAsStream(resource);
 	if (in == null) {
 	    fail("Failed to open resource");
 	}
-	try {
-	    validateStream(in);
-	} catch (IOException ioe) {
-	    fail("Failed to read accounts from resource: " + ioe.getMessage());
-	} catch (GeneralSecurityException gse) {
-	    fail("Decryption failure: " + gse.getMessage());
-	}
+	return readFromStream(in);
+    }
+
+    protected void validateFile(File inFile) {
+	validateContent(readFromFile(inFile));
+    }
+
+    protected void validateResource(String resource) {
+	validateContent(readFromResource(resource));
     }
 }
