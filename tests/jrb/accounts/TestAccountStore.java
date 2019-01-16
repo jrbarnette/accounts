@@ -52,29 +52,20 @@ public class TestAccountStore extends AccountStoreFactory {
 	}
     }
 
-    private void testContent(AccountStore accounts) {
-	int i = 0;
-	for (Account acct : accounts.allAccounts()) {
-	    assertEquals("Account data wrong or out of order",
-			 TEST_ACCOUNTS[i], acct);
-	    i++;
-	}
-    }
-
-    private void testOrdering(boolean createInOrder) {
+    private void validateOrdering(boolean createInOrder) {
 	for (int num = 0; num <= TEST_ACCOUNTS.length; num++) {
-	    testContent(createTestStore(num, createInOrder));
+	    validateContent(createTestStore(num, createInOrder));
 	}
     }
 
     @Test
     public void testAddInOrder() {
-	testOrdering(true);
+	validateOrdering(true);
     }
 
     @Test
     public void testAddOutOfOrder() {
-	testOrdering(false);
+	validateOrdering(false);
     }
 
     @Test
@@ -85,21 +76,21 @@ public class TestAccountStore extends AccountStoreFactory {
 	} catch (IOException ioe) {
 	    fail("Unable to create temp file: " + ioe.toString());
 	}
-	AccountStore accounts = createTestStore();
+
 	try {
-	    FileOutputStream out = new FileOutputStream(tFile);
-	    accounts.writeAccounts(out);
-	    out.close();
+	    writeToFile(tFile);
 	} catch (IOException ioe) {
 	    fail("I/O Exception writing: " + ioe.toString());
 	}
+
+	validateFile(tFile);
+    }
+
+    public static void main(String argv[]) {
 	try {
-	    FileInputStream in = new FileInputStream(tFile);
-	    accounts = new AccountStore(in);
-	    in.close();
+	    (new TestAccountStore()).writeToFile(new File(argv[0]));
 	} catch (IOException ioe) {
-	    fail("I/O Exception reading: " + ioe.toString());
+	    System.err.println("Failed to write: " + ioe.getMessage());
 	}
-	testContent(accounts);
     }
 }
