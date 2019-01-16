@@ -152,6 +152,7 @@ class AccountStorePanel extends JPanel
 	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
+	accountList.setVisibleRowCount(30);
 	JScrollPane aScrollPane = new JScrollPane();
 	aScrollPane.setViewportView(accountList);
 	aScrollPane.setVerticalScrollBarPolicy(
