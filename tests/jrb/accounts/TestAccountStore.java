@@ -14,23 +14,15 @@ import java.io.IOException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class TestAccountStore {
-    private static final Account[] testAccounts = {
+public class TestAccountStore extends AccountStoreFactory {
+    private static final Account[] TEST_ACCOUNTS = {
 	new Account("xxx desc", "http://c.com", "u0", "p3"),
 	new Account("yyy desc", "http://b.com", "u0", "p2"),
 	new Account("zzz desc", "http://a.com", "u0", "p0"),
     };
 
-    private static AccountStore createTestStore(int num, boolean inOrder) {
-	AccountStore accounts = new AccountStore();
-	for (int i = 0; i < num; i++) {
-	    if (inOrder) {
-		accounts.addAccount(testAccounts[i]);
-	    } else {
-		accounts.addAccount(testAccounts[num - i - 1]);
-	    }
-	}
-	return accounts;
+    public TestAccountStore() {
+	super(TEST_ACCOUNTS);
     }
 
     private static int countElements(AccountStore accounts) {
@@ -43,8 +35,8 @@ public class TestAccountStore {
 
     @Test
     public void testReportedSize() {
-	for (int num = 0; num <= testAccounts.length; num++) {
-	    AccountStore accounts = createTestStore(num, true);
+	for (int num = 0; num <= TEST_ACCOUNTS.length; num++) {
+	    AccountStore accounts = createTestStore(num);
 	    assertEquals("AccountStore size() reports wrong value",
 			 num, accounts.size());
 	}
@@ -52,8 +44,8 @@ public class TestAccountStore {
 
     @Test
     public void testActualSize() {
-	for (int num = 0; num <= testAccounts.length; num++) {
-	    AccountStore accounts = createTestStore(num, true);
+	for (int num = 0; num <= TEST_ACCOUNTS.length; num++) {
+	    AccountStore accounts = createTestStore(num);
 	    String msg =
 		"AccountStore iterates through the wrong number of elements";
 	    assertEquals(msg, num, countElements(accounts));
@@ -64,13 +56,13 @@ public class TestAccountStore {
 	int i = 0;
 	for (Account acct : accounts.allAccounts()) {
 	    assertEquals("Account data wrong or out of order",
-			 testAccounts[i], acct);
+			 TEST_ACCOUNTS[i], acct);
 	    i++;
 	}
     }
 
     private void testOrdering(boolean createInOrder) {
-	for (int num = 0; num <= testAccounts.length; num++) {
+	for (int num = 0; num <= TEST_ACCOUNTS.length; num++) {
 	    testContent(createTestStore(num, createInOrder));
 	}
     }
@@ -93,7 +85,7 @@ public class TestAccountStore {
 	} catch (IOException ioe) {
 	    fail("Unable to create temp file: " + ioe.toString());
 	}
-	AccountStore accounts = createTestStore(testAccounts.length, true);
+	AccountStore accounts = createTestStore();
 	try {
 	    FileOutputStream out = new FileOutputStream(tFile);
 	    accounts.writeAccounts(out);
