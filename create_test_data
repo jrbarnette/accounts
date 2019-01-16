@@ -1,4 +1,6 @@
 #!/bin/bash
+# Copyright 2019, by J. Richard Barnette.  All Rights Reserved.
+#
 
 ant tests || exit $?
 OUTFILE=$1
