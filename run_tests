@@ -9,9 +9,4 @@ SED='
     s=\.java$==
     s=/=.=g
 '
-TESTS=( $(sed "$SED" < tests-list) )
-for t in "${TESTS[@]}"
-do
-    echo $t
-    java org.junit.runner.JUnitCore $t
-done
+java org.junit.runner.JUnitCore $(sed "$SED" <tests-list)
