@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ant tests || exit $?
+OUTFILE=$1
+export CLASSPATH=test-classes:accounts.jar:$CLASSPATH
+java jrb.accounts.TestAccountStore "$OUTFILE"

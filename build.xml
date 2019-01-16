@@ -40,6 +40,11 @@
 	    <pathelement path="${env.CLASSPATH}"/>
 	</classpath>
     </javac>
+    <copy todir="${test.classes}">
+	<fileset dir="${basedir}/tests">
+	    <include name="test-data/**"/>
+	</fileset>
+    </copy>
   </target>
 
   <target name="private-docs"
