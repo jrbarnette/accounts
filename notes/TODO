@@ -1,0 +1,10 @@
+Select text when focus gained on text fields.
+
+Organize the accounts list hierarchically (or some other layout?)
+
+Password generation
+
+Save file as executable script that embeds the account data shar-style
+
+change focus-cycle so that from password, we go to "Update" or "Change"
+    or maybe:  if changes, "Update/Change", if no changes "Copy"
