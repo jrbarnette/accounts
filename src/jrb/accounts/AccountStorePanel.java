@@ -18,7 +18,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +25,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -164,7 +162,7 @@ class AccountStorePanel extends JPanel
 	clearAccounts();
     }
 
-    private void clearAccountData() {
+    private void clearAccountFields() {
 	descriptionText.setText("");
 	urlText.setText("");
 	usernameText.setText("");
@@ -176,35 +174,7 @@ class AccountStorePanel extends JPanel
 	copyButton.setEnabled(false);
     }
 
-    public void clearAccounts() {
-	myAccountStore = new AccountStore();
-	accountsChanged = false;
-	clearAccountData();
-	refillAccountList();
-    }
-
-    boolean needSave() {
-        return accountsChanged;
-    }
-
-    void openAccounts(File accountsFile, char[] password)
-	    throws IOException, GeneralSecurityException {
-	myAccountStore.readAccounts(
-	    new FileInputStream(accountsFile), password);
-	refillAccountList();
-    }
-
-    void saveAccounts(File accountsFile, char[] password)
-	    throws IOException, GeneralSecurityException {
-	if (password != null)
-	    myAccountStore.writeAccounts(
-		new FileOutputStream(accountsFile), password);
-	else
-	    myAccountStore.writeAccounts(
-		new FileOutputStream(accountsFile));
-    }
-
-    private void fillAccountData() {
+    private void fillAccountFields() {
 	descriptionText.setText(selectedAccount.getDescription());
 	urlText.setText(selectedAccount.getUrl());
 	usernameText.setText(selectedAccount.getUsername());
@@ -216,13 +186,43 @@ class AccountStorePanel extends JPanel
 	copyButton.setEnabled(true);
     }
 
+    public void clearAccounts() {
+	myAccountStore = new AccountStore();
+	accountsChanged = false;
+	clearAccountFields();
+	refillAccountList();
+    }
+
+    boolean needSave() {
+        return accountsChanged;
+    }
+
+    void openAccounts(File accountsFile, char[] password)
+	    throws IOException, GeneralSecurityException {
+	myAccountStore.readAccounts(
+	    new FileInputStream(accountsFile), password);
+	accountsChanged = false;
+	refillAccountList();
+    }
+
+    void saveAccounts(File accountsFile, char[] password)
+	    throws IOException, GeneralSecurityException {
+	if (password != null)
+	    myAccountStore.writeAccounts(
+		new FileOutputStream(accountsFile), password);
+	else
+	    myAccountStore.writeAccounts(
+		new FileOutputStream(accountsFile));
+	accountsChanged = false;
+    }
+
     private void refillAccountList() {
 	Vector<Account> v = new Vector<Account>();
 	for (Account acct : myAccountStore.allAccounts()) {
 	    v.add(acct);
 	}
-	// This call implicitly clears the selection, forcing a call to
-	// `valueChanged()`.
+	// If there's currently a selection, this call clears it,
+	// forcing a call to `valueChanged()`.
 	accountList.setListData(v);
     }
 
@@ -234,6 +234,7 @@ class AccountStorePanel extends JPanel
 	    urlText.getText(),
 	    usernameText.getText(),
 	    new String(passwordText.getPassword()));
+	accountsChanged = true;
 	refillAccountList();
     }
 
@@ -244,7 +245,9 @@ class AccountStorePanel extends JPanel
 	    urlText.getText(),
 	    usernameText.getText(),
 	    new String(passwordText.getPassword()));
+	accountsChanged = true;
 	refillAccountList();
+	clearAccountFields();
     }
 
     private void validateFields() {
@@ -281,9 +284,9 @@ class AccountStorePanel extends JPanel
 	if (buttonName.equals(CLEAR)) {
 	    // If the selection goes from "something" to "null", it will
 	    // trigger "valueChanged()", which will then call
-	    // "clearAccountData()".
+	    // "clearAccountFields()".
 	    if (accountList.isSelectionEmpty()) {
-		clearAccountData();
+		clearAccountFields();
 	    } else {
 		accountList.clearSelection();
 	    }
@@ -303,9 +306,9 @@ class AccountStorePanel extends JPanel
 	    return;
 	selectedAccount = accountList.getSelectedValue();
 	if (selectedAccount != null) {
-	    fillAccountData();
+	    fillAccountFields();
 	} else {
-	    clearAccountData();
+	    clearAccountFields();
 	}
     }
 
