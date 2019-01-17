@@ -1,0 +1,47 @@
+Key
+    interface, fields:
+	algorithm
+	encoded value
+	encoding format name
+
+SecretKey
+    subinterface of Key, adds in Destroyable
+
+KeySpec
+    marker interface
+    used as input to factory methods
+
+SecretKeySpec
+    implements KeySpec, SecretKey
+    construct from raw bytes of key material and algorithm
+
+SecretKeyFactory
+    generateSecret()
+	convert KeySpec -> SecretKey
+    getKeySpec()
+	convert SecretKey -> KeySpec
+
+AlgorithmParameterSpec
+    marker interface
+    used as input to Cipher initialization, others
+
+AlgorithmParameters
+
+PBEKey
+    subinterface of SecretKey
+
+PBEKeySpec
+    implements KeySpec
+
+PBEParameterSpec
+    implements AlgorithmParameterSpec
+    contains only salt and iteration count
+
+Cipher
+    init from Key
+	optional AlgorithmParameters or AlgorithmParameterSpec
+
+generateSecret from PBEKeySpec, algorithm "PBKDF2WithHmacSHA256" ->
+    com.sun.crypto.provider.PBKDF2KeyImpl
+	implements PBEKey
+    algorithm "PBKDF2WithHmacSHA256"
