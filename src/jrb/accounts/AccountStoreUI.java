@@ -18,7 +18,7 @@ import javax.swing.*;
  */
 class AccountStoreUI extends JFrame {
     private static final String NEW = "New";
-    private static final String OPEN = "Load";
+    private static final String OPEN = "Open";
     private static final String SAVE = "Save";
     private static final String SAVE_AS = "Save As ...";
     private static final String EXIT = "Exit";
@@ -146,7 +146,7 @@ class AccountStoreUI extends JFrame {
     }
 
     /**
-     * Load accounts from a user-selected file for the <i>Load</i>
+     * Read accounts from a user-selected file for the <i>Open</i>
      * file-menu choice.
      */
     private void openAccounts() {
@@ -167,10 +167,10 @@ class AccountStoreUI extends JFrame {
 	} catch (Exception e) {
 	    JOptionPane.showMessageDialog(
 		this,
-		"Unable to load '"
+		"Unable to open '"
 		    + newFile.getName() +"': "
 		    + e.getMessage(),
-		"Unable to Load Accounts",
+		"Unable to Open Accounts",
 		JOptionPane.WARNING_MESSAGE);
 	}
     }
