@@ -8,8 +8,9 @@ import java.io.File;
 import java.io.IOException;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 
@@ -186,7 +187,7 @@ class AccountStoreUI extends JFrame {
 	rightColumn.add(passwordField);
 	dialog.add(rightColumn, BorderLayout.EAST);
 
-	JPanel buttonPanel = new JPanel();
+	JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 	buttonPanel.add(new JButton(new AbstractAction("Quit") {
 	    public void actionPerformed(ActionEvent e) {
 		System.exit(0);
