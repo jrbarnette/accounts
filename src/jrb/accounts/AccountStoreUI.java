@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
@@ -66,7 +67,7 @@ class AccountStoreUI extends JFrame {
 
 	    act = new AbstractAction(OPEN) {
 		public void actionPerformed(ActionEvent ae) {
-		    openAccounts();
+		    openAccountsDialog();
 		}
 	    };
 	    fileMenu.add(act);
@@ -82,7 +83,7 @@ class AccountStoreUI extends JFrame {
 
 	    act = new AbstractAction(SAVE_AS) {
 		public void actionPerformed(ActionEvent ae) {
-		    saveAccountsAs();
+		    saveAccountsDialog();
 		}
 	    };
 	    fileMenu.add(act);
@@ -136,7 +137,7 @@ class AccountStoreUI extends JFrame {
 
 	switch (choice) {
 	case 0: // Save
-	    saveAccountsAs();
+	    saveAccountsDialog();
 	    return !accountsPanel.needSave();
 	case 1: // Don't Save
 	    return true;
@@ -145,21 +146,7 @@ class AccountStoreUI extends JFrame {
 	}
     }
 
-    /**
-     * Read accounts from a user-selected file for the <i>Open</i>
-     * file-menu choice.
-     */
-    private void openAccounts() {
-	if (!checkSaveAccounts())
-	    return;
-
-	checkFileChooser();
-	int option = fileChooser.showOpenDialog();
-	if (option != AccountFileDialog.APPROVE_OPTION)
-	    return;
-
-	File newFile = fileChooser.getSelectedFile();
-	char[] password = fileChooser.getPassword();
+    private void openAccounts(File newFile, char[] password) {
 	try {
 	    accountsPanel.openAccounts(newFile, password);
 	    saveFile = newFile;
@@ -173,6 +160,76 @@ class AccountStoreUI extends JFrame {
 		"Unable to Open Accounts",
 		JOptionPane.WARNING_MESSAGE);
 	}
+    }
+
+    private void openAccountsPasswordDialog(String filename) {
+	File newFile = new File(filename);
+	JDialog dialog = new JDialog(this, "Please enter password");
+	dialog.setModalityType(JDialog.ModalityType.APPLICATION_MODAL);
+	((JComponent) dialog.getContentPane()).setBorder(
+	    BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+	JPanel leftColumn = new JPanel(new GridLayout(0, 1));
+	leftColumn.add(new JLabel("File"));
+	leftColumn.add(new JLabel("Password"));
+	dialog.add(leftColumn, BorderLayout.WEST);
+
+	JPanel rightColumn = new JPanel(new GridLayout(0, 1));
+	rightColumn.add(new JLabel(filename));
+	JPasswordField passwordField = new JPasswordField();
+	passwordField.setColumns(24);
+	passwordField.addActionListener(new AbstractAction() {
+	    public void actionPerformed(ActionEvent e) {
+		dialog.dispose();
+	    }
+	});
+	rightColumn.add(passwordField);
+	dialog.add(rightColumn, BorderLayout.EAST);
+
+	JPanel buttonPanel = new JPanel();
+	buttonPanel.add(new JButton(new AbstractAction("Quit") {
+	    public void actionPerformed(ActionEvent e) {
+		System.exit(0);
+	    }
+	}));
+	buttonPanel.add(new JButton(new AbstractAction("Cancel") {
+	    public void actionPerformed(ActionEvent e) {
+		passwordField.setText("");
+		dialog.dispose();
+	    }
+	}));
+	buttonPanel.add(new JButton(new AbstractAction("Open") {
+	    public void actionPerformed(ActionEvent e) {
+		dialog.dispose();
+	    }
+	}));
+	dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+	dialog.pack();
+	dialog.setVisible(true);
+	char[] password = passwordField.getPassword();
+	if (password != null && password.length > 0) {
+	    openAccounts(newFile, password);
+	}
+    }
+
+    /**
+     * Read accounts from a user-selected file for the <i>Open</i>
+     * file-menu choice.
+     */
+    private void openAccountsDialog() {
+	if (!checkSaveAccounts())
+	    return;
+
+	checkFileChooser();
+	int option = fileChooser.showOpenDialog();
+	if (option != AccountFileDialog.APPROVE_OPTION)
+	    return;
+
+	File newFile = fileChooser.getSelectedFile();
+	char[] password = fileChooser.getPassword();
+
+	openAccounts(newFile, password);
     }
 
     /**
@@ -199,7 +256,7 @@ class AccountStoreUI extends JFrame {
      * Save accounts to a user-selected file for the <i>Save As</i>
      * file-menu choice.
      */
-    private void saveAccountsAs() {
+    private void saveAccountsDialog() {
 	checkFileChooser();
 	int option = fileChooser.showSaveDialog();
 	if (option != AccountFileDialog.APPROVE_OPTION)
@@ -244,7 +301,11 @@ class AccountStoreUI extends JFrame {
         JFrame.setDefaultLookAndFeelDecorated(true);
 	EventQueue.invokeLater(new Runnable() {
 	    public void run() {
-		new AccountStoreUI().setVisible(true);
+		AccountStoreUI ui = new AccountStoreUI();
+		if (argv.length != 0) {
+		    ui.openAccountsPasswordDialog(argv[0]);
+		}
+		ui.setVisible(true);
 	    }
 	});
     }
