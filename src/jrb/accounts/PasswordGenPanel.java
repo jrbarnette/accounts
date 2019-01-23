@@ -68,18 +68,10 @@ public class PasswordGenPanel extends JPanel {
 	allowedList.setListData(allowed);
     }
 
-    private void allowSpecialChar(Character c) {
-	transferChar(prohibited, allowed, c);
-    }
-
-    private void prohibitSpecialChar(Character c) {
-	transferChar(allowed, prohibited, c);
-    }
-
-    private JList addCharacterList(JPanel parent,
-				   String title,
-				   Vector<Character> chars) {
-	JList charList = new JList<Character>();
+    private JList<Character> addCharacterList(JPanel parent,
+					      String title,
+					      Vector<Character> chars) {
+	JList<Character> charList = new JList<Character>();
 	charList.setListData(chars);
 	charList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 	charList.setVisibleRowCount(1);
@@ -120,7 +112,7 @@ public class PasswordGenPanel extends JPanel {
 	xferButtonPanel.add(new JButton(new AbstractAction("+") {
 	    public void actionPerformed(ActionEvent e) {
 		for (Character c : prohibitedList.getSelectedValuesList()) {
-		    allowSpecialChar(c);
+		    transferChar(prohibited, allowed, c);
 		}
 	    }
 	}));
@@ -128,7 +120,7 @@ public class PasswordGenPanel extends JPanel {
 	xferButtonPanel.add(new JButton(new AbstractAction("-") {
 	    public void actionPerformed(ActionEvent e) {
 		for (Character c : allowedList.getSelectedValuesList()) {
-		    prohibitSpecialChar(c);
+		    transferChar(allowed, prohibited, c);
 		}
 	    }
 	}));
