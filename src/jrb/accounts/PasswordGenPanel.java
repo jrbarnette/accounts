@@ -129,6 +129,9 @@ public class PasswordGenPanel extends JPanel {
 	prohibitedList = addCharacterList(
 		rightPanel, "Prohibited special characters", prohibited);
 
+	allowedList.setPreferredSize(allowedList.getMinimumSize());
+	prohibitedList.setPreferredSize(allowedList.getMinimumSize());
+
 	add(rightPanel, BorderLayout.EAST);
     }
 }
