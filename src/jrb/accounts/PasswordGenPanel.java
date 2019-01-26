@@ -16,17 +16,6 @@ import javax.swing.*;
 /**
  */
 public class PasswordGenPanel extends JPanel {
-    private static final String SPECIAL = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-
-    private static final String[] CATEGORIES = {
-	"Uppercase letters",
-	"Lowercase letters",
-	"Digits",
-	"Special characters",
-    };
-
-    private static final String[] CONSTRAINTS = { "Allowed", "Required" };
-
     JRadioButton uppercaseAllowed;
     JRadioButton lowercaseAllowed;
     JRadioButton digitsAllowed;
@@ -43,7 +32,7 @@ public class PasswordGenPanel extends JPanel {
     JList<Character> allowedList;
     JList<Character> prohibitedList;
 
-    private int find(Vector<Character> v, Character c) {
+    private static int find(Vector<Character> v, Character c) {
 	int lo = 0;
 	int hi = v.size();
 	while (lo < hi) {
@@ -68,6 +57,17 @@ public class PasswordGenPanel extends JPanel {
 	allowedList.setListData(allowed);
     }
 
+    private void fillSpecialCharacterDefaults() {
+	String SPECIAL = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+	int len = SPECIAL.length();
+	allowed = new Vector<Character>();
+	for (int i = 0; i < len; i++) {
+	    allowed.add(Character.valueOf(SPECIAL.charAt(i)));
+	}
+	prohibited = new Vector<Character>();
+	prohibited.add(Character.valueOf(' '));
+    }
+
     private JList<Character> addCharacterList(JPanel parent,
 					      String title,
 					      Vector<Character> chars) {
@@ -82,34 +82,40 @@ public class PasswordGenPanel extends JPanel {
 	return charList;
     }
 
-    public PasswordGenPanel() {
-	super(new BorderLayout());
-	JPanel leftPanel = new JPanel(new GridLayout(0, 1));
+    private JComponent createConstraintsPanel(String category) {
+	JPanel aPanel = new JPanel(new GridLayout(0, 2));
+	aPanel.setBorder(BorderFactory.createTitledBorder(category));
+	aPanel.add(new JRadioButton("Allowed"));
+	aPanel.add(new JRadioButton("Required"));
+	return aPanel;
+    }
+
+    private JComponent createCategoriesPanel() {
+	String[] CATEGORIES = {
+	    "Uppercase letters",
+	    "Lowercase letters",
+	    "Digits",
+	};
+
+	JPanel aPanel = new JPanel(new GridLayout(0, 1));
 	for (String category : CATEGORIES) {
-	    JPanel bPanel = new JPanel(new GridLayout(0, 2));
-	    bPanel.setBorder(BorderFactory.createTitledBorder(category));
-	    bPanel.add(new JRadioButton(CONSTRAINTS[0]));
-	    bPanel.add(new JRadioButton(CONSTRAINTS[1]));
-	    leftPanel.add(bPanel);
+	    aPanel.add(createConstraintsPanel(category));
 	}
-	add(leftPanel, BorderLayout.WEST);
 
-	int len = SPECIAL.length();
-	allowed = new Vector<Character>();
-	for (int i = 0; i < len; i++) {
-	    allowed.add(Character.valueOf(SPECIAL.charAt(i)));
-	}
-	prohibited = new Vector<Character>();
-	prohibited.add(Character.valueOf(' '));
+	JPanel tPanel = new JPanel(new BorderLayout());
+	tPanel.add(aPanel, BorderLayout.NORTH);
+	tPanel.add(new JPanel(), BorderLayout.CENTER);
+	return tPanel;
+    }
 
-	JPanel rightPanel = new JPanel(new GridLayout(0, 1));
+    private JComponent createSpecialCharSelector() {
+	JPanel selectorPanel = new JPanel(new GridLayout(0, 1));
 
 	allowedList = addCharacterList(
-		rightPanel, "Allowed special characters", allowed);
+		selectorPanel, "Allowed special characters", allowed);
 
 	JPanel xferButtonPanel = new JPanel();
-
-	xferButtonPanel.add(new JButton(new AbstractAction("+") {
+	xferButtonPanel.add(new JButton(new AbstractAction("allow") {
 	    public void actionPerformed(ActionEvent e) {
 		for (Character c : prohibitedList.getSelectedValuesList()) {
 		    transferChar(prohibited, allowed, c);
@@ -117,21 +123,71 @@ public class PasswordGenPanel extends JPanel {
 	    }
 	}));
 
-	xferButtonPanel.add(new JButton(new AbstractAction("-") {
+	xferButtonPanel.add(new JButton(new AbstractAction("prohibit") {
 	    public void actionPerformed(ActionEvent e) {
 		for (Character c : allowedList.getSelectedValuesList()) {
 		    transferChar(allowed, prohibited, c);
 		}
 	    }
 	}));
-	rightPanel.add(xferButtonPanel);
+	selectorPanel.add(xferButtonPanel);
 
 	prohibitedList = addCharacterList(
-		rightPanel, "Prohibited special characters", prohibited);
+		selectorPanel, "Prohibited special characters", prohibited);
+
+	return selectorPanel;
+    }
+
+    private JComponent createSpecialsPanel() {
+	JPanel specialsPanel = new JPanel(new BorderLayout());
+	// specialsPanel.setBorder(BorderFactory.createEmptyBorder());
+
+	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	// tPanel.setBorder(BorderFactory.createEmptyBorder());
+	JComponent cPanel = createConstraintsPanel("Special characters");
+	cPanel.setPreferredSize(cPanel.getMinimumSize());
+	tPanel.add(cPanel);
+
+	specialsPanel.add(tPanel, BorderLayout.NORTH);
+	specialsPanel.add(createSpecialCharSelector(),
+			  BorderLayout.CENTER);
+	return specialsPanel;
+    }
+
+    private JComponent createLengthSelector() {
+	JPanel aPanel = new JPanel();
+	aPanel.setBorder(BorderFactory.createTitledBorder("Length"));
+
+	aPanel.add(new JLabel("Minimum"));
+	SpinnerNumberModel minValueModel = new SpinnerNumberModel(
+	    PasswordGenerator.DEFAULT_MIN_LENGTH,
+	    PasswordGenerator.MIN_LENGTH,
+	    PasswordGenerator.MAX_LENGTH,
+	    1);
+	JSpinner minLength = new JSpinner(minValueModel);
+	aPanel.add(minLength);
+
+	aPanel.add(new JLabel("Maximum"));
+	SpinnerNumberModel maxValueModel = new SpinnerNumberModel(
+	    PasswordGenerator.DEFAULT_MAX_LENGTH,
+	    PasswordGenerator.MIN_LENGTH,
+	    PasswordGenerator.MAX_LENGTH,
+	    1);
+	JSpinner maxLength = new JSpinner(maxValueModel);
+	aPanel.add(maxLength);
+
+	return aPanel;
+    }
+
+    public PasswordGenPanel() {
+	super(new BorderLayout());
+	fillSpecialCharacterDefaults();
+
+	add(createLengthSelector(), BorderLayout.NORTH);
+	add(createCategoriesPanel(), BorderLayout.WEST);
+	add(createSpecialsPanel(), BorderLayout.EAST);
 
 	allowedList.setPreferredSize(allowedList.getMinimumSize());
 	prohibitedList.setPreferredSize(allowedList.getMinimumSize());
-
-	add(rightPanel, BorderLayout.EAST);
     }
 }
