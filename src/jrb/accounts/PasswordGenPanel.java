@@ -16,15 +16,16 @@ import javax.swing.*;
 /**
  */
 public class PasswordGenPanel extends JPanel {
-    JRadioButton uppercaseAllowed;
-    JRadioButton lowercaseAllowed;
-    JRadioButton digitsAllowed;
-    JRadioButton specialsAllowed;
+    private static final String[] CATEGORIES = {
+	"Uppercase letters",
+	"Lowercase letters",
+	"Digits",
+	"Special characters",
+    };
 
-    JRadioButton uppercaseRequired;
-    JRadioButton lowercaseRequired;
-    JRadioButton digitsRequired;
-    JRadioButton specialsRequired;
+    JRadioButton[] categoryRequired = new JRadioButton[CATEGORIES.length];
+
+    JPasswordField password;
 
     Vector<Character> allowed;
     Vector<Character> prohibited;
@@ -82,24 +83,26 @@ public class PasswordGenPanel extends JPanel {
 	return charList;
     }
 
-    private JComponent createConstraintsPanel(String category) {
-	JPanel aPanel = new JPanel(new GridLayout(0, 2));
-	aPanel.setBorder(BorderFactory.createTitledBorder(category));
-	aPanel.add(new JRadioButton("Allowed"));
-	aPanel.add(new JRadioButton("Required"));
-	return aPanel;
+    private JComponent[] createConstraintsPanels() {
+	JComponent[] panels = new JComponent[CATEGORIES.length];
+	int index = 0;
+	for (String category : CATEGORIES) {
+	    JPanel aPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	    aPanel.add(new JLabel(category));
+	    categoryRequired[index] = new JRadioButton("Required");
+	    aPanel.add(categoryRequired[index]);
+	    panels[index] = aPanel;
+	    index++;
+	}
+	return panels;
     }
 
-    private JComponent createCategoriesPanel() {
-	String[] CATEGORIES = {
-	    "Uppercase letters",
-	    "Lowercase letters",
-	    "Digits",
-	};
-
+    private JComponent createCategoriesPanel(JComponent[] categories) {
 	JPanel aPanel = new JPanel(new GridLayout(0, 1));
-	for (String category : CATEGORIES) {
-	    aPanel.add(createConstraintsPanel(category));
+	aPanel.setBorder(BorderFactory.createTitledBorder(
+		"Character Requirements"));
+	for (JComponent category : categories) {
+	    aPanel.add(category);
 	}
 
 	JPanel tPanel = new JPanel(new BorderLayout());
@@ -138,17 +141,15 @@ public class PasswordGenPanel extends JPanel {
 	return selectorPanel;
     }
 
-    private JComponent createSpecialsPanel() {
+    private JComponent createSpecialsPanel(JComponent[] categories) {
 	JPanel specialsPanel = new JPanel(new BorderLayout());
-	// specialsPanel.setBorder(BorderFactory.createEmptyBorder());
 
 	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-	// tPanel.setBorder(BorderFactory.createEmptyBorder());
-	JComponent cPanel = createConstraintsPanel("Special characters");
+	JComponent cPanel = categories[categories.length-1];
 	cPanel.setPreferredSize(cPanel.getMinimumSize());
 	tPanel.add(cPanel);
-
 	specialsPanel.add(tPanel, BorderLayout.NORTH);
+
 	specialsPanel.add(createSpecialCharSelector(),
 			  BorderLayout.CENTER);
 	return specialsPanel;
@@ -179,13 +180,25 @@ public class PasswordGenPanel extends JPanel {
 	return aPanel;
     }
 
+    private JComponent createPasswordPanel() {
+	JPanel aPanel = new JPanel();
+	aPanel.add(new JLabel("Password"));
+	password = new JPasswordField();
+	password.setColumns(PasswordGenerator.MAX_LENGTH);
+	aPanel.add(password);
+	aPanel.add(new JButton("Generate"));
+	return aPanel;
+    }
+
     public PasswordGenPanel() {
 	super(new BorderLayout());
 	fillSpecialCharacterDefaults();
 
+	JComponent[] categoryConstraints = createConstraintsPanels();
 	add(createLengthSelector(), BorderLayout.NORTH);
-	add(createCategoriesPanel(), BorderLayout.WEST);
-	add(createSpecialsPanel(), BorderLayout.EAST);
+	add(createCategoriesPanel(categoryConstraints), BorderLayout.WEST);
+	add(createSpecialCharSelector(), BorderLayout.EAST);
+	add(createPasswordPanel(), BorderLayout.SOUTH);
 
 	allowedList.setPreferredSize(allowedList.getMinimumSize());
 	prohibitedList.setPreferredSize(allowedList.getMinimumSize());

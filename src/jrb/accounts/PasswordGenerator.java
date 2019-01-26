@@ -14,7 +14,7 @@ import java.util.Set;
 class PasswordGenerator {
     public static final int MIN_LENGTH = 6;
     public static final int MAX_LENGTH = 32;
-    public static final int DEFAULT_MIN_LENGTH = 6;
+    public static final int DEFAULT_MIN_LENGTH = 8;
     public static final int DEFAULT_MAX_LENGTH = 16;
 
     private static final PasswordCharSpec DEFAULT_CHAR_SPEC
