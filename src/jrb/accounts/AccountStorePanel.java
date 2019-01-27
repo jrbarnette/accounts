@@ -18,6 +18,7 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +38,7 @@ class AccountStorePanel extends JPanel
     static private final String CLEAR = "Clear";
     static private final String UPDATE = "Update";
     static private final String CREATE = "Add";
-    static private final String GENERATE = "Generate ...";
+    static private final String GENERATE = "Generate";
 
     static private final Account PROTOTYPE_ACCOUNT =
 	new Account("12345678901234567890123456789012",
@@ -117,8 +118,8 @@ class AccountStorePanel extends JPanel
     }
 
     private JComponent createAccountButtons() {
-	JPanel buttonPanel = new JPanel(new GridLayout(1, 0));
-	String[] buttonNames = { CLEAR, CREATE, COPY, GENERATE };
+	JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	String[] buttonNames = { CLEAR, CREATE, COPY };
 	JButton[] buttons = new JButton[buttonNames.length];
 	int i = 0;
 	for (String name : buttonNames) {
@@ -152,13 +153,21 @@ class AccountStorePanel extends JPanel
 	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
-	accountList.setVisibleRowCount(30);
+	accountList.setVisibleRowCount(35);
 	JScrollPane aScrollPane = new JScrollPane();
 	aScrollPane.setViewportView(accountList);
 	aScrollPane.setVerticalScrollBarPolicy(
 		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 	add(aScrollPane, BorderLayout.WEST);
-	add(createAccountDataPanel(), BorderLayout.CENTER);
+	JPanel outer = new JPanel(new BorderLayout());
+	JPanel inner = new JPanel(new BorderLayout());
+	outer.add(createAccountDataPanel(), BorderLayout.NORTH);
+	inner.add(new PasswordGenPanel(), BorderLayout.NORTH);
+	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	tPanel.add(new JButton(GENERATE));
+	inner.add(tPanel, BorderLayout.SOUTH);
+	outer.add(inner, BorderLayout.SOUTH);
+	add(outer, BorderLayout.CENTER);
 	clearAccounts();
     }
 

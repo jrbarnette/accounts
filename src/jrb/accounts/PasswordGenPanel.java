@@ -72,14 +72,17 @@ public class PasswordGenPanel extends JPanel {
     private JList<Character> addCharacterList(JPanel parent,
 					      String title,
 					      Vector<Character> chars) {
+	JPanel tPanel = new JPanel(new GridLayout(0, 1));
+	JPanel cPanel = new JPanel();
+	cPanel.add(new JLabel(title));
+	tPanel.add(cPanel);
 	JList<Character> charList = new JList<Character>();
 	charList.setListData(chars);
 	charList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 	charList.setVisibleRowCount(1);
-	JPanel aPanel = new JPanel();
-	aPanel.setBorder(BorderFactory.createTitledBorder(title));
-	aPanel.add(charList);
-	parent.add(aPanel);
+	tPanel.add(charList);
+
+	parent.add(tPanel);
 	return charList;
     }
 
@@ -99,8 +102,6 @@ public class PasswordGenPanel extends JPanel {
 
     private JComponent createCategoriesPanel(JComponent[] categories) {
 	JPanel aPanel = new JPanel(new GridLayout(0, 1));
-	aPanel.setBorder(BorderFactory.createTitledBorder(
-		"Character Requirements"));
 	for (JComponent category : categories) {
 	    aPanel.add(category);
 	}
@@ -157,9 +158,8 @@ public class PasswordGenPanel extends JPanel {
 
     private JComponent createLengthSelector() {
 	JPanel aPanel = new JPanel();
-	aPanel.setBorder(BorderFactory.createTitledBorder("Length"));
 
-	aPanel.add(new JLabel("Minimum"));
+	aPanel.add(new JLabel("Minimum length"));
 	SpinnerNumberModel minValueModel = new SpinnerNumberModel(
 	    PasswordGenerator.DEFAULT_MIN_LENGTH,
 	    PasswordGenerator.MIN_LENGTH,
@@ -168,7 +168,7 @@ public class PasswordGenPanel extends JPanel {
 	JSpinner minLength = new JSpinner(minValueModel);
 	aPanel.add(minLength);
 
-	aPanel.add(new JLabel("Maximum"));
+	aPanel.add(new JLabel("Maximum length"));
 	SpinnerNumberModel maxValueModel = new SpinnerNumberModel(
 	    PasswordGenerator.DEFAULT_MAX_LENGTH,
 	    PasswordGenerator.MIN_LENGTH,
@@ -180,25 +180,15 @@ public class PasswordGenPanel extends JPanel {
 	return aPanel;
     }
 
-    private JComponent createPasswordPanel() {
-	JPanel aPanel = new JPanel();
-	aPanel.add(new JLabel("Password"));
-	password = new JPasswordField();
-	password.setColumns(PasswordGenerator.MAX_LENGTH);
-	aPanel.add(password);
-	aPanel.add(new JButton("Generate"));
-	return aPanel;
-    }
-
     public PasswordGenPanel() {
 	super(new BorderLayout());
+	setBorder(BorderFactory.createTitledBorder("Password Parameters"));
 	fillSpecialCharacterDefaults();
 
 	JComponent[] categoryConstraints = createConstraintsPanels();
 	add(createLengthSelector(), BorderLayout.NORTH);
 	add(createCategoriesPanel(categoryConstraints), BorderLayout.WEST);
 	add(createSpecialCharSelector(), BorderLayout.EAST);
-	add(createPasswordPanel(), BorderLayout.SOUTH);
 
 	allowedList.setPreferredSize(allowedList.getMinimumSize());
 	prohibitedList.setPreferredSize(allowedList.getMinimumSize());
