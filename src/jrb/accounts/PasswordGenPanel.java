@@ -39,32 +39,7 @@ public class PasswordGenPanel extends JPanel {
     JSpinner minLength;
     JSpinner maxLength;
 
-    private static int find(Vector<Character> v, Character c) {
-	int lo = 0;
-	int hi = v.size();
-	while (lo < hi) {
-	    int mid = (lo + hi) / 2;
-	    int compare = c.compareTo(v.get(mid));
-	    if (compare == 0)
-		return mid;
-	    if (compare < 0)
-		hi = mid;
-	    else
-		lo = mid + 1;
-	}
-	return lo;
-    }
-
-    private void transferChar(Vector<Character> src,
-			      Vector<Character> dst,
-			      Character c) {
-	src.remove(find(src, c));
-	dst.add(find(dst, c), c);
-	prohibitedList.setListData(prohibited);
-	allowedList.setListData(allowed);
-    }
-
-    private void fillSpecialCharacterDefaults() {
+    private void createAllowedSpecialCharacters() {
 	String specials = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 	int len = specials.length();
 	allowed = new Vector<Character>();
@@ -75,25 +50,9 @@ public class PasswordGenPanel extends JPanel {
 	prohibited.add(Character.valueOf(' '));
     }
 
-    private JList<Character> addCharacterList(JPanel parent,
-					      String title,
-					      Vector<Character> chars) {
-	JPanel tPanel = new JPanel(new GridLayout(0, 1));
-	JPanel cPanel = new JPanel();
-	cPanel.add(new JLabel(title));
-	tPanel.add(cPanel);
-	JList<Character> charList = new JList<Character>();
-	charList.setListData(chars);
-	charList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-	charList.setVisibleRowCount(1);
-	tPanel.add(charList);
-
-	parent.add(tPanel);
-	return charList;
-    }
-
-    private JComponent[] createConstraintsPanels() {
-	JComponent[] panels = new JComponent[CATEGORIES.length];
+    private JComponent createRequiredCategoriesSelector() {
+	JComponent[] categories = new JComponent[CATEGORIES.length];
+	JPanel contentPanel = new JPanel(new GridLayout(0, 1));
 	int index = 0;
 	for (String category : CATEGORIES) {
 	    JPanel aPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -101,25 +60,36 @@ public class PasswordGenPanel extends JPanel {
 	    categoryRequired[index] = new JCheckBox("Required");
 	    categoryRequired[index].setSelected(true);
 	    aPanel.add(categoryRequired[index]);
-	    panels[index] = aPanel;
+	    contentPanel.add(aPanel);
 	    index++;
-	}
-	return panels;
-    }
-
-    private JComponent createCategoriesPanel(JComponent[] categories) {
-	JPanel aPanel = new JPanel(new GridLayout(0, 1));
-	for (JComponent category : categories) {
-	    aPanel.add(category);
 	}
 
 	JPanel tPanel = new JPanel(new BorderLayout());
-	tPanel.add(aPanel, BorderLayout.NORTH);
+	tPanel.add(contentPanel, BorderLayout.NORTH);
 	tPanel.add(new JPanel(), BorderLayout.CENTER);
 	return tPanel;
     }
 
+    private JList<Character> addCharacterList(JPanel parent,
+					      String title,
+					      Vector<Character> chars) {
+	JPanel tPanel = new JPanel(new BorderLayout());
+	JPanel cPanel = new JPanel();
+	cPanel.add(new JLabel(title));
+	tPanel.add(cPanel, BorderLayout.NORTH);
+	JList<Character> charList = new JList<Character>();
+	charList.setListData(chars);
+	charList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+	charList.setVisibleRowCount(1);
+	tPanel.add(charList, BorderLayout.SOUTH);
+
+	parent.add(tPanel);
+
+	return charList;
+    }
+
     private JComponent createSpecialCharSelector() {
+	createAllowedSpecialCharacters();
 	JPanel selectorPanel = new JPanel(new GridLayout(0, 1));
 
 	allowedList = addCharacterList(
@@ -146,21 +116,10 @@ public class PasswordGenPanel extends JPanel {
 	prohibitedList = addCharacterList(
 		selectorPanel, "Prohibited special characters", prohibited);
 
+	allowedList.setPreferredSize(allowedList.getMinimumSize());
+	prohibitedList.setPreferredSize(allowedList.getMinimumSize());
+
 	return selectorPanel;
-    }
-
-    private JComponent createSpecialsPanel(JComponent[] categories) {
-	JPanel specialsPanel = new JPanel(new BorderLayout());
-
-	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-	JComponent cPanel = categories[categories.length-1];
-	cPanel.setPreferredSize(cPanel.getMinimumSize());
-	tPanel.add(cPanel);
-	specialsPanel.add(tPanel, BorderLayout.NORTH);
-
-	specialsPanel.add(createSpecialCharSelector(),
-			  BorderLayout.CENTER);
-	return specialsPanel;
     }
 
     private JComponent createLengthSelector() {
@@ -190,15 +149,35 @@ public class PasswordGenPanel extends JPanel {
     public PasswordGenPanel() {
 	super(new BorderLayout());
 	setBorder(BorderFactory.createTitledBorder("Password Parameters"));
-	fillSpecialCharacterDefaults();
 
-	JComponent[] categoryConstraints = createConstraintsPanels();
 	add(createLengthSelector(), BorderLayout.NORTH);
-	add(createCategoriesPanel(categoryConstraints), BorderLayout.WEST);
+	add(createRequiredCategoriesSelector(), BorderLayout.WEST);
 	add(createSpecialCharSelector(), BorderLayout.EAST);
+    }
 
-	allowedList.setPreferredSize(allowedList.getMinimumSize());
-	prohibitedList.setPreferredSize(allowedList.getMinimumSize());
+    private static int find(Vector<Character> v, Character c) {
+	int lo = 0;
+	int hi = v.size();
+	while (lo < hi) {
+	    int mid = (lo + hi) / 2;
+	    int compare = c.compareTo(v.get(mid));
+	    if (compare == 0)
+		return mid;
+	    if (compare < 0)
+		hi = mid;
+	    else
+		lo = mid + 1;
+	}
+	return lo;
+    }
+
+    private void transferChar(Vector<Character> src,
+			      Vector<Character> dst,
+			      Character c) {
+	src.remove(find(src, c));
+	dst.add(find(dst, c), c);
+	prohibitedList.setListData(prohibited);
+	allowedList.setListData(allowed);
     }
 
     public char[] generatePassword() {
