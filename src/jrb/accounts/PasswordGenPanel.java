@@ -52,7 +52,6 @@ public class PasswordGenPanel extends JPanel {
     }
 
     private JComponent createRequiredCategoriesSelector() {
-	JComponent[] categories = new JComponent[CATEGORIES.length];
 	JPanel contentPanel = new JPanel(new GridLayout(0, 1));
 	int index = 0;
 	for (String category : CATEGORIES) {
