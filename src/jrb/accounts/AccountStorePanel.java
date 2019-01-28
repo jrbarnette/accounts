@@ -331,6 +331,7 @@ class AccountStorePanel extends JPanel
     }
 
     public void focusGained(FocusEvent e) {
+	((JTextField) e.getSource()).selectAll();
     }
 
     public void focusLost(FocusEvent e) {
