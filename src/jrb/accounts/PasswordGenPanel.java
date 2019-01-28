@@ -16,6 +16,11 @@ import javax.swing.*;
 /**
  */
 public class PasswordGenPanel extends JPanel {
+    private static final int UPPER = 0;
+    private static final int LOWER = 1;
+    private static final int DIGITS = 2;
+    private static final int SPECIAL = 3;
+
     private static final String[] CATEGORIES = {
 	"Uppercase letters",
 	"Lowercase letters",
@@ -23,15 +28,16 @@ public class PasswordGenPanel extends JPanel {
 	"Special characters",
     };
 
-    JRadioButton[] categoryRequired = new JRadioButton[CATEGORIES.length];
-
-    JPasswordField password;
+    JToggleButton[] categoryRequired = new JToggleButton[CATEGORIES.length];
 
     Vector<Character> allowed;
     Vector<Character> prohibited;
 
     JList<Character> allowedList;
     JList<Character> prohibitedList;
+
+    JSpinner minLength;
+    JSpinner maxLength;
 
     private static int find(Vector<Character> v, Character c) {
 	int lo = 0;
@@ -59,11 +65,11 @@ public class PasswordGenPanel extends JPanel {
     }
 
     private void fillSpecialCharacterDefaults() {
-	String SPECIAL = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-	int len = SPECIAL.length();
+	String specials = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+	int len = specials.length();
 	allowed = new Vector<Character>();
 	for (int i = 0; i < len; i++) {
-	    allowed.add(Character.valueOf(SPECIAL.charAt(i)));
+	    allowed.add(Character.valueOf(specials.charAt(i)));
 	}
 	prohibited = new Vector<Character>();
 	prohibited.add(Character.valueOf(' '));
@@ -92,7 +98,8 @@ public class PasswordGenPanel extends JPanel {
 	for (String category : CATEGORIES) {
 	    JPanel aPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 	    aPanel.add(new JLabel(category));
-	    categoryRequired[index] = new JRadioButton("Required");
+	    categoryRequired[index] = new JCheckBox("Required");
+	    categoryRequired[index].setSelected(true);
 	    aPanel.add(categoryRequired[index]);
 	    panels[index] = aPanel;
 	    index++;
@@ -160,21 +167,21 @@ public class PasswordGenPanel extends JPanel {
 	JPanel aPanel = new JPanel();
 
 	aPanel.add(new JLabel("Minimum length"));
-	SpinnerNumberModel minValueModel = new SpinnerNumberModel(
+	SpinnerModel minValueModel = new SpinnerNumberModel(
 	    PasswordGenerator.DEFAULT_MIN_LENGTH,
 	    PasswordGenerator.MIN_LENGTH,
 	    PasswordGenerator.MAX_LENGTH,
 	    1);
-	JSpinner minLength = new JSpinner(minValueModel);
+	minLength = new JSpinner(minValueModel);
 	aPanel.add(minLength);
 
 	aPanel.add(new JLabel("Maximum length"));
-	SpinnerNumberModel maxValueModel = new SpinnerNumberModel(
+	SpinnerModel maxValueModel = new SpinnerNumberModel(
 	    PasswordGenerator.DEFAULT_MAX_LENGTH,
 	    PasswordGenerator.MIN_LENGTH,
 	    PasswordGenerator.MAX_LENGTH,
 	    1);
-	JSpinner maxLength = new JSpinner(maxValueModel);
+	maxLength = new JSpinner(maxValueModel);
 	aPanel.add(maxLength);
 
 	return aPanel;
@@ -192,5 +199,31 @@ public class PasswordGenPanel extends JPanel {
 
 	allowedList.setPreferredSize(allowedList.getMinimumSize());
 	prohibitedList.setPreferredSize(allowedList.getMinimumSize());
+    }
+
+    public char[] generatePassword() {
+	int min = ((Integer) minLength.getValue()).intValue();
+	int max = ((Integer) maxLength.getValue()).intValue();
+
+	if (min > max) {
+	    max = min;
+	}
+
+	PasswordGenerator gen = new PasswordGenerator(min, max);
+
+	if (categoryRequired[UPPER].isSelected()) {
+	    gen.addCharSpec(PasswordCharSpec.createUppercaseCharSpec(1));
+	}
+	if (categoryRequired[LOWER].isSelected()) {
+	    gen.addCharSpec(PasswordCharSpec.createLowercaseCharSpec(1));
+	}
+	if (categoryRequired[DIGITS].isSelected()) {
+	    gen.addCharSpec(PasswordCharSpec.createDigitCharSpec(1));
+	}
+	if (categoryRequired[SPECIAL].isSelected()) {
+	    gen.addCharSpec(new PasswordCharSpec(allowed, 1));
+	}
+
+	return gen.generatePassword();
     }
 }

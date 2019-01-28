@@ -49,6 +49,8 @@ class AccountStorePanel extends JPanel
     private JTextField usernameText;
     private JPasswordField passwordText;
 
+    private PasswordGenPanel passwordPanel;
+
     private JButton clearButton;
     private JButton updateButton;
     private JButton copyButton;
@@ -162,9 +164,12 @@ class AccountStorePanel extends JPanel
 	JPanel outer = new JPanel(new BorderLayout());
 	JPanel inner = new JPanel(new BorderLayout());
 	outer.add(createAccountDataPanel(), BorderLayout.NORTH);
-	inner.add(new PasswordGenPanel(), BorderLayout.NORTH);
+	passwordPanel = new PasswordGenPanel();
+	inner.add(passwordPanel, BorderLayout.NORTH);
 	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-	tPanel.add(new JButton(GENERATE));
+	JButton generateButton = new JButton(GENERATE);
+	generateButton.addActionListener(this);
+	tPanel.add(generateButton);
 	inner.add(tPanel, BorderLayout.SOUTH);
 	outer.add(inner, BorderLayout.SOUTH);
 	add(outer, BorderLayout.CENTER);
@@ -301,6 +306,10 @@ class AccountStorePanel extends JPanel
 	    }
 	} else if (buttonName.equals(COPY)) {
 	    copyPasswordToClipboard();
+	} else if (buttonName.equals(GENERATE)) {
+	    String password = new String(passwordPanel.generatePassword());
+	    // System.out.println(password);
+	    passwordText.setText(password);
 	} else if (updateButton.isEnabled()) {
 	    if (buttonName.equals(UPDATE)) {
 		updateAccount();

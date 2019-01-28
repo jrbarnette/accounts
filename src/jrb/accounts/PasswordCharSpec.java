@@ -5,7 +5,7 @@
 package jrb.accounts;
 
 import java.util.Random;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  */
@@ -31,10 +31,10 @@ class PasswordCharSpec {
 	this(chars.toCharArray(), mult);
     }
 
-    PasswordCharSpec(Set<Character> set, int mult) {
-	allowableChars = new char[set.size()];
+    PasswordCharSpec(Collection<Character> chars, int mult) {
+	allowableChars = new char[chars.size()];
 	int index = 0;
-	for (Character c : set) {
+	for (Character c : chars) {
 	    allowableChars[index] = c.charValue();
 	    index++;
 	}

@@ -64,12 +64,16 @@ class PasswordGenerator {
 	setLength(min, min + DEFAULT_MAX_LENGTH - DEFAULT_MIN_LENGTH);
     }
 
+    public void addCharSpec(PasswordCharSpec spec) {
+	charSpecs.add(spec);
+    }
+
     public void addCharSpec(char[] allowed, int multiplicity) {
-	charSpecs.add(new PasswordCharSpec(allowed, multiplicity));
+	addCharSpec(new PasswordCharSpec(allowed, multiplicity));
     }
 
     public void addCharSpec(Set<Character> allowed, int multiplicity) {
-	charSpecs.add(new PasswordCharSpec(allowed, multiplicity));
+	addCharSpec(new PasswordCharSpec(allowed, multiplicity));
     }
 
     public void setDefaultCharSpec(char[] allowed) {
