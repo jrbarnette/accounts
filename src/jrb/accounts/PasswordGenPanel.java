@@ -4,6 +4,7 @@
 
 package jrb.accounts;
 
+import java.util.List;
 import java.util.Vector;
 
 import java.awt.BorderLayout;
@@ -98,17 +99,17 @@ public class PasswordGenPanel extends JPanel {
 	JPanel xferButtonPanel = new JPanel();
 	xferButtonPanel.add(new JButton(new AbstractAction("allow") {
 	    public void actionPerformed(ActionEvent e) {
-		for (Character c : prohibitedList.getSelectedValuesList()) {
-		    transferChar(prohibited, allowed, c);
-		}
+		transferChars(prohibited,
+			      allowed,
+			      prohibitedList.getSelectedValuesList());
 	    }
 	}));
 
 	xferButtonPanel.add(new JButton(new AbstractAction("prohibit") {
 	    public void actionPerformed(ActionEvent e) {
-		for (Character c : allowedList.getSelectedValuesList()) {
-		    transferChar(allowed, prohibited, c);
-		}
+		transferChars(allowed,
+			      prohibited,
+			      allowedList.getSelectedValuesList());
 	    }
 	}));
 	selectorPanel.add(xferButtonPanel);
@@ -171,11 +172,13 @@ public class PasswordGenPanel extends JPanel {
 	return lo;
     }
 
-    private void transferChar(Vector<Character> src,
-			      Vector<Character> dst,
-			      Character c) {
-	src.remove(find(src, c));
-	dst.add(find(dst, c), c);
+    private void transferChars(Vector<Character> src,
+			       Vector<Character> dst,
+			       List<Character> cList) {
+	for (Character c : cList) {
+	    src.remove(find(src, c));
+	    dst.add(find(dst, c), c);
+	}
 	prohibitedList.setListData(prohibited);
 	allowedList.setListData(allowed);
     }
