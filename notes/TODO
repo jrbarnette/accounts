@@ -1,4 +1,9 @@
-Change Icon/naming so that the running program can be distinuguished
+Don't silently discard field changes when selecting a new account.
+
+Fix "Save As" to actually work.
+
+--
+Change Icon/naming so that the running program can be distinguished
 from other Java programs.
 
 Keyboard shortcuts
