@@ -11,12 +11,11 @@ import javax.swing.*;
 
 import java.io.File;
 
-class AccountFileDialog extends JDialog
-	implements ActionListener, PropertyChangeListener {
+class AccountFileDialog extends JDialog implements ActionListener {
     private static final String OPEN = "Open";
     private static final String SAVE = "Save";
     private static final String CANCEL = "Cancel";
-    private static final String PASSWORD = "SetPassword";
+    private static final String SET_PASSWORD = "SetPassword";
 
     private static final int PASSWORD_COLUMNS = 24;
 
@@ -25,21 +24,24 @@ class AccountFileDialog extends JDialog
     public static final int ERROR_OPTION = JFileChooser.ERROR_OPTION;
 
     private JFileChooser fileChooser;
-    private JButton openButton;
-    private JButton cancelButton;
     private JPasswordField passwordText;
 
     private File selectedFile;
     private char[] selectedPassword;
 
+    private static final InputVerifier PASSWORD_ENFORCER =
+        new InputVerifier() {
+            public boolean verify(JComponent c) {
+                char[] password = ((JPasswordField) c).getPassword();
+                return (password != null && password.length != 0);
+            }
+        };
+
     private JFileChooser makeFileChooser() {
 	JFileChooser aChooser = new JFileChooser();
-	aChooser.setControlButtonsAreShown(false);
 	aChooser.setMultiSelectionEnabled(false);
 	aChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	aChooser.addActionListener(this);
-	aChooser.addPropertyChangeListener(
-		JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, this);
 	return aChooser;
     }
 
@@ -49,19 +51,10 @@ class AccountFileDialog extends JDialog
 	pwdPanel.add(pwdLabel);
 
 	passwordText = new JPasswordField(PASSWORD_COLUMNS);
-	passwordText.setActionCommand(PASSWORD);
+	passwordText.setActionCommand(SET_PASSWORD);
 	passwordText.addActionListener(this);
 	pwdLabel.setLabelFor(passwordText);
 	pwdPanel.add(passwordText);
-
-	cancelButton = new JButton(CANCEL);
-	cancelButton.addActionListener(this);
-	pwdPanel.add(cancelButton);
-
-	openButton = new JButton(OPEN);
-	openButton.addActionListener(this);
-	openButton.setEnabled(false);
-	pwdPanel.add(openButton);
 	return pwdPanel;
     }
 
@@ -69,7 +62,7 @@ class AccountFileDialog extends JDialog
 	super(parent, "Choose a file and password");
 	fileChooser = makeFileChooser();
 	add(fileChooser, BorderLayout.CENTER);
-	add(makePasswordPanel(), BorderLayout.SOUTH);
+	add(makePasswordPanel(), BorderLayout.NORTH);
 	pack();
     }
 
@@ -78,10 +71,15 @@ class AccountFileDialog extends JDialog
     }
 
     public File getSelectedFile() {
-	return selectedFile;
+	return fileChooser.getSelectedFile();
     }
 
-    private void openFile() {
+    public void setSelectedFile(char[] password, File f) {
+	selectedPassword = password;
+	fileChooser.setSelectedFile(f);
+    }
+
+    private void selectFile() {
 	char[] password = passwordText.getPassword();
 	if (password == null || password.length == 0) {
 	    passwordText.requestFocusInWindow();
@@ -95,44 +93,40 @@ class AccountFileDialog extends JDialog
 	}
 
 	selectedPassword = password;
-	selectedFile = f;
 	setVisible(false);
     }
 
-    private int showDialog(String approvalName) {
-	openButton.setText(approvalName);
+    private int showDialog(int fileDialogType) {
+	fileChooser.rescanCurrentDirectory();
+	fileChooser.setDialogType(fileDialogType);
 	setModalityType(ModalityType.APPLICATION_MODAL);
+	passwordText.requestFocusInWindow();
 	setVisible(true);
-	if (selectedPassword != null && selectedFile != null) {
+	if (selectedPassword != null) {
 	    return APPROVE_OPTION;
-	} else if (selectedPassword == null && selectedFile == null) {
-	    return CANCEL_OPTION;
 	} else {
-	    return ERROR_OPTION;
+	    return CANCEL_OPTION;
 	}
     }
 
     public int showOpenDialog() {
-	return showDialog(OPEN);
+	passwordText.setInputVerifier(null);
+	return showDialog(JFileChooser.OPEN_DIALOG);
     }
 
     public int showSaveDialog() {
-	return showDialog(SAVE);
+	passwordText.setInputVerifier(PASSWORD_ENFORCER);
+	return showDialog(JFileChooser.SAVE_DIALOG);
     }
 
     public void actionPerformed(ActionEvent e) {
 	String command = e.getActionCommand();
-	if (command == JFileChooser.APPROVE_SELECTION
-		|| command == openButton.getText()
-		|| command == PASSWORD) {
-	    openFile();
-	} else if (command == CANCEL) {
+	if (command.equals(JFileChooser.APPROVE_SELECTION)
+		|| command.equals(SET_PASSWORD)) {
+	    selectFile();
+	} else if (command.equals(JFileChooser.CANCEL_SELECTION)) {
+	    selectedPassword = null;
 	    setVisible(false);
 	}
-    }
-
-    public void propertyChange(PropertyChangeEvent e) {
-	File f = (File) e.getNewValue();
-	openButton.setEnabled(f != null && !f.isDirectory());
     }
 }
