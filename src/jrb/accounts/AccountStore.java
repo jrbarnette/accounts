@@ -68,9 +68,11 @@ class AccountStore {
 	addAccount(account);
     }
 
-    public void createAccount(String description, String url,
+    public Account createAccount(String description, String url,
 			      String username, String password) {
-	addAccount(new Account(description, url, username, password));
+	Account account = new Account(description, url, username, password);
+	addAccount(account);
+	return account;
     }
 
     public int size() {
@@ -83,7 +85,7 @@ class AccountStore {
 
     private boolean readMagic(InputStream in) throws IOException {
 	byte[] magic = new byte[FILEMAGIC.length()];
-        int nRead = in.read(magic);
+	int nRead = in.read(magic);
 	String magicString = new String(magic, 0, nRead);
 	if (nRead < magic.length) {
 	    throw new IOException("Magic truncated: " + magicString);

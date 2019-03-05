@@ -208,7 +208,7 @@ class AccountStorePanel extends JPanel
     }
 
     boolean needSave() {
-        return accountsChanged;
+	return accountsChanged;
     }
 
     void openAccounts(File accountsFile, char[] password)
@@ -242,26 +242,28 @@ class AccountStorePanel extends JPanel
 
     private void updateAccount() {
 	// error check: creating a duplicate.
+	Account account = selectedAccount;
 	myAccountStore.updateAccount(
-	    selectedAccount,
+	    account,
 	    descriptionText.getText(),
 	    urlText.getText(),
 	    usernameText.getText(),
 	    new String(passwordText.getPassword()));
 	accountsChanged = true;
 	refillAccountList();
+	accountList.setSelectedValue(account, true);
     }
 
     private void createAccount() {
 	// error check: creating a duplicate.
-	myAccountStore.createAccount(
+	Account account = myAccountStore.createAccount(
 	    descriptionText.getText(),
 	    urlText.getText(),
 	    usernameText.getText(),
 	    new String(passwordText.getPassword()));
 	accountsChanged = true;
 	refillAccountList();
-	clearAccountFields();
+	accountList.setSelectedValue(account, true);
     }
 
     private void validateFields() {
