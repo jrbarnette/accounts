@@ -1,3 +1,9 @@
+Save password generation parameters with the account.
+
+Start solving the history/merge problem:
+  * Merge two different files with overlapping data
+  * Be able to recover older passwords.
+
 Don't silently discard field changes when selecting a new account.
 
 Fix "Save As" to actually work.
