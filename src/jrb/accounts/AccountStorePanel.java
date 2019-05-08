@@ -266,6 +266,12 @@ class AccountStorePanel extends JPanel
 	accountList.setSelectedValue(account, true);
     }
 
+    /**
+     * Validate the input fields, and enable or disable updates based
+     * on the result.  The fields are "valid" if they're all non-empty.
+     * When the fields are valid, we enable the update button if any
+     * field has changed from its original value.
+     */
     private void validateFields() {
 	String description = descriptionText.getText();
 	String url = urlText.getText();
@@ -298,9 +304,10 @@ class AccountStorePanel extends JPanel
 	String buttonName = e.getActionCommand();
 	validateFields();
 	if (buttonName.equals(CLEAR)) {
-	    // If the selection goes from "something" to "null", it will
-	    // trigger "valueChanged()", which will then call
-	    // "clearAccountFields()".
+            // When there's no selection, calling `accountList` to clear
+            // the selection does nothing.  When we have a selection,
+            // clearing the selection will trigger "valueChanged()",
+            // which will then call "clearAccountFields()".
 	    if (accountList.isSelectionEmpty()) {
 		clearAccountFields();
 	    } else {
