@@ -55,11 +55,9 @@ class AccountStorePanel extends JPanel
     private JButton updateButton;
     private JButton copyButton;
 
-    private Account selectedAccount;
     boolean accountsChanged;
 
 
-    // private DefaultListModel<Account> accountListModel;
     JList<Account> accountList;
 
     private AccountStore myAccountStore;
@@ -161,9 +159,9 @@ class AccountStorePanel extends JPanel
 	aScrollPane.setVerticalScrollBarPolicy(
 		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 	add(aScrollPane, BorderLayout.WEST);
+
 	JPanel outer = new JPanel(new BorderLayout());
 	JPanel inner = new JPanel(new BorderLayout());
-	outer.add(createAccountDataPanel(), BorderLayout.NORTH);
 	passwordPanel = new PasswordGenPanel();
 	inner.add(passwordPanel, BorderLayout.NORTH);
 	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -171,8 +169,10 @@ class AccountStorePanel extends JPanel
 	generateButton.addActionListener(this);
 	tPanel.add(generateButton);
 	inner.add(tPanel, BorderLayout.SOUTH);
+	outer.add(createAccountDataPanel(), BorderLayout.NORTH);
 	outer.add(inner, BorderLayout.SOUTH);
 	add(outer, BorderLayout.CENTER);
+
 	clearAccounts();
     }
 
@@ -188,7 +188,7 @@ class AccountStorePanel extends JPanel
 	copyButton.setEnabled(false);
     }
 
-    private void fillAccountFields() {
+    private void fillAccountFields(Account selectedAccount) {
 	descriptionText.setText(selectedAccount.getDescription());
 	urlText.setText(selectedAccount.getUrl());
 	usernameText.setText(selectedAccount.getUsername());
@@ -240,27 +240,24 @@ class AccountStorePanel extends JPanel
 	accountList.setListData(v);
     }
 
-    private void updateAccount() {
+    private void updateAccountData() {
 	// error check: creating a duplicate.
-	Account account = selectedAccount;
-	myAccountStore.updateAccount(
-	    account,
-	    descriptionText.getText(),
-	    urlText.getText(),
-	    usernameText.getText(),
-	    new String(passwordText.getPassword()));
-	accountsChanged = true;
-	refillAccountList();
-	accountList.setSelectedValue(account, true);
-    }
-
-    private void createAccount() {
-	// error check: creating a duplicate.
-	Account account = myAccountStore.createAccount(
-	    descriptionText.getText(),
-	    urlText.getText(),
-	    usernameText.getText(),
-	    new String(passwordText.getPassword()));
+	Account account = null;
+	if (!accountList.isSelectionEmpty()) {
+            account = accountList.getSelectedValue();
+            myAccountStore.updateAccount(
+                account,
+                descriptionText.getText(),
+                urlText.getText(),
+                usernameText.getText(),
+                new String(passwordText.getPassword()));
+        } else {
+            account = myAccountStore.createAccount(
+                descriptionText.getText(),
+                urlText.getText(),
+                usernameText.getText(),
+                new String(passwordText.getPassword()));
+        }
 	accountsChanged = true;
 	refillAccountList();
 	accountList.setSelectedValue(account, true);
@@ -281,7 +278,8 @@ class AccountStorePanel extends JPanel
 			&& !url.isEmpty()
 			&& !username.isEmpty()
 			&& !password.isEmpty();
-	if (valid && selectedAccount != null) {
+	if (valid && !accountList.isSelectionEmpty()) {
+            Account selectedAccount = accountList.getSelectedValue();
 	    updateButton.setEnabled(
 		    !description.equals(selectedAccount.getDescription())
 		    || !url.equals(selectedAccount.getUrl())
@@ -301,10 +299,10 @@ class AccountStorePanel extends JPanel
     }
 
     public void actionPerformed(ActionEvent e) {
-	String buttonName = e.getActionCommand();
+	String actionName = e.getActionCommand();
 	validateFields();
-	if (buttonName.equals(CLEAR)) {
-            // When there's no selection, calling `accountList` to clear
+	if (actionName.equals(CLEAR)) {
+            // When there's no selection, calling "accountList" to clear
             // the selection does nothing.  When we have a selection,
             // clearing the selection will trigger "valueChanged()",
             // which will then call "clearAccountFields()".
@@ -313,29 +311,25 @@ class AccountStorePanel extends JPanel
 	    } else {
 		accountList.clearSelection();
 	    }
-	} else if (buttonName.equals(COPY)) {
+	} else if (actionName.equals(COPY)) {
 	    copyPasswordToClipboard();
-	} else if (buttonName.equals(GENERATE)) {
+	} else if (actionName.equals(GENERATE)) {
 	    String password = new String(passwordPanel.generatePassword());
-	    // System.out.println(password);
 	    passwordText.setText(password);
-	} else if (updateButton.isEnabled()) {
-	    if (buttonName.equals(UPDATE)) {
-		updateAccount();
-	    } else if (buttonName.equals(CREATE)) {
-		createAccount();
-	    }
+	} else if (updateButton.isEnabled()
+                   && actionName.equals(updateButton.getText())) {
+            updateAccountData();
 	}
     }
 
     public void valueChanged(ListSelectionEvent e) {
 	if (e.getValueIsAdjusting())
 	    return;
-	selectedAccount = accountList.getSelectedValue();
-	if (selectedAccount != null) {
-	    fillAccountFields();
-	} else {
+        Account selectedAccount = accountList.getSelectedValue();
+	if (selectedAccount == null) {
 	    clearAccountFields();
+	} else {
+	    fillAccountFields(selectedAccount);
 	}
     }
 
