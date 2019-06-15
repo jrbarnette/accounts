@@ -1,0 +1,68 @@
+account selection actions:
+    select existing account
+    clear fields to create new account
+        (when account is selected but not changed)
+accout change actions:
+    change one or more fields
+        includes generating password
+    update selected account
+    add new account (requires no account selected)
+    delete selected account
+    discard
+        (when fields have changed)
+    copy password to clipboard
+
+
+state machine
+
+state: creating account, no changes
+    select account ->
+        state: account selected, no changes
+    change one or more fields ->
+        if account fields valid:
+            state: creating account, pending changes
+        if account fields empty:
+            state: creating account, no changes
+
+state: account selected, no changes
+    select existing account ->
+        state: account selected, no changes
+    clear fields to create new account ->
+        state: creating account, no changes
+    change one or more fields ->
+        state: account selected, pending changes
+    copy password to clipboard ->
+        state: account selected, no changes
+
+state: creating account, pending changes
+    select existing account ->
+        dialog ->
+        option:
+            add new account
+        option:
+            discard changes
+            state: creating account, no changes
+        option:
+            (no change)
+            state: creating account, pending changes
+    change one or more fields ->
+        state: creating account, pending changes
+    add new account ->
+        create new account
+        state: account selected, no changes
+    discard
+        (dialog to confirm?)
+        state: account selected, no changes
+    copy password to clipboard
+        (warning - not saved)
+
+state: account selected, pending changes
+    select existing account
+        dialog -> discard, select, cancel
+    change one or more fields
+        includes generating password
+    update (requires a selected account)
+    add new account (requires no account selected)
+    discard
+        (when fields have changed)
+    copy password to clipboard
