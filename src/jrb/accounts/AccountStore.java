@@ -69,10 +69,14 @@ class AccountStore {
     }
 
     public Account createAccount(String description, String url,
-			      String username, String password) {
+				 String username, String password) {
 	Account account = new Account(description, url, username, password);
 	addAccount(account);
 	return account;
+    }
+
+    public void deleteAccount(Account account) {
+	myAccounts.remove(account.getDescription());
     }
 
     public int size() {

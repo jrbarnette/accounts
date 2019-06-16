@@ -58,6 +58,8 @@ abstract class AccountStoreFactory {
 			 testData[i], acct);
 	    i++;
 	}
+	assertEquals("Number of items seen by account iterator",
+		     accounts.size(), i);
     }
 
     private AccountStore readFromStream(InputStream in) {

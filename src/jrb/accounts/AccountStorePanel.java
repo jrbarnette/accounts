@@ -33,9 +33,9 @@ import javax.swing.event.ListSelectionListener;
  */
 class AccountStorePanel extends JPanel
 	implements ActionListener, ListSelectionListener, FocusListener {
-    static private final String SEARCH = "Search";
     static private final String COPY = "Copy";
-    static private final String CLEAR = "Clear";
+    static private final String CLEAR = "New";
+    static private final String DELETE = "Delete";
     static private final String UPDATE = "Update";
     static private final String CREATE = "Add";
     static private final String GENERATE = "Generate";
@@ -51,6 +51,7 @@ class AccountStorePanel extends JPanel
 
     private PasswordGenPanel passwordPanel;
 
+    private JButton deleteButton;
     private JButton clearButton;
     private JButton updateButton;
     private JButton copyButton;
@@ -119,7 +120,7 @@ class AccountStorePanel extends JPanel
 
     private JComponent createAccountButtons() {
 	JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-	String[] buttonNames = { CLEAR, CREATE, COPY };
+	String[] buttonNames = { DELETE, CLEAR, CREATE, COPY };
 	JButton[] buttons = new JButton[buttonNames.length];
 	int i = 0;
 	for (String name : buttonNames) {
@@ -130,9 +131,10 @@ class AccountStorePanel extends JPanel
 	    buttonPanel.add(aPanel);
 	    i++;
 	}
-	clearButton = buttons[0];
-	updateButton = buttons[1];
-	copyButton = buttons[2];
+	deleteButton = buttons[0];
+	clearButton = buttons[1];
+	updateButton = buttons[2];
+	copyButton = buttons[3];
 	return buttonPanel;
     }
 
@@ -182,6 +184,7 @@ class AccountStorePanel extends JPanel
 	usernameText.setText("");
 	passwordText.setText("");
 
+	deleteButton.setEnabled(false);
 	clearButton.setEnabled(false);
 	updateButton.setText(CREATE);
 	updateButton.setEnabled(false);
@@ -194,6 +197,7 @@ class AccountStorePanel extends JPanel
 	usernameText.setText(selectedAccount.getUsername());
 	passwordText.setText(selectedAccount.getPassword());
 
+	deleteButton.setEnabled(true);
 	clearButton.setEnabled(true);
 	updateButton.setText(UPDATE);
 	updateButton.setEnabled(false);
@@ -280,13 +284,16 @@ class AccountStorePanel extends JPanel
 			&& !password.isEmpty();
 	if (valid && !accountList.isSelectionEmpty()) {
             Account selectedAccount = accountList.getSelectedValue();
-	    updateButton.setEnabled(
+            boolean changed =
 		    !description.equals(selectedAccount.getDescription())
 		    || !url.equals(selectedAccount.getUrl())
 		    || !username.equals(selectedAccount.getUsername())
-		    || !password.equals(selectedAccount.getPassword()));
+		    || !password.equals(selectedAccount.getPassword());
+	    updateButton.setEnabled(changed);
+            deleteButton.setEnabled(!changed);
 	} else {
 	    updateButton.setEnabled(valid);
+            deleteButton.setEnabled(false);
 	}
     }
 
@@ -301,7 +308,14 @@ class AccountStorePanel extends JPanel
     public void actionPerformed(ActionEvent e) {
 	String actionName = e.getActionCommand();
 	validateFields();
-	if (actionName.equals(CLEAR)) {
+	if (actionName.equals(DELETE)) {
+	    if (!accountList.isSelectionEmpty()) {
+                Account selectedAccount = accountList.getSelectedValue();
+                myAccountStore.deleteAccount(selectedAccount);
+                accountsChanged = true;
+                refillAccountList();
+            }
+	} else if (actionName.equals(CLEAR)) {
             // When there's no selection, calling "accountList" to clear
             // the selection does nothing.  When we have a selection,
             // clearing the selection will trigger "valueChanged()",

@@ -71,6 +71,18 @@ public class TestAccountStore extends AccountStoreFactory {
     }
 
     @Test
+    public void testDelete() {
+	AccountStore accounts = createTestStore(TEST_ACCOUNTS.length);
+	for (int num = 0; num < TEST_ACCOUNTS.length; num++) {
+	    int idx = TEST_ACCOUNTS.length - num - 1;
+	    accounts.deleteAccount(TEST_ACCOUNTS[idx]);
+	    validateContent(accounts);
+	    assertEquals("Account data size after delete",
+			 idx, accounts.size());
+	}
+    }
+
+    @Test
     public void testFileIO() {
 	File tFile = null;
 	try {
