@@ -27,29 +27,17 @@ public class TestReadAccountsV0 extends AccountStoreFactory {
     }
 
     @Test
-    public void testSampleFile() {
+    public void testSampleFile()
+	    throws IOException, GeneralSecurityException {
 	validateResource(TEST_RESOURCE);
     }
 
     @Test
-    public void testConversion() {
-	File tFile = null;
-	try {
-	    tFile = File.createTempFile("test", ".acct");
-	} catch (IOException ioe) {
-	    fail("Unable to create temp file: " + ioe.toString());
-	}
-
+    public void testConversion()
+	    throws IOException, GeneralSecurityException {
+	File tFile = File.createTempFile("test", ".acct");
 	AccountStore accounts = readFromResource(TEST_RESOURCE);
-
-	try {
-	    accounts.writeAccounts(new FileOutputStream(tFile));
-	} catch (IOException ioe) {
-	    fail("I/O Exception writing: " + ioe.toString());
-	} catch (GeneralSecurityException gse) {
-	    fail("Encryption failure writing: " + gse.toString());
-	}
-
+	accounts.writeAccounts(new FileOutputStream(tFile));
 	validateFile(tFile);
     }
 }

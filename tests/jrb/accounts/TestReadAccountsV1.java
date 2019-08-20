@@ -4,6 +4,10 @@
 
 package jrb.accounts;
 
+import java.io.IOException;
+
+import java.security.GeneralSecurityException;
+
 import org.junit.Test;
 
 public class TestReadAccountsV1 extends AccountStoreFactory {
@@ -20,7 +24,8 @@ public class TestReadAccountsV1 extends AccountStoreFactory {
     }
 
     @Test
-    public void testSampleFile() {
+    public void testSampleFile()
+	    throws IOException, GeneralSecurityException {
 	validateResource(TEST_RESOURCE);
     }
 }

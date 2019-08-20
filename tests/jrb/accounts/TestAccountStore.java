@@ -83,22 +83,10 @@ public class TestAccountStore extends AccountStoreFactory {
     }
 
     @Test
-    public void testFileIO() {
-	File tFile = null;
-	try {
-	    tFile = File.createTempFile("test", ".acct");
-	} catch (IOException ioe) {
-	    fail("Unable to create temp file: " + ioe.toString());
-	}
-
-	try {
-	    writeToFile(tFile);
-	} catch (IOException ioe) {
-	    fail("I/O Exception writing: " + ioe.toString());
-	} catch (GeneralSecurityException gse) {
-	    fail("Encryption failure writing: " + gse.toString());
-	}
-
+    public void testFileIO()
+	    throws IOException, GeneralSecurityException {
+	File tFile = File.createTempFile("test", ".acct");
+	writeToFile(tFile);
 	validateFile(tFile);
     }
 
