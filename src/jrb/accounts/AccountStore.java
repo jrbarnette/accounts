@@ -45,14 +45,17 @@ class AccountStore {
     private Cipher fileCipher;
 
     public AccountStore() {
-	myAccounts = new TreeMap<String, Account>();
-	fileCipher = null;
+	initialize();
     }
 
     public AccountStore(InputStream rawInput, char[] password)
 	    throws GeneralSecurityException, IOException {
-	this();
 	readAccounts(rawInput, password);
+    }
+
+    private void initialize() {
+	myAccounts = new TreeMap<String, Account>();
+	fileCipher = null;
     }
 
     public void addAccount(Account newAccount) {
@@ -147,6 +150,7 @@ class AccountStore {
 
     public void readAccounts(InputStream raw, char[] password)
 	    throws GeneralSecurityException, IOException {
+	initialize();
 	DataInputStream in;
 	if (readMagic(raw)) {
 	    fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
