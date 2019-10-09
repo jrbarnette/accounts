@@ -63,58 +63,39 @@ class AccountStorePanel extends JPanel
 
     private AccountStore myAccountStore;
 
-    private static void addInPanel(JComponent p, JComponent c) {
-	JPanel aPanel = new JPanel();
-	aPanel.add(c);
-	p.add(aPanel);
-    }
-
-    private void createTextFields() {
-	int nColumns = PROTOTYPE_ACCOUNT.getDescription().length();
-	descriptionText = new JTextField();
-	descriptionText.setColumns(nColumns);
-	descriptionText.addActionListener(this);
-	descriptionText.addFocusListener(this);
-
-	urlText = new JTextField();
-	urlText.setColumns(nColumns);
-	urlText.addActionListener(this);
-	urlText.addFocusListener(this);
-
-	usernameText = new JTextField();
-	usernameText.setColumns(nColumns);
-	usernameText.addActionListener(this);
-	usernameText.addFocusListener(this);
-
-	passwordText = new JPasswordField();
-	passwordText.setColumns(nColumns);
-	passwordText.addActionListener(this);
-	passwordText.addFocusListener(this);
-    }
-
     private JComponent createFieldPanels() {
-	JPanel parentPanel = new JPanel();
-	JPanel namesColumn = new JPanel(new GridLayout(0, 1));
-	parentPanel.add(namesColumn);
+	descriptionText = new JTextField();
+	urlText = new JTextField();
+	usernameText = new JTextField();
+	passwordText = new JPasswordField();
+
 	JPanel textBoxColumn = new JPanel(new GridLayout(0, 1));
+	JPanel namesColumn = new JPanel(new GridLayout(0, 1));
+
+        JTextField[] fields = {
+            descriptionText, urlText, usernameText, passwordText,
+        };
+        String[] names = {
+            "Description",   "URL",   "User Name",  "Password",
+        };
+
+	int textWidth = PROTOTYPE_ACCOUNT.getDescription().length();
+
+        for (int i = 0; i < fields.length; i++) {
+            JPanel aPanel = new JPanel();
+            aPanel.add(new JLabel(names[i]));
+            namesColumn.add(aPanel);
+
+            fields[i].setColumns(textWidth);
+            fields[i].addActionListener(this);
+            fields[i].setActionCommand(names[i]);
+            fields[i].addFocusListener(this);
+            textBoxColumn.add(fields[i]);
+        }
+
+	JPanel parentPanel = new JPanel();
+	parentPanel.add(namesColumn);
 	parentPanel.add(textBoxColumn);
-
-	// Description
-	addInPanel(namesColumn, new JLabel("Description"));
-	textBoxColumn.add(descriptionText);
-
-	// URL
-	addInPanel(namesColumn, new JLabel("URL"));
-	textBoxColumn.add(urlText);
-
-	// User Name
-	addInPanel(namesColumn, new JLabel("User Name"));
-	textBoxColumn.add(usernameText);
-
-	// Password
-	addInPanel(namesColumn, new JLabel("Password"));
-	textBoxColumn.add(passwordText);
-
 	return parentPanel;
     }
 
@@ -150,8 +131,6 @@ class AccountStorePanel extends JPanel
     public AccountStorePanel() {
 	super(new BorderLayout());
 
-	createTextFields();
-
 	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
@@ -164,6 +143,7 @@ class AccountStorePanel extends JPanel
 
 	JPanel outer = new JPanel(new BorderLayout());
 	JPanel inner = new JPanel(new BorderLayout());
+
 	passwordPanel = new PasswordGenPanel();
 	inner.add(passwordPanel, BorderLayout.NORTH);
 	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -171,6 +151,7 @@ class AccountStorePanel extends JPanel
 	generateButton.addActionListener(this);
 	tPanel.add(generateButton);
 	inner.add(tPanel, BorderLayout.SOUTH);
+
 	outer.add(createAccountDataPanel(), BorderLayout.NORTH);
 	outer.add(inner, BorderLayout.SOUTH);
 	add(outer, BorderLayout.CENTER);
