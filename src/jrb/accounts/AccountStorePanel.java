@@ -26,13 +26,17 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.Document;
 
 /**
  */
 class AccountStorePanel extends JPanel
-	implements ActionListener, ListSelectionListener, FocusListener {
+	implements ActionListener, ListSelectionListener,
+		    FocusListener, DocumentListener {
     static private final String COPY = "Copy";
     static private final String CLEAR = "New";
     static private final String DELETE = "Delete";
@@ -72,26 +76,24 @@ class AccountStorePanel extends JPanel
 	JPanel textBoxColumn = new JPanel(new GridLayout(0, 1));
 	JPanel namesColumn = new JPanel(new GridLayout(0, 1));
 
-        JTextField[] fields = {
-            descriptionText, urlText, usernameText, passwordText,
-        };
-        String[] names = {
-            "Description",   "URL",   "User Name",  "Password",
-        };
+	JTextField[] fields = {
+	    descriptionText, urlText, usernameText, passwordText,
+	};
+	String[] names = {
+	    "Description",   "URL",   "User Name",  "Password",
+	};
 
 	int textWidth = PROTOTYPE_ACCOUNT.getDescription().length();
 
-        for (int i = 0; i < fields.length; i++) {
-            JPanel aPanel = new JPanel();
-            aPanel.add(new JLabel(names[i]));
-            namesColumn.add(aPanel);
+	for (int i = 0; i < fields.length; i++) {
+	    JPanel aPanel = new JPanel();
+	    aPanel.add(new JLabel(names[i]));
+	    namesColumn.add(aPanel);
 
-            fields[i].setColumns(textWidth);
-            fields[i].addActionListener(this);
-            fields[i].setActionCommand(names[i]);
-            fields[i].addFocusListener(this);
-            textBoxColumn.add(fields[i]);
-        }
+	    fields[i].setColumns(textWidth);
+	    fields[i].getDocument().addDocumentListener(this);
+	    textBoxColumn.add(fields[i]);
+	}
 
 	JPanel parentPanel = new JPanel();
 	parentPanel.add(namesColumn);
@@ -229,20 +231,20 @@ class AccountStorePanel extends JPanel
 	// error check: creating a duplicate.
 	Account account = null;
 	if (!accountList.isSelectionEmpty()) {
-            account = accountList.getSelectedValue();
-            myAccountStore.updateAccount(
-                account,
-                descriptionText.getText(),
-                urlText.getText(),
-                usernameText.getText(),
-                new String(passwordText.getPassword()));
-        } else {
-            account = myAccountStore.createAccount(
-                descriptionText.getText(),
-                urlText.getText(),
-                usernameText.getText(),
-                new String(passwordText.getPassword()));
-        }
+	    account = accountList.getSelectedValue();
+	    myAccountStore.updateAccount(
+		account,
+		descriptionText.getText(),
+		urlText.getText(),
+		usernameText.getText(),
+		new String(passwordText.getPassword()));
+	} else {
+	    account = myAccountStore.createAccount(
+		descriptionText.getText(),
+		urlText.getText(),
+		usernameText.getText(),
+		new String(passwordText.getPassword()));
+	}
 	accountsChanged = true;
 	refillAccountList();
 	accountList.setSelectedValue(account, true);
@@ -264,17 +266,17 @@ class AccountStorePanel extends JPanel
 			&& !username.isEmpty()
 			&& !password.isEmpty();
 	if (valid && !accountList.isSelectionEmpty()) {
-            Account selectedAccount = accountList.getSelectedValue();
-            boolean changed =
+	    Account selectedAccount = accountList.getSelectedValue();
+	    boolean changed =
 		    !description.equals(selectedAccount.getDescription())
 		    || !url.equals(selectedAccount.getUrl())
 		    || !username.equals(selectedAccount.getUsername())
 		    || !password.equals(selectedAccount.getPassword());
 	    updateButton.setEnabled(changed);
-            deleteButton.setEnabled(!changed);
+	    deleteButton.setEnabled(!changed);
 	} else {
 	    updateButton.setEnabled(valid);
-            deleteButton.setEnabled(false);
+	    deleteButton.setEnabled(false);
 	}
     }
 
@@ -288,19 +290,18 @@ class AccountStorePanel extends JPanel
 
     public void actionPerformed(ActionEvent e) {
 	String actionName = e.getActionCommand();
-	validateFields();
 	if (actionName.equals(DELETE)) {
 	    if (!accountList.isSelectionEmpty()) {
-                Account selectedAccount = accountList.getSelectedValue();
-                myAccountStore.deleteAccount(selectedAccount);
-                accountsChanged = true;
-                refillAccountList();
-            }
+		Account selectedAccount = accountList.getSelectedValue();
+		myAccountStore.deleteAccount(selectedAccount);
+		accountsChanged = true;
+		refillAccountList();
+	    }
 	} else if (actionName.equals(CLEAR)) {
-            // When there's no selection, calling "accountList" to clear
-            // the selection does nothing.  When we have a selection,
-            // clearing the selection will trigger "valueChanged()",
-            // which will then call "clearAccountFields()".
+	    // When there's no selection, calling "accountList" to clear
+	    // the selection does nothing.  When we have a selection,
+	    // clearing the selection will trigger "valueChanged()",
+	    // which will then call "clearAccountFields()".
 	    if (accountList.isSelectionEmpty()) {
 		clearAccountFields();
 	    } else {
@@ -312,15 +313,15 @@ class AccountStorePanel extends JPanel
 	    String password = new String(passwordPanel.generatePassword());
 	    passwordText.setText(password);
 	} else if (updateButton.isEnabled()
-                   && actionName.equals(updateButton.getText())) {
-            updateAccountData();
+		   && actionName.equals(updateButton.getText())) {
+	    updateAccountData();
 	}
     }
 
     public void valueChanged(ListSelectionEvent e) {
 	if (e.getValueIsAdjusting())
 	    return;
-        Account selectedAccount = accountList.getSelectedValue();
+	Account selectedAccount = accountList.getSelectedValue();
 	if (selectedAccount == null) {
 	    clearAccountFields();
 	} else {
@@ -333,6 +334,18 @@ class AccountStorePanel extends JPanel
     }
 
     public void focusLost(FocusEvent e) {
+    }
+
+    public void insertUpdate(DocumentEvent e) {
 	validateFields();
+    }
+
+    public void removeUpdate(DocumentEvent e) {
+	validateFields();
+    }
+
+    public void changedUpdate(DocumentEvent e) {
+	// I _think_ this is for non-text property changes
+	// validateFields();
     }
 }
