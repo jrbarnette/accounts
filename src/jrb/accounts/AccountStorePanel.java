@@ -91,6 +91,7 @@ class AccountStorePanel extends JPanel
 	    namesColumn.add(aPanel);
 
 	    fields[i].setColumns(textWidth);
+	    fields[i].addFocusListener(this);
 	    fields[i].getDocument().addDocumentListener(this);
 	    textBoxColumn.add(fields[i]);
 	}
