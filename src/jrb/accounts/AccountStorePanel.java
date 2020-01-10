@@ -39,6 +39,7 @@ class AccountStorePanel extends JPanel
 		    FocusListener, DocumentListener {
     static private final String COPY = "Copy";
     static private final String CLEAR = "New";
+    static private final String REVERT = "Revert";
     static private final String DELETE = "Delete";
     static private final String UPDATE = "Update";
     static private final String CREATE = "Add";
@@ -61,7 +62,6 @@ class AccountStorePanel extends JPanel
     private JButton copyButton;
 
     boolean accountsChanged;
-
 
     JList<Account> accountList;
 
@@ -163,39 +163,95 @@ class AccountStorePanel extends JPanel
 	add(outer, BorderLayout.CENTER);
 
 	clearAccounts();
+	// XXX Usually, clearAccounts() triggers field changes that
+	// invoke validateAccountFields().  But the call here doesn't.
+	// I'm not sure why; best guess is because the fields are
+	// already all empty.  So, we call to validate the fields
+	// manually.
+	validateAccountFields();
+    }
+
+    /**
+     * Validate the input fields, and enable or disable updates based
+     * on the result.  The fields are "valid" if they're all non-empty.
+     * When the fields are valid, we enable the update button if any
+     * field has changed from its original value.
+     */
+    private void validateAccountFields() {
+	String description = descriptionText.getText();
+	String url = urlText.getText();
+	String username = usernameText.getText();
+	String password = new String(passwordText.getPassword());
+
+	clearButton.setText(REVERT);
+
+	boolean changed;
+	if (!accountList.isSelectionEmpty()) {
+	    Account selectedAccount = accountList.getSelectedValue();
+	    changed = !description.equals(selectedAccount.getDescription())
+		    || !url.equals(selectedAccount.getUrl())
+		    || !username.equals(selectedAccount.getUsername())
+		    || !password.equals(selectedAccount.getPassword());
+	    deleteButton.setEnabled(!changed);
+	    if (!changed) {
+		clearButton.setText(CLEAR);
+	    }
+	    clearButton.setEnabled(true);
+	    updateButton.setText(UPDATE);
+	} else {
+	    changed = !description.isEmpty()
+		    || !url.isEmpty()
+		    || !username.isEmpty()
+		    || !password.isEmpty();
+	    deleteButton.setEnabled(false);
+	    clearButton.setEnabled(changed);
+	    updateButton.setText(CREATE);
+	}
+	if (changed) {
+	    boolean valid = !description.isEmpty()
+			&& !url.isEmpty()
+			&& !username.isEmpty()
+			&& !password.isEmpty();
+	    updateButton.setEnabled(valid);
+	} else {
+	    updateButton.setEnabled(false);
+	}
+	copyButton.setEnabled(deleteButton.isEnabled());
+	accountList.setEnabled(!changed);
     }
 
     private void clearAccountFields() {
+	// These changes will trigger DocumentEvent notifications
+	// that will update the button states.
 	descriptionText.setText("");
 	urlText.setText("");
 	usernameText.setText("");
 	passwordText.setText("");
-
-	deleteButton.setEnabled(false);
-	clearButton.setEnabled(false);
-	updateButton.setText(CREATE);
-	updateButton.setEnabled(false);
-	copyButton.setEnabled(false);
     }
 
     private void fillAccountFields(Account selectedAccount) {
+	// These changes will trigger DocumentEvent notifications
+	// that will update the button states.
 	descriptionText.setText(selectedAccount.getDescription());
 	urlText.setText(selectedAccount.getUrl());
 	usernameText.setText(selectedAccount.getUsername());
 	passwordText.setText(selectedAccount.getPassword());
+    }
 
-	deleteButton.setEnabled(true);
-	clearButton.setEnabled(true);
-	updateButton.setText(UPDATE);
-	updateButton.setEnabled(false);
-	copyButton.setEnabled(true);
+    private void refreshAccountFields() {
+	Account selectedAccount = accountList.getSelectedValue();
+	if (selectedAccount == null) {
+	    clearAccountFields();
+	} else {
+	    fillAccountFields(selectedAccount);
+	}
     }
 
     public void clearAccounts() {
 	myAccountStore = new AccountStore();
 	accountsChanged = false;
-	clearAccountFields();
 	refillAccountList();
+	clearAccountFields();
     }
 
     boolean needSave() {
@@ -254,36 +310,6 @@ class AccountStorePanel extends JPanel
 	accountList.setSelectedValue(account, true);
     }
 
-    /**
-     * Validate the input fields, and enable or disable updates based
-     * on the result.  The fields are "valid" if they're all non-empty.
-     * When the fields are valid, we enable the update button if any
-     * field has changed from its original value.
-     */
-    private void validateFields() {
-	String description = descriptionText.getText();
-	String url = urlText.getText();
-	String username = usernameText.getText();
-	String password = new String(passwordText.getPassword());
-	boolean valid = !description.isEmpty()
-			&& !url.isEmpty()
-			&& !username.isEmpty()
-			&& !password.isEmpty();
-	if (valid && !accountList.isSelectionEmpty()) {
-	    Account selectedAccount = accountList.getSelectedValue();
-	    boolean changed =
-		    !description.equals(selectedAccount.getDescription())
-		    || !url.equals(selectedAccount.getUrl())
-		    || !username.equals(selectedAccount.getUsername())
-		    || !password.equals(selectedAccount.getPassword());
-	    updateButton.setEnabled(changed);
-	    deleteButton.setEnabled(!changed);
-	} else {
-	    updateButton.setEnabled(valid);
-	    deleteButton.setEnabled(false);
-	}
-    }
-
     private void copyPasswordToClipboard() {
 	StringSelection selection =
 	    new StringSelection(new String(passwordText.getPassword()));
@@ -295,12 +321,12 @@ class AccountStorePanel extends JPanel
     public void actionPerformed(ActionEvent e) {
 	String actionName = e.getActionCommand();
 	if (actionName.equals(DELETE)) {
-	    if (!accountList.isSelectionEmpty()) {
-		Account selectedAccount = accountList.getSelectedValue();
-		myAccountStore.deleteAccount(selectedAccount);
-		accountsChanged = true;
-		refillAccountList();
-	    }
+	    // Our state machine guarantees that there's an account
+	    // selection in this case.
+	    Account selectedAccount = accountList.getSelectedValue();
+	    myAccountStore.deleteAccount(selectedAccount);
+	    accountsChanged = true;
+	    refillAccountList();
 	} else if (actionName.equals(CLEAR)) {
 	    // When there's no selection, calling "accountList" to clear
 	    // the selection does nothing.  When we have a selection,
@@ -312,6 +338,8 @@ class AccountStorePanel extends JPanel
 		accountList.clearSelection();
 	    }
 	    descriptionText.requestFocusInWindow();
+	} else if (actionName.equals(REVERT)) {
+	    refreshAccountFields();
 	} else if (actionName.equals(COPY)) {
 	    copyPasswordToClipboard();
 	} else if (actionName.equals(GENERATE)) {
@@ -326,12 +354,7 @@ class AccountStorePanel extends JPanel
     public void valueChanged(ListSelectionEvent e) {
 	if (e.getValueIsAdjusting())
 	    return;
-	Account selectedAccount = accountList.getSelectedValue();
-	if (selectedAccount == null) {
-	    clearAccountFields();
-	} else {
-	    fillAccountFields(selectedAccount);
-	}
+	refreshAccountFields();
     }
 
     public void focusGained(FocusEvent e) {
@@ -342,15 +365,15 @@ class AccountStorePanel extends JPanel
     }
 
     public void insertUpdate(DocumentEvent e) {
-	validateFields();
+	validateAccountFields();
     }
 
     public void removeUpdate(DocumentEvent e) {
-	validateFields();
+	validateAccountFields();
     }
 
     public void changedUpdate(DocumentEvent e) {
 	// I _think_ this is for non-text property changes
-	// validateFields();
+	// validateAccountFields();
     }
 }
