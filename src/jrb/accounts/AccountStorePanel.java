@@ -311,6 +311,7 @@ class AccountStorePanel extends JPanel
 	    } else {
 		accountList.clearSelection();
 	    }
+	    descriptionText.requestFocusInWindow();
 	} else if (actionName.equals(COPY)) {
 	    copyPasswordToClipboard();
 	} else if (actionName.equals(GENERATE)) {
