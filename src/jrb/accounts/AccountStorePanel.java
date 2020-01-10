@@ -45,7 +45,7 @@ class AccountStorePanel extends JPanel
     static private final String GENERATE = "Generate";
 
     static private final Account PROTOTYPE_ACCOUNT =
-	new Account("12345678901234567890123456789012",
+	new Account("123456789 123456789 123456789 12",
 		    "http://example.com", "user", "pw");
 
     private JTextField descriptionText;
@@ -86,8 +86,11 @@ class AccountStorePanel extends JPanel
 	int textWidth = PROTOTYPE_ACCOUNT.getDescription().length();
 
 	for (int i = 0; i < fields.length; i++) {
-	    JPanel aPanel = new JPanel();
-	    aPanel.add(new JLabel(names[i]));
+	    JPanel aPanel = new JPanel(
+		    new FlowLayout(FlowLayout.RIGHT, 0, 5));
+	    JLabel aLabel = new JLabel(names[i]);
+	    aLabel.setLabelFor(fields[i]);
+	    aPanel.add(aLabel);
 	    namesColumn.add(aPanel);
 
 	    fields[i].setColumns(textWidth);
