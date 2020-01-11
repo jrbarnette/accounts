@@ -1,4 +1,4 @@
-public methods to be tested:
+==== public methods to be tested:
     public AccountStore()
     // TBD:
     // public AccountStore(char[] password)
@@ -16,6 +16,7 @@ public methods to be tested:
     public void writeAccounts(OutputStream raw, char[] password)
     public void writeAccounts(OutputStream raw)
 
+==== Coverage goals
 Given:  Each of the following, in turn
     AccountStore constructed by calling addAccount() with program data
 	varying order in adding entries
@@ -47,3 +48,80 @@ Assertions:
     size is unchanged
     updated account entries reflect the update
     other entries are unchanged
+
+==== Actual tests
+TestAccountStore:
+    public void testReportedSize()
+	construct AccountStore by calling addAccount() with program data
+	    sequence of program data that gets progressively larger
+	assert size matches expectation
+	covers:
+	    no-arg constructor
+	    addAccount()
+	    size()
+
+    public void testActualSize()
+	construct AccountStore by calling addAccount() with program data
+	    sequence of program data that gets progressively larger
+	assert iterator returns the expected number of items
+	covers:
+	    no-arg constructor
+	    addAccount()
+	    allAccounts()
+
+    public void testAddInOrder()
+	construct AccountStore by calling addAccount() with program data
+	    sequence of program data that gets progressively larger
+	    data is added in iterator order
+	assert iterator returns the expected items in the expected order
+	    items are compared using matches()
+	assert that iterator returns a number of items equal to size
+	covers:
+	    no-arg constructor
+	    addAccount()
+	    allAccounts()
+	    size()
+
+    public void testAddInOrder()
+	construct AccountStore by calling addAccount() with program data
+	    sequence of program data that gets progressively larger
+	    data is added in reverse iterator order
+	assert iterator returns the expected items in the expected order
+	    items are compared using matches()
+	assert that the number of items returned equals size
+	covers:
+	    no-arg constructor
+	    addAccount()
+	    allAccounts()
+	    size()
+
+    public void testDelete()
+	construct AccountStore by calling addAccount() with program data
+	    single construction with largest data set
+	delete items in addition order
+	assert iterator returns the expected items in the expected order
+	    items are compared using matches()
+	assert that the number of items returned equals size
+	assert size is correct after each deletion
+	covers:
+	    no-arg constructor
+	    addAccount()
+	    deleteAccount()
+	    allAccounts()
+	    size()
+
+    public void testFileIO()
+	construct AccountStore by calling addAccount() with program data
+	    single construction with largest data set
+	write AccountStore to a temporary file
+	read back AccountStore from temporary file
+	assert iterator returns the expected items in the expected order
+	    items are compared using matches()
+	assert that the number of items returned equals size
+	covers:
+	    no-arg constructor
+	    addAccount()
+	    allAccounts()
+	    size()
+	    writeAccounts(OutputStream raw, char[] password)
+	    AccountStore(InputStream rawInput, char[] password)
