@@ -1,0 +1,49 @@
+public methods to be tested:
+    public AccountStore()
+    // TBD:
+    // public AccountStore(char[] password)
+    public AccountStore(InputStream rawInput, char[] password)
+    public void addAccount(Account newAccount)
+    public void updateAccount(Account account,
+			      String description, String url,
+			      String username, String password)
+    public Account createAccount(String description, String url,
+				 String username, String password)
+    public void deleteAccount(Account account)
+    public int size()
+    public Iterable<Account> allAccounts()
+    public void readAccounts(InputStream raw, char[] password)
+    public void writeAccounts(OutputStream raw, char[] password)
+    public void writeAccounts(OutputStream raw)
+
+Given:  Each of the following, in turn
+    AccountStore constructed by calling addAccount() with program data
+	varying order in adding entries
+	varying number of entries
+	N.B. this given tests addAccount()
+    AccountStore read from V0 file
+    AccountStore read from V1 file
+    AccountStore read from V2 file
+Assertions: (some redunancy here)
+    size matches number of entries as constructed
+    size matches number of entries entries seen during iteration
+    entries seen during iteration match contents as constructed
+	entries are seen in canonical order
+	"matches" defined by version as constructed
+	no duplicates
+	nothing added
+	nothing removed
+
+Action:
+    write AccountStore to temp file, read it back
+	with new password
+	using implicit password
+Assertions:
+    original and result from file are equal via equals()
+
+Action:
+    Update one (more?) Account entries in the AccountStore
+Assertions:
+    size is unchanged
+    updated account entries reflect the update
+    other entries are unchanged
