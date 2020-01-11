@@ -72,7 +72,7 @@ public class TestAccountStore extends AccountStoreSupport {
 
     @Test
     public void testDelete() {
-	AccountStore accounts = createTestStore(TEST_ACCOUNTS.length);
+	AccountStore accounts = createTestStore();
 	for (int num = 0; num < TEST_ACCOUNTS.length; num++) {
 	    int idx = TEST_ACCOUNTS.length - num - 1;
 	    accounts.deleteAccount(TEST_ACCOUNTS[idx]);
@@ -83,11 +83,13 @@ public class TestAccountStore extends AccountStoreSupport {
     }
 
     @Test
-    public void testFileIO()
+    public void testFileSaveRestore()
 	    throws IOException, GeneralSecurityException {
 	File tFile = File.createTempFile("test", ".acct");
-	writeToFile(tFile);
-	validateFile(tFile);
+	AccountStore origAccounts = writeToFile(tFile);
+	AccountStore newAccounts = createFromFile(tFile);
+	assertEquals("AccountStore changed by save/restore cycle",
+		     origAccounts, newAccounts);
     }
 
     public static void main(String argv[]) {

@@ -182,4 +182,12 @@ class AccountStore {
 	    throws GeneralSecurityException, IOException {
 	writeAccounts(raw, fileKey.getPassword());
     }
+
+    @Override
+    public boolean equals(Object o) {
+	if (!(o instanceof AccountStore)) {
+	    return false;
+	}
+	return myAccounts.equals(((AccountStore) o).myAccounts);
+    }
 }

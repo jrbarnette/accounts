@@ -26,6 +26,7 @@ public class TestReadAccountsV1 extends AccountStoreSupport {
     @Test
     public void testSampleFile()
 	    throws IOException, GeneralSecurityException {
-	validateResource(TEST_RESOURCE);
+	AccountStore accounts = createFromResource(TEST_RESOURCE);
+	validateContent(accounts);
     }
 }

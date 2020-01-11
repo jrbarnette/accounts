@@ -43,12 +43,36 @@ abstract class AccountStoreSupport {
 	return createTestStore(testData.length);
     }
 
-    protected void writeToFile(File outFile)
+    private AccountStore createFromStream(InputStream in)
+	    throws IOException, GeneralSecurityException {
+	AccountStore accounts =
+	    new AccountStore(in, PASSWORD.toCharArray());
+	in.close();
+	return accounts;
+    }
+
+    protected AccountStore createFromFile(File inFile)
+	    throws IOException, GeneralSecurityException {
+	return createFromStream(new FileInputStream(inFile));
+    }
+
+    protected AccountStore createFromResource(String resource)
+	    throws IOException, GeneralSecurityException {
+	InputStream in =
+	    getClass().getClassLoader().getResourceAsStream(resource);
+	if (in == null) {
+	    fail("Failed to open resource: " + resource);
+	}
+	return createFromStream(in);
+    }
+
+    protected AccountStore writeToFile(File outFile)
 	    throws IOException, GeneralSecurityException {
 	AccountStore accounts = createTestStore();
 	FileOutputStream out = new FileOutputStream(outFile);
 	accounts.writeAccounts(out, PASSWORD.toCharArray());
 	out.close();
+	return accounts;
     }
 
     protected void validateContent(AccountStore accounts) {
@@ -60,38 +84,5 @@ abstract class AccountStoreSupport {
 	}
 	assertEquals("Number of items seen by account iterator",
 		     accounts.size(), i);
-    }
-
-    private AccountStore readFromStream(InputStream in)
-	    throws IOException, GeneralSecurityException {
-	AccountStore accounts =
-	    new AccountStore(in, PASSWORD.toCharArray());
-	in.close();
-	return accounts;
-    }
-
-    protected AccountStore readFromFile(File inFile)
-	    throws IOException, GeneralSecurityException {
-	return readFromStream(new FileInputStream(inFile));
-    }
-
-    protected AccountStore readFromResource(String resource)
-	    throws IOException, GeneralSecurityException {
-	InputStream in =
-	    getClass().getClassLoader().getResourceAsStream(resource);
-	if (in == null) {
-	    fail("Failed to open resource: " + resource);
-	}
-	return readFromStream(in);
-    }
-
-    protected void validateFile(File inFile)
-	    throws IOException, GeneralSecurityException {
-	validateContent(readFromFile(inFile));
-    }
-
-    protected void validateResource(String resource)
-	    throws IOException, GeneralSecurityException {
-	validateContent(readFromResource(resource));
     }
 }

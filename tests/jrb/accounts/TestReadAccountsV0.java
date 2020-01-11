@@ -29,15 +29,16 @@ public class TestReadAccountsV0 extends AccountStoreSupport {
     @Test
     public void testSampleFile()
 	    throws IOException, GeneralSecurityException {
-	validateResource(TEST_RESOURCE);
+	AccountStore accounts = createFromResource(TEST_RESOURCE);
+	validateContent(accounts);
     }
 
     @Test
     public void testConversion()
 	    throws IOException, GeneralSecurityException {
 	File tFile = File.createTempFile("test", ".acct");
-	AccountStore accounts = readFromResource(TEST_RESOURCE);
+	AccountStore accounts = createFromResource(TEST_RESOURCE);
 	accounts.writeAccounts(new FileOutputStream(tFile));
-	validateFile(tFile);
+	validateContent(createFromFile(tFile));
     }
 }
