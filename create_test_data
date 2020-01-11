@@ -1,8 +1,46 @@
 #!/bin/bash
 # Copyright 2019, by J. Richard Barnette.  All Rights Reserved.
 #
+# This script is meant to support creating new test data files when
+# updating the save file format.  The command creates a test data file
+# in the current file format using canned data as found in the source
+# for the GENERATOR class named below.
+#
+# usage:
+#     create_test_data output-file
+#
+# To use the script, first make the code changes to reading and writing
+# the new format, and get the unit tests to pass.  Then run this script
+# with the name of a new data file; this will create a new file using
+# the new format.
+#
+# Once the new file is created, create a unit test class along the lines
+# of src/jrb/accounts/TestReadAccountsV*.java.  Note that this new test
+# must make a copy of the canned data in the GENERATOR class, rather
+# than referring to it by name.  That's because the test must be run
+# against the canned data as originally embedded in the data file.  If
+# the GENERATOR class updates its canned data, it mustn't affect tests
+# against the older data files.
+#
+# The newly created test class provides two-fold coverage:
+#  1) As new file formats are added, it proves that old formats can
+#     still be read.
+#  2) As code for the current format changes, it proves that the new
+#     code properly handles the format as defined by the original code.
+#
+# For these two assertions to be valid, the test file shouldn't be
+# updated or changed unless a) the original file was bad in some way
+# and b) the badness shouldn't be worked around for the sake of
+# compatibility.
 
+usage() {
+    echo "$(basename $0) output-file" >&2
+    exit 1
+}
+
+[ $# -eq 1 ] || usage
 ant tests || exit $?
 OUTFILE=$1
 export CLASSPATH=test-classes:accounts.jar:$CLASSPATH
-java jrb.accounts.TestAccountStore "$OUTFILE"
+GENERATOR=jrb.accounts.TestAccountStore
+java $GENERATOR "$OUTFILE"
