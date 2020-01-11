@@ -1,10 +1,19 @@
+Bugs/risks:
+  * The Save As dialog should ask for the password twice, to
+    guarantee that it's not mis-typed.
+  * The various file dialogs shouldn't enable the action button
+    until there's a valid password.
+  * When opening a V0 file, the password is remembered, but in
+    AccountData, fileKey is initialized differently.  It's not
+    clear to me whether this is correct.
+  * Maybe we should drop support for V0 files, rather than ask
+    whether the handling is correct...
+
 Start solving the history/merge problem:
   * Merge two different files with overlapping data
   * Be able to recover older passwords.
 
 Don't silently discard field changes when selecting a new account.
-
-Fix "Save As" to actually work.
 
 Save password generation parameters with the account.
 
