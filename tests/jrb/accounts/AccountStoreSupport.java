@@ -14,12 +14,12 @@ import java.security.GeneralSecurityException;
 
 import static org.junit.Assert.*;
 
-abstract class AccountStoreFactory {
+abstract class AccountStoreSupport {
     private static final String PASSWORD = "password";
 
     protected Account[] testData;
 
-    protected AccountStoreFactory(Account[] testData) {
+    protected AccountStoreSupport(Account[] testData) {
 	this.testData = testData;
     }
 

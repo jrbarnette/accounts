@@ -13,7 +13,7 @@ import java.security.GeneralSecurityException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class TestReadAccountsV0 extends AccountStoreFactory {
+public class TestReadAccountsV0 extends AccountStoreSupport {
     private static final Account[] TEST_ACCOUNTS = {
 	new Account("xxx desc", "http://c.com", "u0", "p3"),
 	new Account("yyy desc", "http://b.com", "u0", "p2"),
