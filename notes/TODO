@@ -9,6 +9,9 @@ Bugs/risks:
   * Maybe we should drop support for V0 files, rather than ask
     whether the handling is correct...
 
+There was a bug fixed at commit 536967f.  Need to add a unit test
+that could catch the bug.
+
 Start solving the history/merge problem:
   * Merge two different files with overlapping data
   * Be able to recover older passwords.
