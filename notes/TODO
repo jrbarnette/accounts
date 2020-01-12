@@ -20,8 +20,14 @@ Implement support to show/manipulate stored account data history.
 
 Implement support for merging accounts files together.
 
+Skip the whole "save file" option, and automatically write back after
+any committed change.
+
 Instead of deleting accounts, allow an option that just hides the
-account in the UI.
+account in the UI.  Looking at my current account list, though, this
+might not help much; most of them are still active.  What would
+really be helpful would be providing a hierarchical tree structured
+list.
 
 Save password generation parameters with the account.
 
