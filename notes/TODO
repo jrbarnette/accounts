@@ -12,11 +12,16 @@ Bugs/risks:
 There was a bug fixed at commit 536967f.  Need to add a unit test
 that could catch the bug.
 
-Start solving the history/merge problem:
-  * Merge two different files with overlapping data
-  * Be able to recover older passwords.
+Minor usability: Changing the selected account in the account list
+moves keyboard focus to the Description field.  That prevents using
+the keyboard arrows to move up/down the list.
 
-Don't silently discard field changes when selecting a new account.
+Implement support to show/manipulate stored account data history.
+
+Implement support for merging accounts files together.
+
+Instead of deleting accounts, allow an option that just hides the
+account in the UI.
 
 Save password generation parameters with the account.
 
