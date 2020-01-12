@@ -12,16 +12,12 @@ Bugs/risks:
 There was a bug fixed at commit 536967f.  Need to add a unit test
 that could catch the bug.
 
-Minor usability: Changing the selected account in the account list
-moves keyboard focus to the Description field.  That prevents using
-the keyboard arrows to move up/down the list.
-
 Implement support to show/manipulate stored account data history.
 
 Implement support for merging accounts files together.
 
 Skip the whole "save file" option, and automatically write back after
-any committed change.
+any change is committed.
 
 Instead of deleting accounts, allow an option that just hides the
 account in the UI.  Looking at my current account list, though, this

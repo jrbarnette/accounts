@@ -340,11 +340,13 @@ class AccountStorePanel extends JPanel
 	    descriptionText.requestFocusInWindow();
 	} else if (actionName.equals(REVERT)) {
 	    refreshAccountFields();
+	    descriptionText.requestFocusInWindow();
 	} else if (actionName.equals(COPY)) {
 	    copyPasswordToClipboard();
 	} else if (actionName.equals(GENERATE)) {
 	    String password = new String(passwordPanel.generatePassword());
 	    passwordText.setText(password);
+	    passwordText.requestFocusInWindow();
 	} else if (updateButton.isEnabled()
 		   && actionName.equals(updateButton.getText())) {
 	    updateAccountData();
@@ -355,6 +357,7 @@ class AccountStorePanel extends JPanel
 	if (e.getValueIsAdjusting())
 	    return;
 	refreshAccountFields();
+	accountList.requestFocusInWindow();
     }
 
     public void focusGained(FocusEvent e) {
