@@ -87,16 +87,20 @@ public class TestAccountStore extends AccountStoreSupport {
     @Test
     public void testFileSaveRestore()
 	    throws IOException, GeneralSecurityException {
-	File tFile = File.createTempFile("test", ".acct");
-	AccountStore origAccounts = writeToFile(tFile);
-	AccountStore newAccounts = createFromFile(tFile);
+	AccountStore origAccounts = createTestStore();
+	AccountStore newAccounts = createFromSaveRestore(origAccounts);
 	assertEquals("AccountStore changed by save/restore cycle",
 		     origAccounts, newAccounts);
     }
 
+    private void writeTestDataFile(String filename)
+	    throws IOException, GeneralSecurityException {
+	writeToFile(createTestStore(), new File(filename));
+    }
+
     public static void main(String argv[]) {
 	try {
-	    (new TestAccountStore()).writeToFile(new File(argv[0]));
+	    (new TestAccountStore()).writeTestDataFile(argv[0]);
 	} catch (IOException ioe) {
 	    System.err.println("Failed to write: " + ioe.getMessage());
 	} catch (GeneralSecurityException gse) {

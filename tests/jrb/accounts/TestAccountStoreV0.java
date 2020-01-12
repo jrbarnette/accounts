@@ -38,9 +38,7 @@ public class TestAccountStoreV0 extends AccountStoreSupport {
     @Test
     public void testConversion()
 	    throws IOException, GeneralSecurityException {
-	File tFile = File.createTempFile("test", ".acct");
 	AccountStore accounts = createFromResource(TEST_RESOURCE);
-	accounts.writeAccounts(new FileOutputStream(tFile));
-	validateContent(createFromFile(tFile));
+	validateContent(createFromSaveRestore(accounts));
     }
 }

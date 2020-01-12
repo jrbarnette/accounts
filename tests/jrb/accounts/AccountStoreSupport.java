@@ -51,11 +51,6 @@ abstract class AccountStoreSupport {
 	return accounts;
     }
 
-    AccountStore createFromFile(File inFile)
-	    throws IOException, GeneralSecurityException {
-	return createFromStream(new FileInputStream(inFile));
-    }
-
     AccountStore createFromResource(String resource)
 	    throws IOException, GeneralSecurityException {
 	InputStream in =
@@ -66,13 +61,19 @@ abstract class AccountStoreSupport {
 	return createFromStream(in);
     }
 
-    AccountStore writeToFile(File outFile)
+    void writeToFile(AccountStore accounts, File outFile)
 	    throws IOException, GeneralSecurityException {
-	AccountStore accounts = createTestStore();
 	FileOutputStream out = new FileOutputStream(outFile);
 	accounts.writeAccounts(out, filePassword.toCharArray());
 	out.close();
-	return accounts;
+    }
+
+    AccountStore createFromSaveRestore(AccountStore accounts)
+	    throws IOException, GeneralSecurityException {
+	File tempFile = File.createTempFile("test", ".acct");
+	tempFile.deleteOnExit();
+	writeToFile(accounts, tempFile);
+	return createFromStream(new FileInputStream(tempFile));
     }
 
     void validateContent(AccountStore accounts) {
