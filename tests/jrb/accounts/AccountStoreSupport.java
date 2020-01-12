@@ -15,10 +15,10 @@ import java.security.GeneralSecurityException;
 import static org.junit.Assert.*;
 
 abstract class AccountStoreSupport {
-    Account[] testData;
+    AccountTestData[] testData;
     String filePassword;
 
-    AccountStoreSupport(Account[] testData, String password) {
+    AccountStoreSupport(AccountTestData[] testData, String password) {
 	this.testData = testData;
 	this.filePassword = password;
     }
@@ -26,11 +26,13 @@ abstract class AccountStoreSupport {
     AccountStore createTestStore(int num, boolean inOrder) {
 	AccountStore accounts = new AccountStore();
 	for (int i = 0; i < num; i++) {
+	    int index;
 	    if (inOrder) {
-		accounts.addAccount(testData[i]);
+		index = i;
 	    } else {
-		accounts.addAccount(testData[num - i - 1]);
+		index = num - i - 1;
 	    }
+	    accounts.addAccount(testData[index].getAccount());
 	}
 	return accounts;
     }
@@ -79,8 +81,8 @@ abstract class AccountStoreSupport {
     void validateContent(AccountStore accounts) {
 	int i = 0;
 	for (Account acct : accounts.allAccounts()) {
-	    assertEquals("Account data wrong or out of order",
-			 testData[i], acct);
+	    assertTrue("Account data wrong or out of order",
+		       testData[i].matches(acct));
 	    i++;
 	}
 	assertEquals("Number of items seen by account iterator",

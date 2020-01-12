@@ -11,10 +11,10 @@ import java.security.GeneralSecurityException;
 import org.junit.Test;
 
 public class TestAccountStoreV1 extends AccountStoreSupport {
-    private static final Account[] TEST_ACCOUNTS = {
-	new Account("xxx desc", "http://c.com", "u0", "p3"),
-	new Account("yyy desc", "http://b.com", "u0", "p2"),
-	new Account("zzz desc", "http://a.com", "u0", "p0"),
+    private static final AccountTestData[] TEST_DATA = {
+	new AccountTestData("xxx desc", "http://c.com", "u0", "p3"),
+	new AccountTestData("yyy desc", "http://b.com", "u0", "p2"),
+	new AccountTestData("zzz desc", "http://a.com", "u0", "p0"),
     };
 
     private static final String PASSWORD = "password";
@@ -22,7 +22,7 @@ public class TestAccountStoreV1 extends AccountStoreSupport {
     private static final String TEST_RESOURCE = "test-data/v1-sample.accts";
 
     public TestAccountStoreV1() {
-	super(TEST_ACCOUNTS, PASSWORD);
+	super(TEST_DATA, PASSWORD);
     }
 
     @Test

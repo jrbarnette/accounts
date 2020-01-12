@@ -17,16 +17,16 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class TestAccountStore extends AccountStoreSupport {
-    private static final Account[] TEST_ACCOUNTS = {
-	new Account("xxx desc", "http://c.com", "u0", "p3"),
-	new Account("yyy desc", "http://b.com", "u0", "p2"),
-	new Account("zzz desc", "http://a.com", "u0", "p0"),
+    private static final AccountTestData[] TEST_DATA = {
+	new AccountTestData("xxx desc", "http://c.com", "u0", "p3"),
+	new AccountTestData("yyy desc", "http://b.com", "u0", "p2"),
+	new AccountTestData("zzz desc", "http://a.com", "u0", "p0"),
     };
 
     private static final String PASSWORD = "password";
 
     public TestAccountStore() {
-	super(TEST_ACCOUNTS, PASSWORD);
+	super(TEST_DATA, PASSWORD);
     }
 
     private static int countElements(AccountStore accounts) {
@@ -39,7 +39,7 @@ public class TestAccountStore extends AccountStoreSupport {
 
     @Test
     public void testReportedSize() {
-	for (int num = 0; num <= TEST_ACCOUNTS.length; num++) {
+	for (int num = 0; num <= testData.length; num++) {
 	    AccountStore accounts = createTestStore(num);
 	    assertEquals("AccountStore size() reports wrong value",
 			 num, accounts.size());
@@ -48,7 +48,7 @@ public class TestAccountStore extends AccountStoreSupport {
 
     @Test
     public void testActualSize() {
-	for (int num = 0; num <= TEST_ACCOUNTS.length; num++) {
+	for (int num = 0; num <= testData.length; num++) {
 	    AccountStore accounts = createTestStore(num);
 	    String msg =
 		"AccountStore iterates through the wrong number of elements";
@@ -57,7 +57,7 @@ public class TestAccountStore extends AccountStoreSupport {
     }
 
     private void validateOrdering(boolean createInOrder) {
-	for (int num = 0; num <= TEST_ACCOUNTS.length; num++) {
+	for (int num = 0; num <= testData.length; num++) {
 	    validateContent(createTestStore(num, createInOrder));
 	}
     }
@@ -75,9 +75,9 @@ public class TestAccountStore extends AccountStoreSupport {
     @Test
     public void testDelete() {
 	AccountStore accounts = createTestStore();
-	for (int num = 0; num < TEST_ACCOUNTS.length; num++) {
-	    int idx = TEST_ACCOUNTS.length - num - 1;
-	    accounts.deleteAccount(TEST_ACCOUNTS[idx]);
+	for (int num = 0; num < testData.length; num++) {
+	    int idx = testData.length - num - 1;
+	    accounts.deleteAccount(testData[idx].getAccount());
 	    validateContent(accounts);
 	    assertEquals("Account data size after delete",
 			 idx, accounts.size());
