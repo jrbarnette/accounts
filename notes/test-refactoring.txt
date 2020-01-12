@@ -1,0 +1,15 @@
+Refactoring and missing test coverage that would be nice/necessary:
+  * There's too much boilerplate in the TestAccountStore* classes;
+    can we do better?
+      + Yes, if we bundle all versions into a single class.
+      + Rationale for separate classes is "it's easier to delete a
+	file format if it's one per class."  Does that matter?
+      + Experiment:  What if @Test is applied to a method in an
+	abstract class?
+  * Want testing for AccountStore.writeAccounts() both with and
+    without the password supplied as a parameter.
+  * Want testing for AccountStore.readAccounts() separate from the
+    testing that happens via the constructor (see the bug cited in
+    notes/TODO).
+  * Want testing for AccountStore.updateAcount() and
+    AccountStore.createAcount().
