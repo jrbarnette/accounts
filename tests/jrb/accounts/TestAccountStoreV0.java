@@ -4,14 +4,11 @@
 
 package jrb.accounts;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.security.GeneralSecurityException;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class TestAccountStoreV0 extends AccountStoreSupport {
     private static final Account[] TEST_ACCOUNTS = {
