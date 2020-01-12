@@ -23,9 +23,22 @@ import java.util.TreeMap;
 /**
  */
 class AccountStore {
-    private static final String FILEMAGIC0 = "ACCTS.00";
+    static int FORMAT_V0 = 0;
 
-    private static final String FILEMAGIC = "ACCTS.01";
+    static int FORMAT_V1 = 1;
+
+    static int FORMAT_V2 = 2;
+
+    private static final String[] MAGIC_VERSIONS = {
+	"ACCTS.00",	// FORMAT_V0
+	"ACCTS.01",	// FORMAT_V1
+	"ACCTS.02",	// FORMAT_V2
+    };
+
+    private static int FORMAT_CURRENT = MAGIC_VERSIONS.length - 1;
+
+    private static final String FILEMAGIC
+	    = MAGIC_VERSIONS[FORMAT_CURRENT];
 
     private static final String PASSWORD_TYPE = "AES";
 
@@ -37,12 +50,12 @@ class AccountStore {
 
     private static final SecureRandom randomSource = new SecureRandom();
 
-    private TreeMap<String, Account> myAccounts;
-
     private byte[] passwordSalt = new byte[8];
     private byte[] ivBlock = new byte[128 / 8];		// 1 128-bit AES block
     private PBEKeySpec fileKey;
     private Cipher fileCipher;
+
+    private TreeMap<String, Account> myAccounts;
 
     public AccountStore() {
 	initialize();
@@ -90,22 +103,21 @@ class AccountStore {
 	return myAccounts.values();
     }
 
-    private boolean readMagic(InputStream in) throws IOException {
+    private int readMagic(InputStream in) throws IOException {
 	byte[] magic = new byte[FILEMAGIC.length()];
 	int nRead = in.read(magic);
 	String magicString = new String(magic, 0, nRead);
 	if (nRead < magic.length) {
 	    throw new IOException("Magic truncated: " + magicString);
 	}
-	// XXX:  returning a boolean to indicate "current version"
-	// vs. "old version" is, well..., not safe for the future.
-	if (magicString.equals(FILEMAGIC)) {
-	    return true;
-	} else if (magicString.equals(FILEMAGIC0)) {
-	    return false;
-	} else {
-	    throw new IOException("Unknown file format: " + magicString);
+	int version = 0;
+	for (String testMagic : MAGIC_VERSIONS) {
+	    if (magicString.equals(testMagic)) {
+		return version;
+	    }
+	    version++;
 	}
+	throw new IOException("Unknown file magic: " + magicString);
     }
 
     private Key makeKey(char[] password)
@@ -152,7 +164,8 @@ class AccountStore {
 	    throws GeneralSecurityException, IOException {
 	initialize();
 	DataInputStream in;
-	if (readMagic(raw)) {
+	int formatVersion = readMagic(raw);
+	if (formatVersion > FORMAT_V0) {
 	    fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 	    in = makeInput(raw, password);
 	} else {
@@ -161,7 +174,7 @@ class AccountStore {
 	}
 	int nElements = in.readInt();
 	for (int i = 0; i < nElements; i++) {
-	    addAccount(new Account(in));
+	    addAccount(new Account(in, formatVersion));
 	}
 	in.close();
     }
