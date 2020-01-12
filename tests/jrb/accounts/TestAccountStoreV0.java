@@ -20,10 +20,12 @@ public class TestAccountStoreV0 extends AccountStoreSupport {
 	new Account("zzz desc", "http://a.com", "u0", "p0"),
     };
 
+    private static final String PASSWORD = "password";
+
     private static final String TEST_RESOURCE = "test-data/v0-sample.accts";
 
     public TestAccountStoreV0() {
-	super(TEST_ACCOUNTS);
+	super(TEST_ACCOUNTS, PASSWORD);
     }
 
     @Test

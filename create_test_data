@@ -3,8 +3,8 @@
 #
 # This script is meant to support creating new test data files when
 # updating the save file format.  The command creates a test data file
-# in the current file format using canned data as found in the source
-# for the GENERATOR class named below.
+# in the current file format using canned password and account data as
+# found in the source for the GENERATOR class named below.
 #
 # usage:
 #     create_test_data output-file
@@ -16,11 +16,11 @@
 #
 # Once the new file is created, create a unit test class along the lines
 # of src/jrb/accounts/TestReadAccountsV*.java.  Note that this new test
-# must make a copy of the canned data in the GENERATOR class, rather
-# than referring to it by name.  That's because the test must be run
-# against the canned data as originally embedded in the data file.  If
-# the GENERATOR class updates its canned data, it mustn't affect tests
-# against the older data files.
+# must make a copy of the password and account data in the GENERATOR
+# class, rather than referring to it by name.  That's because the test
+# must be run against the file parameters that created the test file.
+# If the GENERATOR class updates its file parameters, it mustn't affect
+# tests against the older data files.
 #
 # The newly created test class provides two-fold coverage:
 #  1) As new file formats are added, it proves that old formats can

@@ -23,8 +23,10 @@ public class TestAccountStore extends AccountStoreSupport {
 	new Account("zzz desc", "http://a.com", "u0", "p0"),
     };
 
+    private static final String PASSWORD = "password";
+
     public TestAccountStore() {
-	super(TEST_ACCOUNTS);
+	super(TEST_ACCOUNTS, PASSWORD);
     }
 
     private static int countElements(AccountStore accounts) {

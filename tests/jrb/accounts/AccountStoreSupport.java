@@ -15,15 +15,15 @@ import java.security.GeneralSecurityException;
 import static org.junit.Assert.*;
 
 abstract class AccountStoreSupport {
-    private static final String PASSWORD = "password";
+    Account[] testData;
+    String filePassword;
 
-    protected Account[] testData;
-
-    protected AccountStoreSupport(Account[] testData) {
+    AccountStoreSupport(Account[] testData, String password) {
 	this.testData = testData;
+	this.filePassword = password;
     }
 
-    protected AccountStore createTestStore(int num, boolean inOrder) {
+    AccountStore createTestStore(int num, boolean inOrder) {
 	AccountStore accounts = new AccountStore();
 	for (int i = 0; i < num; i++) {
 	    if (inOrder) {
@@ -35,28 +35,28 @@ abstract class AccountStoreSupport {
 	return accounts;
     }
 
-    protected AccountStore createTestStore(int num) {
+    AccountStore createTestStore(int num) {
 	return createTestStore(num, true);
     }
 
-    protected AccountStore createTestStore() {
+    AccountStore createTestStore() {
 	return createTestStore(testData.length);
     }
 
     private AccountStore createFromStream(InputStream in)
 	    throws IOException, GeneralSecurityException {
 	AccountStore accounts =
-	    new AccountStore(in, PASSWORD.toCharArray());
+	    new AccountStore(in, filePassword.toCharArray());
 	in.close();
 	return accounts;
     }
 
-    protected AccountStore createFromFile(File inFile)
+    AccountStore createFromFile(File inFile)
 	    throws IOException, GeneralSecurityException {
 	return createFromStream(new FileInputStream(inFile));
     }
 
-    protected AccountStore createFromResource(String resource)
+    AccountStore createFromResource(String resource)
 	    throws IOException, GeneralSecurityException {
 	InputStream in =
 	    getClass().getClassLoader().getResourceAsStream(resource);
@@ -66,16 +66,16 @@ abstract class AccountStoreSupport {
 	return createFromStream(in);
     }
 
-    protected AccountStore writeToFile(File outFile)
+    AccountStore writeToFile(File outFile)
 	    throws IOException, GeneralSecurityException {
 	AccountStore accounts = createTestStore();
 	FileOutputStream out = new FileOutputStream(outFile);
-	accounts.writeAccounts(out, PASSWORD.toCharArray());
+	accounts.writeAccounts(out, filePassword.toCharArray());
 	out.close();
 	return accounts;
     }
 
-    protected void validateContent(AccountStore accounts) {
+    void validateContent(AccountStore accounts) {
 	int i = 0;
 	for (Account acct : accounts.allAccounts()) {
 	    assertEquals("Account data wrong or out of order",
