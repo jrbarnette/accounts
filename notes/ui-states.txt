@@ -26,14 +26,14 @@ field operations
     CREATE - add new account entry
     COPY - copy password text
 
-C | S | V | DELETE | CLEAR  | REVERT | UPDATE | CREATE | COPY
-F | F | X | no     | no     | no     | no     | no     | no
-T | F | F | no     | no     | yes    | no     | no     | no
-T | F | T | no     | no     | yes    | no     | yes    | no
+S | C | V | DELETE | CLEAR  | REVERT | UPDATE | CREATE | COPY
+F | F | X | no     | XXX    | no     | XXX    | no     | no
+F | T | F | no     | XXX    | yes    | XXX    | no     | no
+F | T | T | no     | XXX    | yes    | XXX    | yes    | no
 
-F | T | X | yes    | yes    | no     | no     | no     | yes
-T | T | F | no     | no     | yes    | no     | no     | no
-T | T | T | no     | no     | yes    | yes    | no     | no
+T | F | X | yes    | yes    | XXX    | no     | XXX    | yes
+T | T | F | no     | XXX    | yes    | no     | XXX    | no
+T | T | T | no     | XXX    | yes    | yes    | XXX    | no
 
     buttons:
 	DELETE CLEAR/REVERT UPDATE/CREATE COPY

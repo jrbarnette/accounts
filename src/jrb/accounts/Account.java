@@ -13,6 +13,27 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 /**
+ * A class representing one account in an account store.  An account
+ * tracks four user visible data items:
+ *<dl>
+ *<dt>Description</dt>
+ *<dd> User provided text describing or naming the account.
+ *<dt>URL</dt>
+ *<dd> The URL of the account.  Typically a website, but it could be
+ *     any resource.  Currently, there are no syntax checks on this
+ *     data.
+ *<dt>Username</dt>
+ *<dd> The username by which to log in.
+ *<dt>Password</dt>
+ *<dd> The password.
+ *</dl>
+ *<p>
+ * Each account keeps a log of the history of changes made to its data.
+ * Each entry in the log contains all of the data for the account, plus
+ * the time when the entry was created.
+ *<p>
+ * <em>Note:</em> The history log is part of the save file format, but
+ * currently isn't accessible via the API.
  */
 class Account {
     private static class AccountData

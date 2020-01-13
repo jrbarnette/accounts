@@ -49,6 +49,8 @@ class AccountStoreUI extends JFrame {
 
     /**
      * Make the GUI's <i>File</i> menu.
+     *
+     * @return The application's <i>File</i> menu.
      */
     private JMenu makeFileMenu() {
 	JMenu fileMenu = new JMenu("File"); {
@@ -216,7 +218,8 @@ class AccountStoreUI extends JFrame {
 
     /**
      * Read accounts from a user-selected file for the <i>Open</i>
-     * file-menu choice.
+     * file-menu choice.  Give the user a chance to save the current
+     * file if there are changes.
      */
     private void openAccountsDialog() {
 	if (!checkSaveAccounts())
@@ -236,6 +239,10 @@ class AccountStoreUI extends JFrame {
     /**
      * Save accounts for the <i>Save</i> and <i>Save As</i> file-menu
      * choices.
+     *
+     * @param newFile Identifies the file where the accounts should be
+     *     saved.
+     * @param password The password to be used to encrypt the data.
      */
     private void saveAccounts(File newFile, char[] password) {
 	try {
@@ -255,7 +262,8 @@ class AccountStoreUI extends JFrame {
 
     /**
      * Save accounts to a user-selected file for the <i>Save As</i>
-     * file-menu choice.
+     * file-menu choice. If we're requested to overwrite a file, and
+     * it's not the file we read from, confirm it with the user.
      */
     private void saveAccountsDialog() {
 	checkFileChooser();
@@ -297,6 +305,8 @@ class AccountStoreUI extends JFrame {
 
     /**
      * Create and start an instance of the GUI.
+     *
+     * @param argv The command line arguments.
      */
     public static void main(String[] argv) {
         JFrame.setDefaultLookAndFeelDecorated(true);

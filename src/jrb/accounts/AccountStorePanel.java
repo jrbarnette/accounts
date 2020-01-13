@@ -172,10 +172,34 @@ class AccountStorePanel extends JPanel
     }
 
     /**
-     * Validate the input fields, and enable or disable updates based
-     * on the result.  The fields are "valid" if they're all non-empty.
-     * When the fields are valid, we enable the update button if any
-     * field has changed from its original value.
+     * Validate the input fields, and set button states based on the
+     * result.
+     *<p>
+     * The various buttons depend on three boolean input conditions:
+     *<dl>
+     *<dt>S - "selected"</dt>
+     *<dd> True if we are editing an account from the account list.  If
+     *     false, it means we're editing an account to be created.
+     *<dt>C - "changed"</dt>
+     *<dd> True if one or more fields has been edited.
+     *<dt>V - "valid"</dt>
+     *<dd> True if the account fields are valid to be saved to an
+     *     account.  Currently, this means all fields are non-empty.
+     *</dl>
+     *<p>
+     * These inputs determine button states as follows:
+     *<dl>
+     *<dt>DELETE and COPY buttons</dt>
+     *<dd> Enabled only if selected, and there are no changes.
+     *<dt>CLEAR/REVERT button</dt>
+     *<dd> If selected, and there are no changes, the text is CLEAR, and
+     *     the button is enabled.  Otherwise, the text is REVERT, and the
+     *     button is enabled if there are any changes.
+     *<dt>UPDATE/CREATE button</dt>
+     *<dd> If selected, the text is UPDATE; otherwise, the text is
+     *     CREATE.  The button is enabled if there are changes, and
+     *     all fields are valid.
+     *</dl>
      */
     private void validateAccountFields() {
 	String description = descriptionText.getText();
@@ -289,7 +313,7 @@ class AccountStorePanel extends JPanel
 
     private void updateAccountData() {
 	// error check: creating a duplicate.
-	Account account = null;
+	Account account;
 	if (!accountList.isSelectionEmpty()) {
 	    account = accountList.getSelectedValue();
 	    myAccountStore.updateAccount(
@@ -344,8 +368,8 @@ class AccountStorePanel extends JPanel
 	} else if (actionName.equals(COPY)) {
 	    copyPasswordToClipboard();
 	} else if (actionName.equals(GENERATE)) {
-	    String password = new String(passwordPanel.generatePassword());
-	    passwordText.setText(password);
+	    passwordText.setText(
+		    new String(passwordPanel.generatePassword()));
 	    passwordText.requestFocusInWindow();
 	} else if (updateButton.isEnabled()
 		   && actionName.equals(updateButton.getText())) {

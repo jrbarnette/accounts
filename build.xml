@@ -12,9 +12,7 @@
   <property name="test.classes" location="test-classes"/>
   <property name="tests.list" location="tests-list"/>
 
-  <property name="private.docs" location="private-docs"/>
-  <property name="public.docs" location="public-docs"/>
-  <property name="package.docs" location="package-docs"/>
+  <property name="javadoc" location="javadoc"/>
 
   <target name="jarfile" depends="compile">
     <jar destfile="${jarfile}" basedir="${classes}"
@@ -47,28 +45,13 @@
     </copy>
   </target>
 
-  <target name="private-docs"
-        description="generate javadoc for private members"
+  <target name="javadoc"
+        description="generate javadoc for all code"
 	depends="source-list">
-    <delete dir="${private.docs}"/>
-    <javadoc destdir="${private.docs}" private="true">
+    <delete dir="${javadoc}"/>
+    <javadoc destdir="${javadoc}" private="true" noqualifier="all">
 	<fileset dir="${basedir}" includesfile="${source.list}"/>
-    </javadoc>
-  </target>
-
-  <target name="public-docs"
-          description="generate javadoc for public members only">
-    <delete dir="${public.docs}"/>
-    <javadoc destdir="${public.docs}" public="true">
-	<fileset dir="${basedir}" includesfile="${source.list}"/>
-    </javadoc>
-  </target>
-
-  <target name="package-docs"
-          description="generate javadoc for package-visible members">
-    <delete dir="${package.docs}"/>
-    <javadoc destdir="${package.docs}" package="true">
-	<fileset dir="${basedir}" includesfile="${source.list}"/>
+	<fileset dir="${basedir}" includesfile="${tests.list}"/>
     </javadoc>
   </target>
 
@@ -91,9 +74,7 @@
   <target name="clean" description="remove generated files">
     <delete dir="${classes}"/>
     <delete dir="${test.classes}"/>
-    <delete dir="${private.docs}"/>
-    <delete dir="${public.docs}"/>
-    <delete dir="${package.docs}"/>
+    <delete dir="${javadoc}"/>
     <delete file="${jarfile}"/>
     <delete file="${source.list}"/>
     <delete file="${tests.list}"/>
