@@ -1,6 +1,7 @@
 .*.swp
 accounts.jar
 classes/
+javadoc/
 source-list
 test-classes/
 tests-list
