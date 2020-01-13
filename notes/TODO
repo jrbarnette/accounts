@@ -1,3 +1,7 @@
+Unit tests currently don't cover save files with an Account that
+has more than one history entry.  Need to make sure that workds
+before we go much further.
+
 Bugs/risks:
   * The Save As dialog should ask for the password twice, to
     guarantee that it's not mis-typed.
