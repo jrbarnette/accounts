@@ -80,7 +80,7 @@ abstract class AccountStoreSupport {
 
     void validateContent(AccountStore accounts) {
 	int i = 0;
-	for (Account acct : accounts.allAccounts()) {
+	for (Account acct : accounts) {
 	    assertTrue("Account data wrong or out of order",
 		       testData[i].matches(acct));
 	    i++;

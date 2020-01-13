@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 
 import java.security.*;
 import javax.crypto.*;
@@ -28,7 +29,7 @@ import java.util.TreeMap;
  * set of accounts can be saved in a file, encrypted, and later read
  * back to reconstruct the saved account store.
  */
-class AccountStore {
+class AccountStore implements Iterable<Account> {
     static int FORMAT_V0 = 0;
 
     static int FORMAT_V1 = 1;
@@ -56,15 +57,39 @@ class AccountStore {
 
     private static final SecureRandom randomSource = new SecureRandom();
 
+    /**
+     * Password salt used to create an encryption key from a password.
+     * The salt is actually temporary data that is only live when
+     * initializing save and restore operations.  The storage persists
+     * when not in use to avoid creating unnecessary garbage.
+     */
     private byte[] passwordSalt = new byte[8];
+
+    /**
+     * Initialization vector to start encryption and decryption
+     * operations.  This block is actually temporary data that is only
+     * live when initializing save and restore operations.  The storage
+     * persists when not in use to avoid creating unnecessary garbage.
+     */
     private byte[] ivBlock = new byte[128 / 8];		// 1 128-bit AES block
+
+    /**
+     * A key specification created from the user-supplied password.
+     * This is remembered so that it can be re-used when saving the
+     * file.
+     */
     private PBEKeySpec fileKey;
+
+    /**
+     * The <code>Cipher</code> object used for encrypting and decrypting
+     * account data files.
+     */
     private Cipher fileCipher;
 
     /**
-     * The set of accounts kept in this account store.  The accounts are
-     * ordered by their description, and duplicate descriptions aren't
-     * allowed.
+     * A map containing all accounts in the store.  The description is
+     * used as the key to the map to facilitate iteration order and to
+     * prevent duplicate descriptions.
      */
     private TreeMap<String, Account> myAccounts;
 
@@ -92,8 +117,9 @@ class AccountStore {
     }
 
     /**
-     * Clear out the contents of this account store.  Calling this method
-     * sets this account store to state created by the no-arg constructor.
+     * Clear out the contents of this account store.  This method
+     * restores this account store to the state created by the no-arg
+     * constructor.
      */
     private void initialize() {
 	myAccounts = new TreeMap<String, Account>();
@@ -158,34 +184,33 @@ class AccountStore {
     /**
      * Return the number of accounts in the account store.
      *
-     * @return The number of accounts.
+     * @return The number of accounts in this store.
      */
     public int size() {
 	return myAccounts.size();
     }
 
     /**
-     * Return an <code>Iterable</code> over every account in the account
-     * store.  Iteration returns the accounts sorted by their
-     * description.
+     * Return an <code>Iterator</code> over every account.  Iteration
+     * returns the accounts ordered by their description.
      *
-     * @return An iterable over all the accounts.
+     * @return An iterator over all the accounts.
      */
-    public Iterable<Account> allAccounts() {
-	return myAccounts.values();
+    public Iterator<Account> iterator() {
+	return myAccounts.values().iterator();
     }
 
     /**
      * Read the file magic from the start of a saved file, to determine
-     * its save format.  If the stream starts with a recognized magic
+     * its format version.  If the stream starts with a recognized magic
      * string, return the associated file format version number.  If the
      * magic isn't recognized as a supported version, throw an
      * <code>IOException</code>.
      *
-     * @param in The input stream from which to read file magic.
+     * @param in The input stream from which to read version magic.
      * @return The file format version number.
-     * @throws IOException indicates that the file magic couldn't be read,
-     *     or wasn't recognized.
+     * @throws IOException indicates that the file magic couldn't be
+     *     read, or wasn't recognized.
      */
     private int readMagic(InputStream in) throws IOException {
 	byte[] magic = new byte[FILEMAGIC.length()];
@@ -205,13 +230,13 @@ class AccountStore {
     }
 
     /**
-     * Create an encryption key from password characters.  The key is
-     * used to encrypt or decrypt a single save file.  The password
-     * specification used to create the secret key is remembered as a
-     * default key that can be re-used in later operations.
+     * Create an encryption key from a password.  The key is used to
+     * read or write a save file.  The password specification object
+     * used to create the secret key is remembered, and can be re-used
+     * in later operations.
      *
-     * @param password A character array holding the password that will
-     *     used for a single save or restore operation.
+     * @param password A character array holding the password to be used
+     *     for constructing the key.
      * @return A cryptographic key usable in <code>Cipher</code>
      *     methods.
      * @throws GeneralSecurityException Indicates a failure constructing
@@ -232,14 +257,20 @@ class AccountStore {
     }
 
     /**
-     * Create an input stream for reading and decrypting account data.
+     * Create an input stream that reads and decrypts account data from
+     * a raw input stream.
+     *<p>
      * Parameters needed to initialize the decryption are read
      * unencrypted from the raw input stream.
+     *<p>
+     * The password used to generate the encryption key is remembered,
+     * and may be re-used in subsequent write operations.
      *
-     * @param raw Output to which encrypted data will be written.
+     * @param raw Input stream from which encrypted data will be read
+     *     and decrypted.
      * @param password A character array holding the password that will
-     *     encrypt the account data.
-     * @return A data input stream that can supply unencrypted account
+     *     decrypt the account data.
+     * @return A data input stream that can supply decrypted account
      *     data.
      * @throws GeneralSecurityException Indicates a failure constructing
      *     the key or cipher.
@@ -253,13 +284,15 @@ class AccountStore {
 	fileCipher.init(Cipher.DECRYPT_MODE,
 			makeKey(password),
 			new IvParameterSpec(ivBlock));
-	InputStream encryptedStream =
+	InputStream decryptedStream =
 	    new CipherInputStream(raw, fileCipher);
-	return new DataInputStream(encryptedStream);
+	return new DataInputStream(decryptedStream);
     }
 
     /**
-     * Create an output stream for encrypting and writing account data.
+     * Create an output stream that encrypts and writes account data to
+     * a raw output stream.
+     *<p>
      * Parameters needed to initialize the encryption are written
      * unencrypted to the raw output stream.
      *

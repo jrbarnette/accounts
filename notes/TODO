@@ -16,6 +16,10 @@ Bugs/risks:
 There was a bug fixed at commit 536967f.  Need to add a unit test
 that could catch the bug.
 
+Think about making AccountStore implement Collection, or some
+subinterface.  (Maybe too much trouble?  Collection has a lot of
+methods, and most aren't interesting.)
+
 Implement support to show/manipulate stored account data history.
 
 Implement support for merging accounts files together.

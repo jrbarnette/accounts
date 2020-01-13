@@ -303,7 +303,7 @@ class AccountStorePanel extends JPanel
 
     private void refillAccountList() {
 	Vector<Account> v = new Vector<Account>();
-	for (Account acct : myAccountStore.allAccounts()) {
+	for (Account acct : myAccountStore) {
 	    v.add(acct);
 	}
 	// If there's currently a selection, this call clears it,

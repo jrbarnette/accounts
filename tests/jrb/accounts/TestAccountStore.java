@@ -31,7 +31,7 @@ public class TestAccountStore extends AccountStoreSupport {
 
     private static int countElements(AccountStore accounts) {
 	int n = 0;
-	for (Account acct : accounts.allAccounts()) {
+	for (Account acct : accounts) {
 	    n++;
 	}
 	return n;
