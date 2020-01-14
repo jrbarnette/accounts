@@ -59,24 +59,26 @@ class AccountStore implements Iterable<Account> {
 
     /**
      * Password salt used to create an encryption key from a password.
-     * The salt is actually temporary data that is only live when
-     * initializing save and restore operations.  The storage persists
-     * when not in use to avoid creating unnecessary garbage.
+     * The salt is actually temporary data that is only live while
+     * initializing for {@link #readAccounts} or {@link #writeAccounts}.
+     * The storage persists when not in use to avoid creating
+     * unnecessary garbage.
      */
     private byte[] passwordSalt = new byte[8];
 
     /**
      * Initialization vector to start encryption and decryption
      * operations.  This block is actually temporary data that is only
-     * live when initializing save and restore operations.  The storage
-     * persists when not in use to avoid creating unnecessary garbage.
+     * live while initializing for {@link #readAccounts} or {@link
+     * #writeAccounts}.  The storage persists when not in use to avoid
+     * creating unnecessary garbage.
      */
     private byte[] ivBlock = new byte[128 / 8];		// 1 128-bit AES block
 
     /**
      * A key specification created from the user-supplied password.
-     * This is remembered so that it can be re-used when saving the
-     * file.
+     * This is remembered so that it can be re-used for {@link
+     * #writeAccounts(OutputStream)}.
      */
     private PBEKeySpec fileKey;
 
@@ -87,9 +89,9 @@ class AccountStore implements Iterable<Account> {
     private Cipher fileCipher;
 
     /**
-     * A map containing all accounts in the store.  The description is
-     * used as the key to the map to facilitate iteration order and to
-     * prevent duplicate descriptions.
+     * A map containing all accounts in the store.  The account
+     * description is used as the key to the map to facilitate iteration
+     * order and to prevent duplicate descriptions.
      */
     private TreeMap<String, Account> myAccounts;
 
@@ -103,17 +105,17 @@ class AccountStore implements Iterable<Account> {
     /**
      * Construct an account store by reading it from a stream.
      *
-     * @param rawInput An input stream from which the account data will
-     *     be read.
+     * @param raw An input stream from which the account data will be
+     *     read.
      * @param password A character array holding the password that will
      *     decrypt the account data.
      * @throws GeneralSecurityException Indicates a failure during
      *     decryption.
      * @throws IOException Indicates a failure reading data.
      */
-    public AccountStore(InputStream rawInput, char[] password)
+    public AccountStore(InputStream raw, char[] password)
 	    throws GeneralSecurityException, IOException {
-	readAccounts(rawInput, password);
+	readAccounts(raw, password);
     }
 
     /**
@@ -325,25 +327,25 @@ class AccountStore implements Iterable<Account> {
      * The password will be remembered, and can be reused for subsequent
      * write operations.
      *
-     * @param rawInput The input stream from which encrypted data will
-     *     be read.
+     * @param raw The input stream from which encrypted data will be
+     *     read.
      * @param password A character array holding the password that will
      *     decrypt the account data.
      * @throws GeneralSecurityException Indicates a failure during
      *     decryption.
      * @throws IOException Indicates a failure reading data.
      */
-    public void readAccounts(InputStream rawInput, char[] password)
+    public void readAccounts(InputStream raw, char[] password)
 	    throws GeneralSecurityException, IOException {
 	initialize();
 	DataInputStream in;
-	int formatVersion = readMagic(rawInput);
+	int formatVersion = readMagic(raw);
 	if (formatVersion > FORMAT_V0) {
 	    fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
-	    in = makeInput(rawInput, password);
+	    in = makeInput(raw, password);
 	} else {
 	    fileKey = new PBEKeySpec(password);
-	    in = new DataInputStream(rawInput);
+	    in = new DataInputStream(raw);
 	}
 	int nElements = in.readInt();
 	for (int i = 0; i < nElements; i++) {
@@ -357,19 +359,19 @@ class AccountStore implements Iterable<Account> {
      * The password will be remembered, and can be reused for subsequent
      * write operations.
      *
-     * @param rawOutput The output stream to which encrypted data will
-     *     be written.
+     * @param raw The output stream to which encrypted data will be
+     *     written.
      * @param password A character array holding the password that will
      *     encrypt the account data.
      * @throws GeneralSecurityException Indicates a failure during
      *     encryption.
      * @throws IOException Indicates a failure writing data.
      */
-    public void writeAccounts(OutputStream rawOutput, char[] password)
+    public void writeAccounts(OutputStream raw, char[] password)
 	    throws GeneralSecurityException, IOException {
 	fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
-	rawOutput.write(FILEMAGIC.getBytes());
-	DataOutputStream out = makeOutput(rawOutput, password);
+	raw.write(FILEMAGIC.getBytes());
+	DataOutputStream out = makeOutput(raw, password);
 	out.writeInt(myAccounts.size());
 	for (Account acct : myAccounts.values()) {
 	    acct.writeAccount(out);

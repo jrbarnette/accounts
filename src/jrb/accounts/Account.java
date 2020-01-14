@@ -23,9 +23,9 @@ import java.util.UUID;
  *     any resource.  Currently, there are no syntax checks on this
  *     data.
  *<dt>Username</dt>
- *<dd> The username by which to log in.
+ *<dd> The username to use when logging in.
  *<dt>Password</dt>
- *<dd> The password.
+ *<dd> The password to use when logging in.
  *</dl>
  *<p>
  * Each account keeps a log of the history of changes made to its data.
@@ -38,8 +38,8 @@ import java.util.UUID;
 class Account {
     private static class AccountData
 	    implements Comparable<AccountData> {
-	String url;
 	String description;
+	String url;
 	String username;
 	String password;
 	Date timestamp;
@@ -89,6 +89,15 @@ class Account {
     private UUID myUUID;
     private SortedSet<AccountData> myHistory;
 
+    /**
+     * Create a new account object from initial data values.  The given
+     * data becomes the initial entry in the account's history.
+     *
+     * @param description The initial description for this account.
+     * @param url The initial URL for this account.
+     * @param username The initial user name for this account.
+     * @param password The initial password for this account.
+     */
     public Account(String description, String url,
 		   String username, String password) {
 	myUUID = UUID.randomUUID();
@@ -98,11 +107,32 @@ class Account {
 	myHistory.add(data);
     }
 
+    /**
+     * Create a new account object by reading it from an input stream.
+     * The created account will include a complete history as it was
+     * saved in the file.
+     *
+     * @param in The data input stream from which to read the account's
+     *     data.
+     * @param formatVersion The version of the file format being read.
+     *     Prior to version 2, there was no account history, but only
+     *     a single entry with current account data.
+     * @throws IOException Indicates a failure reading account data.
+     */
     Account(DataInput in, int formatVersion) throws IOException {
 	myHistory = new TreeSet<AccountData>();
 	readAccount(in, formatVersion);
     }
 
+    /**
+     * Add a new entry to this account's history.  The new entry's
+     * timestamp will be later than all prior entries.
+     *
+     * @param description The new description for this account.
+     * @param url The new URL for this account.
+     * @param username The new user name for this account.
+     * @param password The new password for this account.
+     */
     public void update(String description, String url,
 		       String username, String password) {
 	AccountData data = new AccountData(
@@ -110,12 +140,27 @@ class Account {
 	AccountData prevData = myHistory.last();
 	// The unit tests will fail without this loop, and I'm pretty
 	// sure this is a fix, not a hack.
-	while (data.timestamp.equals(prevData.timestamp)) {
+	while (data.timestamp.compareTo(prevData.timestamp) <= 0) {
 	    data.timestamp = new Date();
 	}
 	myHistory.add(data);
     }
 
+    /**
+     * Reinitialize this account by reading it from an input stream.
+     * The account's current data and history will be replaced with the
+     * data and history as found in the stream.
+     *<p>
+     * In the case of a pre-version 2 format, the account is given a
+     * single history entry, timestamped as of the current time.
+     *
+     * @param in The data input stream from which to read the account's
+     *     data.
+     * @param formatVersion The version of the file format being read.
+     *     Prior to version 2, there was no account history, but only
+     *     a single entry with account data.
+     * @throws IOException Indicates a failure reading account data.
+     */
     void readAccount(DataInput in, int formatVersion)
 	    throws IOException {
 	int size;
@@ -142,8 +187,17 @@ class Account {
 	    myHistory.add(data);
 	    size--;
 	}
+	assert myHistory.last().timestamp.compareTo(new Date()) >= 0;
     }
 
+    /**
+     * Write this account to an output stream.  Full account history
+     * will be written, consistent with the file format as of version 2.
+     *
+     * @param out The data output stream to which to write the account's
+     *     data.
+     * @throws IOException Indicates a failure writing account data.
+     */
     void writeAccount(DataOutput out) throws IOException {
 	out.writeUTF(myUUID.toString());
 	out.writeInt(myHistory.size());
@@ -156,26 +210,56 @@ class Account {
 	}
     }
 
-    public String getUrl() {
-	return myHistory.last().url;
-    }
-
+    /**
+     * Return this account's description property, as of the most recent
+     * update.
+     *
+     * @return This account's current description.
+     */
     public String getDescription() {
 	return myHistory.last().description;
     }
 
+    /**
+     * Return this account's URL property, as of the most recent update.
+     *
+     * @return This account's current URL.
+     */
+    public String getUrl() {
+	return myHistory.last().url;
+    }
+
+    /**
+     * Return this account's user name property, as of the most recent
+     * update.
+     *
+     * @return This account's current user name.
+     */
     public String getUsername() {
 	return myHistory.last().username;
     }
 
+    /**
+     * Return this account's password property, as of the most recent
+     * update.
+     *
+     * @return This account's current password.
+     */
     public String getPassword() {
 	return myHistory.last().password;
     }
 
+    /**
+     * @return This account's current description.
+     */
     public String toString() {
 	return getDescription();
     }
 
+    /**
+     * @return True if <code>o</code> is an <code>Account</code> object
+     *     and its UUID and history are equal.
+     */
     @Override
     public boolean equals(Object o) {
 	if (!(o instanceof Account)) {
