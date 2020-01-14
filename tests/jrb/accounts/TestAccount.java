@@ -4,6 +4,16 @@
 
 package jrb.accounts;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -15,17 +25,18 @@ import static org.junit.Assert.*;
  * here exercise the latter class, or exercise interactions between the
  * two.
  *<p>
- * We test these basic properties:
+ * We test these basic behaviors:
  *<ul>
  *<li> If you construct an <code>Account</code> its various accessor
  *     methods return the values you constructed it with.
  *<li> If you compare identical accounts with
- *     {@link AccountTestData#matches}, the result is a match.
+ *     <code>AccountTestData.matches()</code>, the result is a match.
  *<li> If you compare distinct accounts with
- *     {@link AccountTestData#matches}, the result is no match.
- *<li> When comparing with <code>AccountTestData.matches</code>,
+ *     <code>AccountTestData.matches()</code>, the result is no match.
+ *<li> When comparing with <code>AccountTestData.matches()</code>,
  *     every account field is significant.
- *<li> {@link Account#update} updates all fields as expected.
+ *<li> <code>Account.update()</code> updates all fields as expected.
+ *<li> Accounts can be written out and then read back without changes.
  *</ul>
  */
 public class TestAccount {
@@ -130,7 +141,7 @@ public class TestAccount {
 		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
 	Account acct = new Account(
 		DESCRIPTION[1], URL[0], USERNAME[0], PASSWORD[0]);
-	assertFalse("Different descriptions, but match",
+	assertFalse("Different descriptions, but accounts match",
 		    data.matches(acct));
     }
 
@@ -144,7 +155,7 @@ public class TestAccount {
 		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
 	Account acct = new Account(
 		DESCRIPTION[0], URL[1], USERNAME[0], PASSWORD[0]);
-	assertFalse("Different URLs, but match",
+	assertFalse("Different URLs, but accounts match",
 		    data.matches(acct));
     }
 
@@ -158,7 +169,7 @@ public class TestAccount {
 		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
 	Account acct = new Account(
 		DESCRIPTION[0], URL[0], USERNAME[1], PASSWORD[0]);
-	assertFalse("Different user names, but match",
+	assertFalse("Different user names, but accounts match",
 		    data.matches(acct));
     }
 
@@ -172,7 +183,7 @@ public class TestAccount {
 		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
 	Account acct = new Account(
 		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[1]);
-	assertFalse("Different passwords, but match",
+	assertFalse("Different passwords, but accounts match",
 		    data.matches(acct));
     }
 
@@ -193,5 +204,119 @@ public class TestAccount {
 		new String(data.getAccount().getPassword()));
 	assertTrue("Accounts don't match after update()",
 		   data.matches(acct));
+    }
+
+    /**
+     * Create a <code>DataInput</code> object that can be read to reconstruct
+     * the given account.  The implementation uses {@link
+     * Account#writeAccount} to save the account data, and then
+     * constructs its return value to read from the saved output.
+     *
+     * @param account The account to be saved for reconstruction.
+     * @return A data input object from which the <code>account</code>
+     *     parameter can be reconstructed.
+     * @throws IOException Any exception is passed up as a test failure.
+     */
+    private DataInput createAccountDataInput(Account account)
+	    throws IOException {
+	ByteArrayOutputStream output = new ByteArrayOutputStream();
+	account.writeAccount(new DataOutputStream(output));
+	ByteArrayInputStream input =
+		new ByteArrayInputStream(output.toByteArray());
+	return new DataInputStream(input);
+    }
+
+    /**
+     * Test using the {@link Account#Account(DataInput, int)}
+     * constructor to read a freshly created account.
+     *<p>
+     * Constructs a new account, and writes it out using {@link
+     * Account#writeAccount}.  Then calls the constructor against
+     * the saved account data, and asserts that the two account
+     * objects are equal.
+     *
+     * @throws IOException Any exception is passed up as a test failure.
+     */
+    @Test
+    public void testReadAccountConstructor() throws IOException {
+	Account acct0 = new Account(
+		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
+	Account acct1 = new Account(createAccountDataInput(acct0),
+				    AccountStore.FORMAT_CURRENT);
+	assertEquals("Accounts don't match after write/read cycle",
+		     acct0, acct1);
+    }
+
+    /**
+     * Test using {@link Account#readAccount(DataInput, int)} to read a
+     * freshly created account into another existing account object.
+     *<p>
+     * Constructs two new, different accounts.  Then writes out one
+     * account, and reads it back into the other.  Asserts that the
+     * second account is now equal to the first.
+     *
+     * @throws IOException Any exception is passed up as a test failure.
+     */
+    @Test
+    public void testReadAccountMethod() throws IOException {
+	Account acct0 = new Account(
+		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
+	Account acct1 = new Account(
+		DESCRIPTION[1], URL[1], USERNAME[1], PASSWORD[1]);
+	acct1.readAccount(createAccountDataInput(acct0),
+			  AccountStore.FORMAT_CURRENT);
+	assertEquals("Accounts don't match after write/read cycle",
+		     acct0, acct1);
+    }
+
+    /**
+     * Test using the {@link Account#Account(DataInput, int)}
+     * constructor to read an account with a history of one update.
+     *<p>
+     * Constructs a new account, applies an update, and writes it out
+     * using {@link Account#writeAccount}.  Then calls the constructor
+     * against the saved account data, and asserts that the two account
+     * objects are equal.
+     *
+     * @throws IOException Any exception is passed up as a test failure.
+     */
+    @Test
+    public void testReadNewUpdatedAccount() throws IOException {
+	Account acct0 = new Account(
+		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
+	acct0.update(
+		DESCRIPTION[1], URL[1], USERNAME[1], PASSWORD[1]);
+	Account acct1 = new Account(createAccountDataInput(acct0),
+				    AccountStore.FORMAT_CURRENT);
+	assertEquals("Accounts don't match after write/read cycle",
+		     acct0, acct1);
+    }
+
+    /**
+     * Test using {@link Account#readAccount(DataInput, int)} to read an
+     * account with a history of one update into another existing
+     * account object.
+     *<p>
+     * Constructs two new, different accounts, and applies updates to
+     * each of them.  Then writes out one account, and reads it back
+     * into the other.  Asserts that the second account is now equal to
+     * the first.
+     *
+     * @throws IOException Any exception is passed up as a test failure.
+     */
+    @Test
+    public void testReadExistingUpdatedAccount() throws IOException {
+	Account acct0 = new Account(
+		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
+	acct0.update(
+		DESCRIPTION[1], URL[1], USERNAME[1], PASSWORD[1]);
+	Account acct1 = new Account(
+		DESCRIPTION[1], URL[1], USERNAME[1], PASSWORD[1]);
+	acct1.update(
+		DESCRIPTION[0], URL[0], USERNAME[0], PASSWORD[0]);
+	acct1.readAccount(createAccountDataInput(acct0),
+			  AccountStore.FORMAT_CURRENT);
+	assertEquals("Accounts don't match after write/read cycle",
+		     acct0, acct1);
     }
 }

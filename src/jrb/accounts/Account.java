@@ -100,8 +100,8 @@ class Account {
      */
     public Account(String description, String url,
 		   String username, String password) {
-	myUUID = UUID.randomUUID();
 	myHistory = new TreeSet<AccountData>();
+	myUUID = UUID.randomUUID();
 	AccountData data = new AccountData(
 		description, url, username, password);
 	myHistory.add(data);
@@ -163,6 +163,7 @@ class Account {
      */
     void readAccount(DataInput in, int formatVersion)
 	    throws IOException {
+	myHistory.clear();
 	int size;
 	if (formatVersion >= AccountStore.FORMAT_V2) {
 	    myUUID = UUID.fromString(in.readUTF());

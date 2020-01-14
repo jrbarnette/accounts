@@ -42,7 +42,7 @@ class AccountStore implements Iterable<Account> {
 	"ACCTS.02",	// FORMAT_V2
     };
 
-    private static int FORMAT_CURRENT = MAGIC_VERSIONS.length - 1;
+    static int FORMAT_CURRENT = MAGIC_VERSIONS.length - 1;
 
     private static final String FILEMAGIC
 	    = MAGIC_VERSIONS[FORMAT_CURRENT];

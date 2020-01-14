@@ -1,6 +1,15 @@
-Unit tests currently don't cover save files with an Account that
-has more than one history entry.  Need to make sure that workds
-before we go much further.
+Unit tests currently only partly cover saving files with an Account
+that has more than one history entry; we cover Account objects, but
+not complete AccountStore files.  Want to add more coverage before
+we go much further.
+
+The chain of trust for the unit tests asserts that we know that
+save/restore cycles work because of the result of comparing two
+objects with equals().  However, we have no tests that prove that we
+can trust the equals() method, either for Account or AccountStore.
+
+There was a bug fixed at commit 536967f.  Need to add a unit test
+that could catch the bug.
 
 Bugs/risks:
   * The Save As dialog should ask for the password twice, to
@@ -13,19 +22,16 @@ Bugs/risks:
   * Maybe we should drop support for V0 files, rather than ask
     whether the handling is correct...
 
-There was a bug fixed at commit 536967f.  Need to add a unit test
-that could catch the bug.
-
-Think about making AccountStore implement Collection, or some
-subinterface.  (Maybe too much trouble?  Collection has a lot of
-methods, and most aren't interesting.)
-
 Implement support to show/manipulate stored account data history.
 
 Implement support for merging accounts files together.
 
 Skip the whole "save file" option, and automatically write back after
 any change is committed.
+
+Think about making AccountStore implement Collection, or some
+subinterface.  (Maybe too much trouble?  Collection has a lot of
+methods, and most aren't interesting.)
 
 Instead of deleting accounts, allow an option that just hides the
 account in the UI.  Looking at my current account list, though, this
