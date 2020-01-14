@@ -4,8 +4,6 @@
 
 package jrb.accounts;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -95,7 +93,10 @@ public class TestAccountStore extends AccountStoreSupport {
 
     private void writeTestDataFile(String filename)
 	    throws IOException, GeneralSecurityException {
-	writeToFile(createTestStore(), new File(filename));
+	FileOutputStream out = new FileOutputStream(new File(filename));
+	createTestStore().writeAccounts(
+		out, filePassword.toCharArray());
+	out.close();
     }
 
     public static void main(String argv[]) {

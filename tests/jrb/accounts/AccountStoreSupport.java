@@ -4,11 +4,11 @@
 
 package jrb.accounts;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import java.security.GeneralSecurityException;
 
@@ -63,19 +63,13 @@ abstract class AccountStoreSupport {
 	return createFromStream(in);
     }
 
-    void writeToFile(AccountStore accounts, File outFile)
-	    throws IOException, GeneralSecurityException {
-	FileOutputStream out = new FileOutputStream(outFile);
-	accounts.writeAccounts(out, filePassword.toCharArray());
-	out.close();
-    }
-
     AccountStore createFromSaveRestore(AccountStore accounts)
 	    throws IOException, GeneralSecurityException {
-	File tempFile = File.createTempFile("test", ".acct");
-	tempFile.deleteOnExit();
-	writeToFile(accounts, tempFile);
-	return createFromStream(new FileInputStream(tempFile));
+	ByteArrayOutputStream output = new ByteArrayOutputStream();
+	accounts.writeAccounts(output, filePassword.toCharArray());
+	ByteArrayInputStream input =
+		new ByteArrayInputStream(output.toByteArray());
+	return createFromStream(input);
     }
 
     void validateContent(AccountStore accounts) {
