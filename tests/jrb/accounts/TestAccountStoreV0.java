@@ -11,11 +11,7 @@ import java.security.GeneralSecurityException;
 import org.junit.Test;
 
 public class TestAccountStoreV0 extends AccountStoreSupport {
-    private static final AccountTestData[] TEST_DATA = {
-	new AccountTestData("xxx desc", "http://c.com", "u0", "p3"),
-	new AccountTestData("yyy desc", "http://b.com", "u0", "p2"),
-	new AccountTestData("zzz desc", "http://a.com", "u0", "p0"),
-    };
+    private static final AccountTestData[] TEST_DATA = {};
 
     private static final String PASSWORD = "password";
 
@@ -28,14 +24,11 @@ public class TestAccountStoreV0 extends AccountStoreSupport {
     @Test
     public void testSampleFile()
 	    throws IOException, GeneralSecurityException {
-	AccountStore accounts = createFromResource(TEST_RESOURCE);
-	validateContent(accounts);
-    }
-
-    @Test
-    public void testConversion()
-	    throws IOException, GeneralSecurityException {
-	AccountStore accounts = createFromResource(TEST_RESOURCE);
-	validateContent(createFromSaveRestore(accounts));
+	try {
+	    AccountStore accounts = createFromResource(TEST_RESOURCE);
+	    org.junit.Assert.fail("Reading V0 format file succeeded");
+	} catch (AccountFileFormatException fe) {
+	    // This is what we expect.
+	}
     }
 }

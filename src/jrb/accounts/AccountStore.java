@@ -30,8 +30,6 @@ import java.util.TreeMap;
  * back to reconstruct the saved account store.
  */
 class AccountStore implements Iterable<Account> {
-    static int FORMAT_V0 = 0;
-
     static int FORMAT_V1 = 1;
 
     static int FORMAT_V2 = 2;
@@ -219,7 +217,8 @@ class AccountStore implements Iterable<Account> {
 	int nRead = in.read(magic);
 	String magicString = new String(magic, 0, nRead);
 	if (nRead < magic.length) {
-	    throw new IOException("Magic truncated: " + magicString);
+	    throw new AccountFileFormatException(
+		    "Magic truncated: " + magicString);
 	}
 	int version = 0;
 	for (String testMagic : MAGIC_VERSIONS) {
@@ -228,7 +227,8 @@ class AccountStore implements Iterable<Account> {
 	    }
 	    version++;
 	}
-	throw new IOException("Unknown file magic: " + magicString);
+	throw new AccountFileFormatException(
+		"Unknown file magic: " + magicString);
     }
 
     /**
@@ -340,13 +340,13 @@ class AccountStore implements Iterable<Account> {
 	initialize();
 	DataInputStream in;
 	int formatVersion = readMagic(raw);
-	if (formatVersion > FORMAT_V0) {
-	    fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
-	    in = makeInput(raw, password);
-	} else {
-	    fileKey = new PBEKeySpec(password);
-	    in = new DataInputStream(raw);
+	if (formatVersion < FORMAT_V1) {
+	    throw new AccountFileFormatException(
+		    "File format V" + formatVersion
+		    + " is not supported");
 	}
+	fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
+	in = makeInput(raw, password);
 	int nElements = in.readInt();
 	for (int i = 0; i < nElements; i++) {
 	    addAccount(new Account(in, formatVersion));
