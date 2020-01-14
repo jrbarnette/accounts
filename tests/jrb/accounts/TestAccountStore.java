@@ -83,6 +83,25 @@ public class TestAccountStore extends AccountStoreSupport {
     }
 
     @Test
+    public void testAccountEquality() {
+	AccountStore origAccounts = createTestStore();
+	AccountStore newAccounts = createTestStore(0);
+	for (Account acct : origAccounts) {
+	    newAccounts.addAccount(acct);
+	}
+	assertEquals("Identical AccountStore objects not equal",
+		     origAccounts, newAccounts);
+    }
+
+    @Test
+    public void testAccountInequality() {
+	AccountStore origAccounts = createTestStore();
+	AccountStore newAccounts = createTestStore(0);
+	assertNotEquals("Different AccountStore objects are equal",
+			origAccounts, newAccounts);
+    }
+
+    @Test
     public void testFileSaveRestore()
 	    throws IOException, GeneralSecurityException {
 	AccountStore origAccounts = createTestStore();
