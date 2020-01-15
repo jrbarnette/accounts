@@ -212,6 +212,17 @@ class Account {
     }
 
     /**
+     * Return this account's UUID as a string. The UUID is permanently
+     * assigned when the account is first created, and is preserved
+     * across both history updates and file save/restore cycles.
+     *
+     * @return This account's current UUID in canonical text format.
+     */
+    public String getUUID() {
+	return myUUID.toString();
+    }
+
+    /**
      * Return this account's description property, as of the most recent
      * update.
      *
@@ -248,6 +259,15 @@ class Account {
      */
     public String getPassword() {
 	return myHistory.last().password;
+    }
+
+    /**
+     * Return the timestamp on the latest log entry, as a string.
+     *
+     * @return The current timestamp of this account's data.
+     */
+    public String getTimestamp() {
+	return myHistory.last().timestamp.toString();
     }
 
     /**

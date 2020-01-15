@@ -49,17 +49,21 @@ class AccountStorePanel extends JPanel
 	new Account("123456789 123456789 123456789 12",
 		    "http://example.com", "user", "pw");
 
-    private JTextField descriptionText;
-    private JTextField urlText;
-    private JTextField usernameText;
-    private JPasswordField passwordText;
+    private JLabel uuidLabel = new JLabel();
+    private JLabel timestampLabel = new JLabel();
 
-    private PasswordGenPanel passwordPanel;
+    private JTextField descriptionText = new JTextField();
+    private JTextField urlText = new JTextField();
+    private JTextField usernameText = new JTextField();
+    private JPasswordField passwordText = new JPasswordField();
 
-    private JButton deleteButton;
-    private JButton clearButton;
-    private JButton updateButton;
-    private JButton copyButton;
+    private PasswordGenPanel passwordPanel = new PasswordGenPanel();
+
+    private JButton deleteButton = new JButton(DELETE);
+    private JButton clearButton = new JButton(CLEAR);
+    private JButton updateButton = new JButton(CREATE);
+    private JButton copyButton = new JButton(COPY);
+
 
     boolean accountsChanged;
 
@@ -67,36 +71,47 @@ class AccountStorePanel extends JPanel
 
     private AccountStore myAccountStore;
 
-    private JComponent createFieldPanels() {
-	descriptionText = new JTextField();
-	urlText = new JTextField();
-	usernameText = new JTextField();
-	passwordText = new JPasswordField();
-
-	JPanel textBoxColumn = new JPanel(new GridLayout(0, 1));
-	JPanel namesColumn = new JPanel(new GridLayout(0, 1));
-
+    private void initializeTextFields() {
 	JTextField[] fields = {
 	    descriptionText, urlText, usernameText, passwordText,
-	};
-	String[] names = {
-	    "Description",   "URL",   "User Name",  "Password",
 	};
 
 	int textWidth = PROTOTYPE_ACCOUNT.getDescription().length();
 
-	for (int i = 0; i < fields.length; i++) {
+	for (JTextField f : fields) {
+	    f.setColumns(textWidth);
+	    f.addFocusListener(this);
+	    f.getDocument().addDocumentListener(this);
+	}
+    }
+
+    private JComponent createFieldPanels() {
+	initializeTextFields();
+
+	JPanel textBoxColumn = new JPanel(new GridLayout(0, 1));
+	JPanel namesColumn = new JPanel(new GridLayout(0, 1));
+
+	// Wrap the UUID in a panel so that its margin aligns with the
+	// text fields.
+	JPanel uuidPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	uuidPanel.add(uuidLabel);
+	JComponent[] accountData = {
+	    uuidPanel, descriptionText, urlText, usernameText, passwordText,
+	};
+
+	String[] names = {
+	    "UUID", "Description",   "URL",   "User Name",  "Password",
+	};
+
+	for (int i = 0; i < names.length; i++) {
 	    JPanel aPanel = new JPanel(
 		    new FlowLayout(FlowLayout.RIGHT, 0, 5));
 	    JLabel aLabel = new JLabel(names[i]);
-	    aLabel.setLabelFor(fields[i]);
+	    aLabel.setLabelFor(accountData[i]);
 	    aPanel.add(aLabel);
 	    namesColumn.add(aPanel);
 
-	    fields[i].setColumns(textWidth);
-	    fields[i].addFocusListener(this);
-	    fields[i].getDocument().addDocumentListener(this);
-	    textBoxColumn.add(fields[i]);
+	    textBoxColumn.add(accountData[i]);
 	}
 
 	JPanel parentPanel = new JPanel();
@@ -105,31 +120,59 @@ class AccountStorePanel extends JPanel
 	return parentPanel;
     }
 
-    private JComponent createAccountButtons() {
-	JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-	String[] buttonNames = { DELETE, CLEAR, CREATE, COPY };
-	JButton[] buttons = new JButton[buttonNames.length];
-	int i = 0;
-	for (String name : buttonNames) {
-	    JPanel aPanel = new JPanel();
-	    buttons[i] = new JButton(name);
-	    buttons[i].addActionListener(this);
-	    aPanel.add(buttons[i]);
-	    buttonPanel.add(aPanel);
-	    i++;
+    private JPanel createButtonPanel(JButton[] buttons) {
+	JPanel buttonPanel = new JPanel(
+		new FlowLayout(FlowLayout.RIGHT, 0, 0));
+	for (JButton aButton : buttons) {
+	    aButton.addActionListener(this);
+	    buttonPanel.add(aButton);
 	}
-	deleteButton = buttons[0];
-	clearButton = buttons[1];
-	updateButton = buttons[2];
-	copyButton = buttons[3];
 	return buttonPanel;
     }
 
+    private JComponent createAccountButtons() {
+	JPanel combinedPanel = new JPanel(new GridLayout(0, 1));
+
+	JButton[] accountButtons = {
+	    deleteButton, clearButton, updateButton
+	};
+	combinedPanel.add(createButtonPanel(accountButtons));
+
+	JButton generateButton = new JButton(GENERATE);
+	JButton[] passwordButtons = { generateButton, copyButton };
+	combinedPanel.add(createButtonPanel(passwordButtons));
+
+	return combinedPanel;
+    }
+
+    private JComponent createHistoryPanel() {
+	JPanel outer = new JPanel();
+	JButton aButton;
+
+	aButton = new JButton("<");
+	aButton.setEnabled(false);
+	outer.add(aButton);
+
+	JPanel timestampPanel = new JPanel(new GridLayout(0, 1));
+	timestampPanel.add(new JLabel("Account data timestamp"));
+	timestampPanel.add(timestampLabel);
+	outer.add(timestampPanel);
+
+	aButton = new JButton(">");
+	aButton.setEnabled(false);
+	outer.add(aButton);
+	return outer;
+    }
+
     private JComponent createAccountDataPanel() {
-	JPanel aPanel = new JPanel(new BorderLayout());
-	aPanel.add(createFieldPanels(), BorderLayout.CENTER);
-	aPanel.add(createAccountButtons(), BorderLayout.SOUTH);
-	return aPanel;
+	JPanel inner = new JPanel(new BorderLayout());
+	inner.add(createFieldPanels(), BorderLayout.CENTER);
+	inner.add(createAccountButtons(), BorderLayout.SOUTH);
+
+	JPanel outer = new JPanel(new BorderLayout());
+	outer.add(inner, BorderLayout.CENTER);
+	outer.add(createHistoryPanel(), BorderLayout.SOUTH);
+	return outer;
     }
 
     /**
@@ -141,25 +184,14 @@ class AccountStorePanel extends JPanel
 	accountList.addListSelectionListener(this);
 	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
 	accountList.setVisibleRowCount(35);
-	JScrollPane aScrollPane = new JScrollPane();
-	aScrollPane.setViewportView(accountList);
+	JScrollPane aScrollPane = new JScrollPane(accountList);
 	aScrollPane.setVerticalScrollBarPolicy(
 		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 	add(aScrollPane, BorderLayout.WEST);
 
 	JPanel outer = new JPanel(new BorderLayout());
-	JPanel inner = new JPanel(new BorderLayout());
-
-	passwordPanel = new PasswordGenPanel();
-	inner.add(passwordPanel, BorderLayout.NORTH);
-	JPanel tPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-	JButton generateButton = new JButton(GENERATE);
-	generateButton.addActionListener(this);
-	tPanel.add(generateButton);
-	inner.add(tPanel, BorderLayout.SOUTH);
-
 	outer.add(createAccountDataPanel(), BorderLayout.NORTH);
-	outer.add(inner, BorderLayout.SOUTH);
+	outer.add(passwordPanel, BorderLayout.SOUTH);
 	add(outer, BorderLayout.CENTER);
 
 	clearAccounts();
@@ -245,6 +277,9 @@ class AccountStorePanel extends JPanel
     }
 
     private void clearAccountFields() {
+	uuidLabel.setText("");
+	timestampLabel.setText("");
+
 	// These changes will trigger DocumentEvent notifications
 	// that will update the button states.
 	descriptionText.setText("");
@@ -254,6 +289,9 @@ class AccountStorePanel extends JPanel
     }
 
     private void fillAccountFields(Account selectedAccount) {
+	uuidLabel.setText(selectedAccount.getUUID());
+	timestampLabel.setText(selectedAccount.getTimestamp());
+
 	// These changes will trigger DocumentEvent notifications
 	// that will update the button states.
 	descriptionText.setText(selectedAccount.getDescription());
