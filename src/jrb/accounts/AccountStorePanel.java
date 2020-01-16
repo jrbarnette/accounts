@@ -22,21 +22,19 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.text.Document;
 
 /**
+ * A subclass of JPanel for displaying and changing an account store.
  */
 class AccountStorePanel extends JPanel
 	implements ActionListener, ListSelectionListener,
-		    FocusListener, DocumentListener {
+		   DocumentListener {
     static private final String COPY = "Copy";
     static private final String CLEAR = "New";
     static private final String REVERT = "Revert";
@@ -45,80 +43,19 @@ class AccountStorePanel extends JPanel
     static private final String CREATE = "Add";
     static private final String GENERATE = "Generate";
 
-    static private final Account PROTOTYPE_ACCOUNT =
-	new Account("123456789 123456789 123456789 12",
-		    "http://example.com", "user", "pw");
-
-    private JLabel uuidLabel = new JLabel();
-    private JLabel timestampLabel = new JLabel();
-
-    private JTextField descriptionText = new JTextField();
-    private JTextField urlText = new JTextField();
-    private JTextField usernameText = new JTextField();
-    private JPasswordField passwordText = new JPasswordField();
-
-    private PasswordGenPanel passwordPanel = new PasswordGenPanel();
+    private AccountDataPanel accountDataPanel;
+    private PasswordGenPanel passwordPanel;
 
     private JButton deleteButton = new JButton(DELETE);
     private JButton clearButton = new JButton(CLEAR);
     private JButton updateButton = new JButton(CREATE);
     private JButton copyButton = new JButton(COPY);
 
+    private boolean accountsChanged;
 
-    boolean accountsChanged;
-
-    JList<Account> accountList;
+    private JList<Account> accountList;
 
     private AccountStore myAccountStore;
-
-    private void initializeTextFields() {
-	JTextField[] fields = {
-	    descriptionText, urlText, usernameText, passwordText,
-	};
-
-	int textWidth = PROTOTYPE_ACCOUNT.getDescription().length();
-
-	for (JTextField f : fields) {
-	    f.setColumns(textWidth);
-	    f.addFocusListener(this);
-	    f.getDocument().addDocumentListener(this);
-	}
-    }
-
-    private JComponent createFieldPanels() {
-	initializeTextFields();
-
-	JPanel textBoxColumn = new JPanel(new GridLayout(0, 1));
-	JPanel namesColumn = new JPanel(new GridLayout(0, 1));
-
-	// Wrap the UUID in a panel so that its margin aligns with the
-	// text fields.
-	JPanel uuidPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-	uuidPanel.add(uuidLabel);
-	JComponent[] accountData = {
-	    uuidPanel, descriptionText, urlText, usernameText, passwordText,
-	};
-
-	String[] names = {
-	    "UUID", "Description",   "URL",   "User Name",  "Password",
-	};
-
-	for (int i = 0; i < names.length; i++) {
-	    JPanel aPanel = new JPanel(
-		    new FlowLayout(FlowLayout.RIGHT, 0, 5));
-	    JLabel aLabel = new JLabel(names[i]);
-	    aLabel.setLabelFor(accountData[i]);
-	    aPanel.add(aLabel);
-	    namesColumn.add(aPanel);
-
-	    textBoxColumn.add(accountData[i]);
-	}
-
-	JPanel parentPanel = new JPanel();
-	parentPanel.add(namesColumn);
-	parentPanel.add(textBoxColumn);
-	return parentPanel;
-    }
 
     private JPanel createButtonPanel(JButton[] buttons) {
 	JPanel buttonPanel = new JPanel(
@@ -145,52 +82,31 @@ class AccountStorePanel extends JPanel
 	return combinedPanel;
     }
 
-    private JComponent createHistoryPanel() {
-	JPanel outer = new JPanel();
-	JButton aButton;
-
-	aButton = new JButton("<");
-	aButton.setEnabled(false);
-	outer.add(aButton);
-
-	JPanel timestampPanel = new JPanel(new GridLayout(0, 1));
-	timestampPanel.add(new JLabel("Account data timestamp"));
-	timestampPanel.add(timestampLabel);
-	outer.add(timestampPanel);
-
-	aButton = new JButton(">");
-	aButton.setEnabled(false);
-	outer.add(aButton);
-	return outer;
+    private JComponent createAccountPanel() {
+	JPanel aPanel = new JPanel(new BorderLayout());
+	aPanel.add(accountDataPanel, BorderLayout.CENTER);
+	aPanel.add(createAccountButtons(), BorderLayout.SOUTH);
+	return aPanel;
     }
 
-    private JComponent createAccountDataPanel() {
-	JPanel inner = new JPanel(new BorderLayout());
-	inner.add(createFieldPanels(), BorderLayout.CENTER);
-	inner.add(createAccountButtons(), BorderLayout.SOUTH);
-
-	JPanel outer = new JPanel(new BorderLayout());
-	outer.add(inner, BorderLayout.CENTER);
-	outer.add(createHistoryPanel(), BorderLayout.SOUTH);
-	return outer;
-    }
-
-    /**
-     */
     public AccountStorePanel() {
 	super(new BorderLayout());
 
 	accountList = new JList<Account>();
 	accountList.addListSelectionListener(this);
-	accountList.setPrototypeCellValue(PROTOTYPE_ACCOUNT);
+	accountList.setPrototypeCellValue(
+		AccountDataPanel.PROTOTYPE_ACCOUNT);
 	accountList.setVisibleRowCount(35);
 	JScrollPane aScrollPane = new JScrollPane(accountList);
 	aScrollPane.setVerticalScrollBarPolicy(
 		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 	add(aScrollPane, BorderLayout.WEST);
 
+	accountDataPanel = new AccountDataPanel(this);
+	passwordPanel = new PasswordGenPanel();
+
 	JPanel outer = new JPanel(new BorderLayout());
-	outer.add(createAccountDataPanel(), BorderLayout.NORTH);
+	outer.add(createAccountPanel(), BorderLayout.NORTH);
 	outer.add(passwordPanel, BorderLayout.SOUTH);
 	add(outer, BorderLayout.CENTER);
 
@@ -203,117 +119,11 @@ class AccountStorePanel extends JPanel
 	validateAccountFields();
     }
 
-    /**
-     * Validate the input fields, and set button states based on the
-     * result.
-     *<p>
-     * The various buttons depend on three boolean input conditions:
-     *<dl>
-     *<dt>S - "selected"</dt>
-     *<dd> True if we are editing an account from the account list.  If
-     *     false, it means we're editing an account to be created.
-     *<dt>C - "changed"</dt>
-     *<dd> True if one or more fields has been edited.
-     *<dt>V - "valid"</dt>
-     *<dd> True if the account fields are valid to be saved to an
-     *     account.  Currently, this means all fields are non-empty.
-     *</dl>
-     *<p>
-     * These inputs determine button states as follows:
-     *<dl>
-     *<dt>DELETE and COPY buttons</dt>
-     *<dd> Enabled only if selected, and there are no changes.
-     *<dt>CLEAR/REVERT button</dt>
-     *<dd> If selected, and there are no changes, the text is CLEAR, and
-     *     the button is enabled.  Otherwise, the text is REVERT, and the
-     *     button is enabled if there are any changes.
-     *<dt>UPDATE/CREATE button</dt>
-     *<dd> If selected, the text is UPDATE; otherwise, the text is
-     *     CREATE.  The button is enabled if there are changes, and
-     *     all fields are valid.
-     *</dl>
-     */
-    private void validateAccountFields() {
-	String description = descriptionText.getText();
-	String url = urlText.getText();
-	String username = usernameText.getText();
-	String password = new String(passwordText.getPassword());
-
-	clearButton.setText(REVERT);
-
-	boolean changed;
-	if (!accountList.isSelectionEmpty()) {
-	    Account selectedAccount = accountList.getSelectedValue();
-	    changed = !description.equals(selectedAccount.getDescription())
-		    || !url.equals(selectedAccount.getUrl())
-		    || !username.equals(selectedAccount.getUsername())
-		    || !password.equals(selectedAccount.getPassword());
-	    deleteButton.setEnabled(!changed);
-	    if (!changed) {
-		clearButton.setText(CLEAR);
-	    }
-	    clearButton.setEnabled(true);
-	    updateButton.setText(UPDATE);
-	} else {
-	    changed = !description.isEmpty()
-		    || !url.isEmpty()
-		    || !username.isEmpty()
-		    || !password.isEmpty();
-	    deleteButton.setEnabled(false);
-	    clearButton.setEnabled(changed);
-	    updateButton.setText(CREATE);
-	}
-	if (changed) {
-	    boolean valid = !description.isEmpty()
-			&& !url.isEmpty()
-			&& !username.isEmpty()
-			&& !password.isEmpty();
-	    updateButton.setEnabled(valid);
-	} else {
-	    updateButton.setEnabled(false);
-	}
-	copyButton.setEnabled(deleteButton.isEnabled());
-	accountList.setEnabled(!changed);
-    }
-
-    private void clearAccountFields() {
-	uuidLabel.setText("");
-	timestampLabel.setText("");
-
-	// These changes will trigger DocumentEvent notifications
-	// that will update the button states.
-	descriptionText.setText("");
-	urlText.setText("");
-	usernameText.setText("");
-	passwordText.setText("");
-    }
-
-    private void fillAccountFields(Account selectedAccount) {
-	uuidLabel.setText(selectedAccount.getUUID());
-	timestampLabel.setText(selectedAccount.getTimestamp());
-
-	// These changes will trigger DocumentEvent notifications
-	// that will update the button states.
-	descriptionText.setText(selectedAccount.getDescription());
-	urlText.setText(selectedAccount.getUrl());
-	usernameText.setText(selectedAccount.getUsername());
-	passwordText.setText(selectedAccount.getPassword());
-    }
-
-    private void refreshAccountFields() {
-	Account selectedAccount = accountList.getSelectedValue();
-	if (selectedAccount == null) {
-	    clearAccountFields();
-	} else {
-	    fillAccountFields(selectedAccount);
-	}
-    }
-
     public void clearAccounts() {
 	myAccountStore = new AccountStore();
 	accountsChanged = false;
 	refillAccountList();
-	clearAccountFields();
+	accountDataPanel.setAccountData(null, true);
     }
 
     boolean needSave() {
@@ -356,16 +166,16 @@ class AccountStorePanel extends JPanel
 	    account = accountList.getSelectedValue();
 	    myAccountStore.updateAccount(
 		account,
-		descriptionText.getText(),
-		urlText.getText(),
-		usernameText.getText(),
-		new String(passwordText.getPassword()));
+		accountDataPanel.getDescription(),
+		accountDataPanel.getUrl(),
+		accountDataPanel.getUsername(),
+		accountDataPanel.getPassword());
 	} else {
 	    account = myAccountStore.createAccount(
-		descriptionText.getText(),
-		urlText.getText(),
-		usernameText.getText(),
-		new String(passwordText.getPassword()));
+		accountDataPanel.getDescription(),
+		accountDataPanel.getUrl(),
+		accountDataPanel.getUsername(),
+		accountDataPanel.getPassword());
 	}
 	accountsChanged = true;
 	refillAccountList();
@@ -374,7 +184,7 @@ class AccountStorePanel extends JPanel
 
     private void copyPasswordToClipboard() {
 	StringSelection selection =
-	    new StringSelection(new String(passwordText.getPassword()));
+	    new StringSelection(accountDataPanel.getPassword());
 	Clipboard clipboard =
 	    Toolkit.getDefaultToolkit().getSystemClipboard();
 	clipboard.setContents(selection, selection);
@@ -391,26 +201,24 @@ class AccountStorePanel extends JPanel
 	    refillAccountList();
 	} else if (actionName.equals(CLEAR)) {
 	    // When there's no selection, calling "accountList" to clear
-	    // the selection does nothing.  When we have a selection,
-	    // clearing the selection will trigger "valueChanged()",
-	    // which will then call "clearAccountFields()".
+	    // the selection triggers no events.  When we have a
+	    // selection, clearing the selection will trigger
+	    // "valueChanged()", which will then call
+	    // "accountDataPanel.setAccountData(null)".
 	    if (accountList.isSelectionEmpty()) {
-		clearAccountFields();
+		accountDataPanel.setAccountData(null, true);
 	    } else {
 		accountList.clearSelection();
 	    }
-	    descriptionText.requestFocusInWindow();
 	} else if (actionName.equals(REVERT)) {
-	    refreshAccountFields();
-	    descriptionText.requestFocusInWindow();
+	    accountDataPanel.setAccountData(
+		    accountList.getSelectedValue(), true);
 	} else if (actionName.equals(COPY)) {
 	    copyPasswordToClipboard();
 	} else if (actionName.equals(GENERATE)) {
-	    passwordText.setText(
-		    new String(passwordPanel.generatePassword()));
-	    passwordText.requestFocusInWindow();
-	} else if (updateButton.isEnabled()
-		   && actionName.equals(updateButton.getText())) {
+	    accountDataPanel.setPassword(
+		    passwordPanel.generatePassword());
+	} else if (actionName.equals(updateButton.getText())) {
 	    updateAccountData();
 	}
     }
@@ -418,15 +226,75 @@ class AccountStorePanel extends JPanel
     public void valueChanged(ListSelectionEvent e) {
 	if (e.getValueIsAdjusting())
 	    return;
-	refreshAccountFields();
-	accountList.requestFocusInWindow();
+	Account selection = accountList.getSelectedValue();
+	if (selection != null) {
+	    accountDataPanel.setAccountData(selection, false);
+	    accountList.requestFocusInWindow();
+	} else {
+	    accountDataPanel.setAccountData(null, true);
+	}
     }
 
-    public void focusGained(FocusEvent e) {
-	((JTextField) e.getSource()).selectAll();
-    }
+    /**
+     * Validate the input fields, and set button states based on the
+     * result.
+     *<p>
+     * The various buttons depend on three boolean input conditions:
+     *<dl>
+     *<dt>E - "existing"</dt>
+     *<dd> True if we are editing an existing account from the account
+     *     list.  If false, it means we're editing an account to be
+     *     created.
+     *<dt>C - "changed"</dt>
+     *<dd> True if one or more fields has been edited.
+     *<dt>V - "valid"</dt>
+     *<dd> True if the account fields are valid to be saved to an
+     *     account.  Currently, this means all fields are non-empty.
+     *</dl>
+     *<p>
+     * These inputs determine button states as follows:
+     *<dl>
+     *<dt>DELETE and COPY buttons</dt>
+     *<dd> Enabled only if it's an existing account with no changes.
+     *<dt>CLEAR/REVERT button</dt>
+     *<dd> For an existing account with no changes, the text is CLEAR,
+     *     and the button is enabled.  Otherwise, the text is REVERT,
+     *     and the button is enabled if there are any changes.
+     *<dt>UPDATE/CREATE button</dt>
+     *<dd> For an existing account, the text is UPDATE; otherwise, the
+     *     text is CREATE.  The button is enabled if there are changes,
+     *     and all fields are valid.
+     *<dt>Account list</dt>
+     *<dd> Changing the selected account is disabled if there are
+     *     changes.
+     *</dl>
+     */
+    private void validateAccountFields() {
+	int fieldState = accountDataPanel.getFieldState(
+		accountList.getSelectedValue());
 
-    public void focusLost(FocusEvent e) {
+	boolean existing
+		= ((fieldState & AccountDataPanel.EXISTING) != 0);
+	boolean changed
+		= ((fieldState & AccountDataPanel.CHANGED) != 0);
+	boolean valid
+		= ((fieldState & AccountDataPanel.VALID) != 0);
+
+	clearButton.setText(REVERT);
+	if (existing) {
+	    if (!changed) {
+		clearButton.setText(CLEAR);
+	    }
+	    updateButton.setText(UPDATE);
+	} else {
+	    updateButton.setText(CREATE);
+	}
+
+	deleteButton.setEnabled(existing && !changed);
+	clearButton.setEnabled(existing || changed);
+	updateButton.setEnabled(changed && valid);
+	copyButton.setEnabled(deleteButton.isEnabled());
+	accountList.setEnabled(!changed);
     }
 
     public void insertUpdate(DocumentEvent e) {
