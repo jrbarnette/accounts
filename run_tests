@@ -12,4 +12,4 @@ SED='
     s=\.java$==
     s=/=.=g
 '
-java org.junit.runner.JUnitCore $(sed "$SED" <tests-list)
+java -ea org.junit.runner.JUnitCore $(sed "$SED" <tests-list)
