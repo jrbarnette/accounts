@@ -95,7 +95,8 @@ class AccountDataPanel extends JPanel implements FocusListener {
     private void fillAccountData() {
 	if (savedAccount != null) {
 	    uuidLabel.setText(savedAccount.getUUID());
-	    timestampLabel.setText(savedAccount.getTimestamp());
+	    timestampLabel.setText(
+		    savedAccount.getTimestamp().toString());
 
 	    // These changes will trigger DocumentEvent notifications
 	    // that will update the button states.

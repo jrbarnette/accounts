@@ -8,43 +8,34 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Date;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.List;
 import java.util.UUID;
+import java.util.Vector;
 
 /**
- * A class representing one account in an account store.  An account
- * tracks four user visible data items:
- *<dl>
- *<dt>Description</dt>
- *<dd> User provided text describing or naming the account.
- *<dt>URL</dt>
- *<dd> The URL of the account.  Typically a website, but it could be
- *     any resource.  Currently, there are no syntax checks on this
- *     data.
- *<dt>Username</dt>
- *<dd> The username to use when logging in.
- *<dt>Password</dt>
- *<dd> The password to use when logging in.
- *</dl>
+ * A class representing one account in an account store.  An
+ * <code>Account</code> contains a time-ordered sequence of
+ * <code>AccountData</code> objects assigned to the account since
+ * its creation.  The history is appended to by calls to
+ * {@link #update()}.
  *<p>
- * Each account keeps a log of the history of changes made to its data.
- * Each entry in the log contains all of the data for the account, plus
- * the time when the entry was created.
- *<p>
- * <em>Note:</em> The history log is part of the save file format, but
- * currently isn't accessible via the API.
+ * As an instance of <code>AccountData</code>, an <code>Account</code>
+ * returns the values of its account data properties as of the most
+ * recent update.
  */
-class Account {
-    private static class AccountData
-	    implements Comparable<AccountData> {
-	String description;
-	String url;
-	String username;
-	String password;
-	Date timestamp;
+class Account extends AccountData {
+    /**
+     * One entry in the update history of an <code>Account</code>.
+     */
+    private static class UpdateEntry extends AccountData
+	    implements Comparable<UpdateEntry> {
+	private String description;
+	private String url;
+	private String username;
+	private String password;
+	private Date timestamp;
 
-	AccountData(String description, String url,
+	UpdateEntry(String description, String url,
 		    String username, String password,
 		    Date timestamp) {
 	    this.description = description;
@@ -54,17 +45,37 @@ class Account {
 	    this.timestamp = timestamp;
 	}
 
-	AccountData(String description, String url,
+	UpdateEntry(String description, String url,
 		    String username, String password) {
 	    this(description, url, username, password, new Date());
 	}
 
+	public String getDescription() {
+	    return description;
+	}
+
+	public String getUrl() {
+	    return url;
+	}
+
+	public String getUsername() {
+	    return username;
+	}
+
+	public String getPassword() {
+	    return password;
+	}
+
+	public Date getTimestamp() {
+	    return timestamp;
+	}
+
 	@Override
 	public boolean equals(Object o) {
-	    if (!(o instanceof AccountData)) {
+	    if (!(o instanceof UpdateEntry)) {
 		return false;
 	    }
-	    AccountData data = (AccountData) o;
+	    UpdateEntry data = (UpdateEntry) o;
 	    return description.equals(data.description)
 		    && url.equals(data.url)
 		    && username.equals(data.username)
@@ -73,7 +84,7 @@ class Account {
 	}
 
 	@Override
-	public int compareTo(AccountData data) {
+	public int compareTo(UpdateEntry data) {
 	    int rv = timestamp.compareTo(data.timestamp);
 	    if (rv != 0) return rv;
 	    rv = description.compareTo(data.description);
@@ -86,8 +97,24 @@ class Account {
 	}
     }
 
+    /**
+     * A UUID distinguishing this account from all others.  The UUID is
+     * permanently assigned when the account is first created, and is
+     * not changed by updates.  The UUID is written as part of save
+     * files, and is read back when restoring from a file.  Thus, if two
+     * different save files have an account with the same UUID, the two
+     * files describe the same account, although the histories may have
+     * diverged.
+     *
+     * @return This account's current UUID in canonical text format.
+     */
     private UUID myUUID;
-    private SortedSet<AccountData> myHistory;
+
+    /**
+     * The history of <code>AccountData</code> entries created by
+     * updates to this account.
+     */
+    private List<UpdateEntry> myHistory;
 
     /**
      * Create a new account object from initial data values.  The given
@@ -100,9 +127,9 @@ class Account {
      */
     public Account(String description, String url,
 		   String username, String password) {
-	myHistory = new TreeSet<AccountData>();
+	myHistory = new Vector<UpdateEntry>();
 	myUUID = UUID.randomUUID();
-	AccountData data = new AccountData(
+	UpdateEntry data = new UpdateEntry(
 		description, url, username, password);
 	myHistory.add(data);
     }
@@ -120,7 +147,7 @@ class Account {
      * @throws IOException Indicates a failure reading account data.
      */
     Account(DataInput in, int formatVersion) throws IOException {
-	myHistory = new TreeSet<AccountData>();
+	myHistory = new Vector<UpdateEntry>();
 	readAccount(in, formatVersion);
     }
 
@@ -135,9 +162,9 @@ class Account {
      */
     public void update(String description, String url,
 		       String username, String password) {
-	AccountData data = new AccountData(
+	UpdateEntry data = new UpdateEntry(
 		description, url, username, password);
-	AccountData prevData = myHistory.last();
+	UpdateEntry prevData = myHistory.get(myHistory.size() - 1);
 	// The unit tests will fail without this loop, and I'm pretty
 	// sure this is a fix, not a hack.
 	while (data.timestamp.compareTo(prevData.timestamp) <= 0) {
@@ -153,6 +180,10 @@ class Account {
      *<p>
      * In the case of a pre-version 2 format, the account is given a
      * single history entry, timestamped as of the current time.
+     *<p>
+     * XXX - It seems like there's no legitimate reason for both this
+     * method and the constructor, and that this method should be
+     * deleted...
      *
      * @param in The data input stream from which to read the account's
      *     data.
@@ -168,10 +199,15 @@ class Account {
 	if (formatVersion >= AccountStore.FORMAT_V2) {
 	    myUUID = UUID.fromString(in.readUTF());
 	    size = in.readInt();
+	    if (size <= 0) {
+		throw new AccountFileFormatException(
+			"Invalid history size for account");
+	    }
 	} else {
 	    myUUID = UUID.randomUUID();
 	    size = 1;
 	}
+	Date prevTimestamp = new Date(0);
 	while (size > 0) {
 	    String description = in.readUTF();
 	    String url = in.readUTF();
@@ -183,12 +219,20 @@ class Account {
 	    } else {
 		timestamp = new Date();
 	    }
-	    AccountData data = new AccountData(
+	    if (prevTimestamp.compareTo(timestamp) >= 0) {
+		throw new AccountFileFormatException(
+			"Account history not in time order");
+	    }
+	    prevTimestamp = timestamp;
+	    UpdateEntry data = new UpdateEntry(
 		    description, url, username, password, timestamp);
 	    myHistory.add(data);
 	    size--;
 	}
-	assert myHistory.last().timestamp.compareTo(new Date()) >= 0;
+	if (prevTimestamp.compareTo(new Date()) > 0) {
+	    throw new AccountFileFormatException(
+		    "Account history has entries in the future");
+	}
     }
 
     /**
@@ -202,7 +246,7 @@ class Account {
     void writeAccount(DataOutput out) throws IOException {
 	out.writeUTF(myUUID.toString());
 	out.writeInt(myHistory.size());
-	for (AccountData data : myHistory) {
+	for (UpdateEntry data : myHistory) {
 	    out.writeUTF(data.description);
 	    out.writeUTF(data.url);
 	    out.writeUTF(data.username);
@@ -223,13 +267,26 @@ class Account {
     }
 
     /**
+     * Return account data from the update history.  The update history
+     * is accessed by an index, which counts the number of calls to
+     * {@link #update()} back in time to go.  Thus, index 0 refers to
+     * the current data, index 1 refers to the data just before the most
+     * recent call to <code>update()</code>, and so on.
+     *
+     * @return Account data as it was <code>index</code> updates ago.
+     */
+    public AccountData getAccountUpdateEntry(int index) {
+	return myHistory.get(myHistory.size() - index - 1);
+    }
+
+    /**
      * Return this account's description property, as of the most recent
      * update.
      *
      * @return This account's current description.
      */
     public String getDescription() {
-	return myHistory.last().description;
+	return myHistory.get(myHistory.size() - 1).description;
     }
 
     /**
@@ -238,7 +295,7 @@ class Account {
      * @return This account's current URL.
      */
     public String getUrl() {
-	return myHistory.last().url;
+	return myHistory.get(myHistory.size() - 1).url;
     }
 
     /**
@@ -248,7 +305,7 @@ class Account {
      * @return This account's current user name.
      */
     public String getUsername() {
-	return myHistory.last().username;
+	return myHistory.get(myHistory.size() - 1).username;
     }
 
     /**
@@ -258,7 +315,7 @@ class Account {
      * @return This account's current password.
      */
     public String getPassword() {
-	return myHistory.last().password;
+	return myHistory.get(myHistory.size() - 1).password;
     }
 
     /**
@@ -266,8 +323,8 @@ class Account {
      *
      * @return The current timestamp of this account's data.
      */
-    public String getTimestamp() {
-	return myHistory.last().timestamp.toString();
+    public Date getTimestamp() {
+	return myHistory.get(myHistory.size() - 1).timestamp;
     }
 
     /**
