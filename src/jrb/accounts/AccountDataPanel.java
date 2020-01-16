@@ -38,6 +38,8 @@ class AccountDataPanel extends JPanel implements FocusListener {
     private JPasswordField passwordText
 	    = new JPasswordField(FIELD_COLUMNS);
 
+    private Account savedAccount;
+
     private void initializeTextFields(DocumentListener listener) {
 	JTextField[] fields = {
 	    descriptionText, urlText, usernameText, passwordText,
@@ -90,17 +92,17 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	add(textBoxColumn);
     }
 
-    void setAccountData(Account account, boolean requestFocus) {
-	if (account != null) {
-	    uuidLabel.setText(account.getUUID());
-	    timestampLabel.setText(account.getTimestamp());
+    private void updateAccountData() {
+	if (savedAccount != null) {
+	    uuidLabel.setText(savedAccount.getUUID());
+	    timestampLabel.setText(savedAccount.getTimestamp());
 
 	    // These changes will trigger DocumentEvent notifications
 	    // that will update the button states.
-	    descriptionText.setText(account.getDescription());
-	    urlText.setText(account.getUrl());
-	    usernameText.setText(account.getUsername());
-	    passwordText.setText(account.getPassword());
+	    descriptionText.setText(savedAccount.getDescription());
+	    urlText.setText(savedAccount.getUrl());
+	    usernameText.setText(savedAccount.getUsername());
+	    passwordText.setText(savedAccount.getPassword());
 	} else {
 	    uuidLabel.setText("");
 	    timestampLabel.setText("");
@@ -112,9 +114,54 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	    usernameText.setText("");
 	    passwordText.setText("");
 	}
-	if (requestFocus) {
+    }
+
+    void setSelectedAccount(Account account) {
+	savedAccount = account;
+	updateAccountData();
+	if (savedAccount == null) {
 	    descriptionText.requestFocusInWindow();
 	}
+    }
+
+    void restoreSelectedAccount() {
+	updateAccountData();
+	descriptionText.requestFocusInWindow();
+    }
+
+    int getFieldState() {
+	String description = descriptionText.getText();
+	String url = urlText.getText();
+	String username = usernameText.getText();
+	String password = new String(passwordText.getPassword());
+
+	int rv = 0;
+	boolean changed;
+	if (savedAccount != null) {
+	    rv |= EXISTING;
+	    changed = !description.equals(savedAccount.getDescription())
+		    || !url.equals(savedAccount.getUrl())
+		    || !username.equals(savedAccount.getUsername())
+		    || !password.equals(savedAccount.getPassword());
+	} else {
+	    changed = !description.isEmpty()
+		    || !url.isEmpty()
+		    || !username.isEmpty()
+		    || !password.isEmpty();
+	}
+	if (changed) {
+	    rv |= CHANGED;
+	    boolean valid = !description.isEmpty()
+			&& !url.isEmpty()
+			&& !username.isEmpty()
+			&& !password.isEmpty();
+	    if (valid) {
+		rv |= VALID;
+	    }
+	} else if (account != null) {
+	    rv |= VALID;
+	}
+	return rv;
     }
 
     /**
@@ -159,41 +206,6 @@ class AccountDataPanel extends JPanel implements FocusListener {
     void setPassword(char[] text) {
 	passwordText.setText(new String(text));
 	passwordText.requestFocusInWindow();
-    }
-
-    int getFieldState(Account account) {
-	String description = descriptionText.getText();
-	String url = urlText.getText();
-	String username = usernameText.getText();
-	String password = new String(passwordText.getPassword());
-
-	int rv = 0;
-	boolean changed;
-	if (account != null) {
-	    rv |= EXISTING;
-	    changed = !description.equals(account.getDescription())
-		    || !url.equals(account.getUrl())
-		    || !username.equals(account.getUsername())
-		    || !password.equals(account.getPassword());
-	} else {
-	    changed = !description.isEmpty()
-		    || !url.isEmpty()
-		    || !username.isEmpty()
-		    || !password.isEmpty();
-	}
-	if (changed) {
-	    rv |= CHANGED;
-	    boolean valid = !description.isEmpty()
-			&& !url.isEmpty()
-			&& !username.isEmpty()
-			&& !password.isEmpty();
-	    if (valid) {
-		rv |= VALID;
-	    }
-	} else if (account != null) {
-	    rv |= VALID;
-	}
-	return rv;
     }
 
     public void focusGained(FocusEvent e) {

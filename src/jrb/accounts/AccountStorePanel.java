@@ -123,7 +123,7 @@ class AccountStorePanel extends JPanel
 	myAccountStore = new AccountStore();
 	accountsChanged = false;
 	refillAccountList();
-	accountDataPanel.setAccountData(null, true);
+	accountDataPanel.setSelectedAccount(null);
     }
 
     boolean needSave() {
@@ -159,7 +159,7 @@ class AccountStorePanel extends JPanel
 	accountList.setListData(v);
     }
 
-    private void updateAccountData() {
+    private void updateAccountStore() {
 	// error check: creating a duplicate.
 	Account account;
 	if (!accountList.isSelectionEmpty()) {
@@ -201,38 +201,32 @@ class AccountStorePanel extends JPanel
 	    refillAccountList();
 	} else if (actionName.equals(CLEAR)) {
 	    // When there's no selection, calling "accountList" to clear
-	    // the selection triggers no events.  When we have a
-	    // selection, clearing the selection will trigger
-	    // "valueChanged()", which will then call
-	    // "accountDataPanel.setAccountData(null)".
+	    // the selection triggers no events, so we must clear
+	    // "accountDataPanel" here.  When we do have a selection,
+	    // clearing it will trigger "valueChanged()", which clears
+	    // the data panel for us.
 	    if (accountList.isSelectionEmpty()) {
-		accountDataPanel.setAccountData(null, true);
+		accountDataPanel.setSelectedAccount(null);
 	    } else {
 		accountList.clearSelection();
 	    }
 	} else if (actionName.equals(REVERT)) {
-	    accountDataPanel.setAccountData(
-		    accountList.getSelectedValue(), true);
+	    accountDataPanel.restoreSelectedAccount();
 	} else if (actionName.equals(COPY)) {
 	    copyPasswordToClipboard();
 	} else if (actionName.equals(GENERATE)) {
 	    accountDataPanel.setPassword(
 		    passwordPanel.generatePassword());
 	} else if (actionName.equals(updateButton.getText())) {
-	    updateAccountData();
+	    updateAccountStore();
 	}
     }
 
     public void valueChanged(ListSelectionEvent e) {
 	if (e.getValueIsAdjusting())
 	    return;
-	Account selection = accountList.getSelectedValue();
-	if (selection != null) {
-	    accountDataPanel.setAccountData(selection, false);
-	    accountList.requestFocusInWindow();
-	} else {
-	    accountDataPanel.setAccountData(null, true);
-	}
+	accountDataPanel.setSelectedAccount(
+		accountList.getSelectedValue());
     }
 
     /**
@@ -270,8 +264,7 @@ class AccountStorePanel extends JPanel
      *</dl>
      */
     private void validateAccountFields() {
-	int fieldState = accountDataPanel.getFieldState(
-		accountList.getSelectedValue());
+	int fieldState = accountDataPanel.getFieldState();
 
 	boolean existing
 		= ((fieldState & AccountDataPanel.EXISTING) != 0);
