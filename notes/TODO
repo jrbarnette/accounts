@@ -5,11 +5,19 @@ we go much further.
 
 The chain of trust for the unit tests asserts that we know that
 save/restore cycles work because of the result of comparing two
-objects with equals().  However, we have no tests that prove that we
-can trust the equals() method, either for Account or AccountStore.
+AccountStore objects with equals().  However, our tests for equals()
+don't prove very much for AccountStore, and prove even less for
+Account.
 
 There was a bug fixed at commit 536967f.  Need to add a unit test
-that could catch the bug.
+that could catch the bug.  In practice, that means we need two tests:
+  * Construct an AccountStore object from program data, save it, and
+    then construct a second object from the saved image.  Assert that
+    the two objects are equal.
+  * Construct two AccountStore objects from distinct program data,
+    save the first object, and then read the saved image into the
+    second object.  Assert that the two objects are equal.
+Currently. we have only the first test.
 
 Bugs/risks:
   * The Save As dialog should ask for the password twice, to
