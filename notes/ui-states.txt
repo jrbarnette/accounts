@@ -1,6 +1,6 @@
 states
-    selected
-	whether the item corresponds to a list selection
+    existing
+	whether the item exists in the account store
 	    true -> "Clear" button is valid
 	    true -> "Update/Create" button is "Update"
 	    false -> "Update/Create" button is "Create"
@@ -26,7 +26,7 @@ field operations
     CREATE - add new account entry
     COPY - copy password text
 
-S | C | V | DELETE | CLEAR  | REVERT | UPDATE | CREATE | COPY
+E | C | V | DELETE | CLEAR  | REVERT | UPDATE | CREATE | COPY
 F | F | X | no     | XXX    | no     | XXX    | no     | no
 F | T | F | no     | XXX    | yes    | XXX    | no     | no
 F | T | T | no     | XXX    | yes    | XXX    | yes    | no
@@ -39,12 +39,12 @@ T | T | T | no     | XXX    | yes    | yes    | XXX    | no
 	DELETE CLEAR/REVERT UPDATE/CREATE COPY
     DELETE button
     COPY button
-	enable -> !C & S
+	enable -> !C & E
     CLEAR/REVERT button
-	text: !C & S ? CLEAR : REVERT
-	enable -> C | S
+	text: !C & E ? CLEAR : REVERT
+	enable -> C | E
     UPDATE/CREATE button
-	text: S ? UPDATE : CREATE
+	text: E ? UPDATE : CREATE
 	enable -> C & V
 
     when selected

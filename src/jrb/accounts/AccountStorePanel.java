@@ -35,13 +35,46 @@ import javax.swing.event.ListSelectionListener;
 class AccountStorePanel extends JPanel
 	implements ActionListener, ListSelectionListener,
 		   DocumentListener {
-    static private final String COPY = "Copy";
-    static private final String CLEAR = "New";
-    static private final String REVERT = "Revert";
+    /**
+     * Text for the button used to delete the currently selected
+     * account.
+     */
     static private final String DELETE = "Delete";
-    static private final String UPDATE = "Update";
+
+    /**
+     * Text for the button used to clear fields to begin entering data
+     * for a new account.
+     */
+    static private final String CLEAR = "New";
+
+    /**
+     * Text for the button used to revert changes made to the current
+     * account data.
+     */
+    static private final String REVERT = "Revert";
+
+    /**
+     * Text for the button used to create a new account from account
+     * data and add it to the account store.
+     */
     static private final String CREATE = "Add";
+
+    /**
+     * Text for the button used to apply edited account data as an
+     * update to the currently selected account.
+     */
+    static private final String UPDATE = "Update";
+
+    /**
+     * Text for the button used to generate a new password.
+     */
     static private final String GENERATE = "Generate";
+
+    /**
+     * Text for the button used to copy password text into the system
+     * clipboard.
+     */
+    static private final String COPY = "Copy";
 
     private AccountDataPanel accountDataPanel;
     private PasswordGenPanel passwordPanel;
@@ -119,126 +152,16 @@ class AccountStorePanel extends JPanel
 	validateAccountFields();
     }
 
-    public void clearAccounts() {
-	myAccountStore = new AccountStore();
-	accountsChanged = false;
-	refillAccountList();
-	accountDataPanel.setSelectedAccount(null);
-    }
-
-    boolean needSave() {
-	return accountsChanged;
-    }
-
-    void openAccounts(File accountsFile, char[] password)
-	    throws IOException, GeneralSecurityException {
-	myAccountStore.readAccounts(
-	    new FileInputStream(accountsFile), password);
-	accountsChanged = false;
-	refillAccountList();
-    }
-
-    void saveAccounts(File accountsFile, char[] password)
-	    throws IOException, GeneralSecurityException {
-	if (password != null)
-	    myAccountStore.writeAccounts(
-		new FileOutputStream(accountsFile), password);
-	else
-	    myAccountStore.writeAccounts(
-		new FileOutputStream(accountsFile));
-	accountsChanged = false;
-    }
-
-    private void refillAccountList() {
-	Vector<Account> v = new Vector<Account>();
-	for (Account acct : myAccountStore) {
-	    v.add(acct);
-	}
-	// If there's currently a selection, this call clears it,
-	// forcing a call to `valueChanged()`.
-	accountList.setListData(v);
-    }
-
-    private void updateAccountStore() {
-	// error check: creating a duplicate.
-	Account account;
-	if (!accountList.isSelectionEmpty()) {
-	    account = accountList.getSelectedValue();
-	    myAccountStore.updateAccount(
-		account,
-		accountDataPanel.getDescription(),
-		accountDataPanel.getUrl(),
-		accountDataPanel.getUsername(),
-		accountDataPanel.getPassword());
-	} else {
-	    account = myAccountStore.createAccount(
-		accountDataPanel.getDescription(),
-		accountDataPanel.getUrl(),
-		accountDataPanel.getUsername(),
-		accountDataPanel.getPassword());
-	}
-	accountsChanged = true;
-	refillAccountList();
-	accountList.setSelectedValue(account, true);
-    }
-
-    private void copyPasswordToClipboard() {
-	StringSelection selection =
-	    new StringSelection(accountDataPanel.getPassword());
-	Clipboard clipboard =
-	    Toolkit.getDefaultToolkit().getSystemClipboard();
-	clipboard.setContents(selection, selection);
-    }
-
-    public void actionPerformed(ActionEvent e) {
-	String actionName = e.getActionCommand();
-	if (actionName.equals(DELETE)) {
-	    // Our state machine guarantees that there's an account
-	    // selection in this case.
-	    Account selectedAccount = accountList.getSelectedValue();
-	    myAccountStore.deleteAccount(selectedAccount);
-	    accountsChanged = true;
-	    refillAccountList();
-	} else if (actionName.equals(CLEAR)) {
-	    // When there's no selection, calling "accountList" to clear
-	    // the selection triggers no events, so we must clear
-	    // "accountDataPanel" here.  When we do have a selection,
-	    // clearing it will trigger "valueChanged()", which clears
-	    // the data panel for us.
-	    if (accountList.isSelectionEmpty()) {
-		accountDataPanel.setSelectedAccount(null);
-	    } else {
-		accountList.clearSelection();
-	    }
-	} else if (actionName.equals(REVERT)) {
-	    accountDataPanel.restoreSelectedAccount();
-	} else if (actionName.equals(COPY)) {
-	    copyPasswordToClipboard();
-	} else if (actionName.equals(GENERATE)) {
-	    accountDataPanel.setPassword(
-		    passwordPanel.generatePassword());
-	} else if (actionName.equals(updateButton.getText())) {
-	    updateAccountStore();
-	}
-    }
-
-    public void valueChanged(ListSelectionEvent e) {
-	if (e.getValueIsAdjusting())
-	    return;
-	accountDataPanel.setSelectedAccount(
-		accountList.getSelectedValue());
-    }
-
     /**
      * Validate the input fields, and set button states based on the
      * result.
      *<p>
      * The various buttons depend on three boolean input conditions:
-     *<dl>
+     *<dl style="text-indent: 3em">
      *<dt>E - "existing"</dt>
-     *<dd> True if we are editing an existing account from the account
-     *     list.  If false, it means we're editing an account to be
-     *     created.
+     *<dd> True if we are editing an existing account to be updated in
+     *     the account store.  If false, it means we're editing an
+     *     account to be created.
      *<dt>C - "changed"</dt>
      *<dd> True if one or more fields has been edited.
      *<dt>V - "valid"</dt>
@@ -247,20 +170,20 @@ class AccountStorePanel extends JPanel
      *</dl>
      *<p>
      * These inputs determine button states as follows:
-     *<dl>
+     *<dl style="text-indent: 3em">
      *<dt>DELETE and COPY buttons</dt>
      *<dd> Enabled only if it's an existing account with no changes.
      *<dt>CLEAR/REVERT button</dt>
-     *<dd> For an existing account with no changes, the text is CLEAR,
-     *     and the button is enabled.  Otherwise, the text is REVERT,
-     *     and the button is enabled if there are any changes.
+     *<dd> For an existing account with no changes, the text is
+     *     <code>CLEAR</code>, and the button is enabled.  Otherwise,
+     *     the text is <code>REVERT</code>, and the button is enabled if
+     *     there are any changes.
      *<dt>UPDATE/CREATE button</dt>
-     *<dd> For an existing account, the text is UPDATE; otherwise, the
-     *     text is CREATE.  The button is enabled if there are changes,
-     *     and all fields are valid.
+     *<dd> For an existing account, the text is <code>UPDATE</code>;
+     *     otherwise, the text is <code>CREATE</code>.  The button is
+     *     enabled if there are changes and all fields are valid.
      *<dt>Account list</dt>
-     *<dd> Changing the selected account is disabled if there are
-     *     changes.
+     *<dd> Selecting a new account is disabled if there are changes.
      *</dl>
      */
     private void validateAccountFields() {
@@ -301,5 +224,166 @@ class AccountStorePanel extends JPanel
     public void changedUpdate(DocumentEvent e) {
 	// I _think_ this is for non-text property changes
 	// validateAccountFields();
+    }
+
+    /**
+     * Re-initialize the contents of {@link #accountList}.  This method
+     * must be called after any change that adds, deletes, or changes an
+     * account in the account store.  After the call, the current
+     * selection will have been cleared.
+     */
+    private void refillAccountList() {
+	Vector<Account> v = new Vector<Account>();
+	for (Account acct : myAccountStore) {
+	    v.add(acct);
+	}
+	// This call leaves the current selection cleared.  If there was
+	// a selection prior to the call, this will also trigger a call
+	// to `valueChanged()`.
+	accountList.setListData(v);
+    }
+
+    /**
+     * Delete the currently selected account.  After the call, the
+     * current selection will have been cleared.
+     */
+    private void deleteAccount() {
+	// validateAccountFields() guarantees that there's an account
+	// selection in this case.
+	myAccountStore.deleteAccount(accountList.getSelectedValue());
+	accountsChanged = true;
+	refillAccountList();
+    }
+
+    /**
+     * Update the account store with current data from the account
+     * panel.  If there is an account currently selected, the data is
+     * used to update the selected account.  Otherwise, a new account is
+     * created from the data.  After the call, the new or updated
+     * account will be the current selection.
+     */
+    private void updateAccountStore() {
+	// error check: creating a duplicate.
+	Account account;
+	if (!accountList.isSelectionEmpty()) {
+	    account = accountList.getSelectedValue();
+	    myAccountStore.updateAccount(
+		account,
+		accountDataPanel.getDescription(),
+		accountDataPanel.getUrl(),
+		accountDataPanel.getUsername(),
+		accountDataPanel.getPassword());
+	} else {
+	    account = myAccountStore.createAccount(
+		accountDataPanel.getDescription(),
+		accountDataPanel.getUrl(),
+		accountDataPanel.getUsername(),
+		accountDataPanel.getPassword());
+	}
+	accountsChanged = true;
+	refillAccountList();
+	accountList.setSelectedValue(account, true);
+    }
+
+    /**
+     * Copy the password from the account panel into the system
+     * clipboard, so that it can be pasted into some other application.
+     */
+    private void copyPasswordToClipboard() {
+	StringSelection selection =
+	    new StringSelection(accountDataPanel.getPassword());
+	Clipboard clipboard =
+	    Toolkit.getDefaultToolkit().getSystemClipboard();
+	clipboard.setContents(selection, selection);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+	String actionName = e.getActionCommand();
+	if (actionName.equals(DELETE)) {
+	    deleteAccount();
+	} else if (actionName.equals(CLEAR)) {
+	    // validateAccountFields() guarantees that there's a selection
+	    // to be cleared.  Clearing the selection will trigger the
+	    // event that updates the account panel.
+	    accountList.clearSelection();
+	} else if (actionName.equals(REVERT)) {
+	    accountDataPanel.restoreSelectedAccount();
+	} else if (actionName.equals(COPY)) {
+	    copyPasswordToClipboard();
+	} else if (actionName.equals(GENERATE)) {
+	    accountDataPanel.setPassword(
+		    passwordPanel.generatePassword());
+	} else if (actionName.equals(updateButton.getText())) {
+	    updateAccountStore();
+	}
+    }
+
+    public void valueChanged(ListSelectionEvent e) {
+	if (e.getValueIsAdjusting())
+	    return;
+	accountDataPanel.setSelectedAccount(
+		accountList.getSelectedValue());
+	accountList.requestFocusInWindow();
+    }
+
+    /**
+     * Clear our account data as for the "File-&gt;New" menu option.
+     */
+    void clearAccounts() {
+	myAccountStore = new AccountStore();
+	accountsChanged = false;
+	refillAccountList();
+    }
+
+    /**
+     * Read account data as for the "File-&gt;Open" menu option.
+     *
+     * @param accountsFile File from which to read our new account
+     *     data.
+     * @param password Password for decrypting the account data in the
+     *     file.
+     * @throws GeneralSecurityException Indicates a failure relating to
+     *     file decryption.
+     * @throws IOException Indicates a failure reading from the file.
+     */
+    void openAccounts(File accountsFile, char[] password)
+	    throws IOException, GeneralSecurityException {
+	myAccountStore.readAccounts(
+	    new FileInputStream(accountsFile), password);
+	accountsChanged = false;
+	refillAccountList();
+    }
+
+    /**
+     * Save account data as for the "File-&gt;Save As" menu option.
+     *
+     * @param accountsFile File from to which to write our new account
+     *     data.
+     * @param password Password for encrypting the account data in the
+     *     file.
+     * @throws GeneralSecurityException Indicates a failure relating to
+     *     file encryption.
+     * @throws IOException Indicates a failure writing to the file.
+     */
+    void saveAccounts(File accountsFile, char[] password)
+	    throws IOException, GeneralSecurityException {
+	if (password != null)
+	    myAccountStore.writeAccounts(
+		new FileOutputStream(accountsFile), password);
+	else
+	    myAccountStore.writeAccounts(
+		new FileOutputStream(accountsFile));
+	accountsChanged = false;
+    }
+
+    /**
+     * Return whether the account store has changes that have not been
+     * written out.
+     *
+     * @return True if any changes have not been written out by
+     *     saveAccounts().
+     */
+    boolean needSave() {
+	return accountsChanged;
     }
 }

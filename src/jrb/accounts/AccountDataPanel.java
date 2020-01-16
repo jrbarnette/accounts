@@ -92,7 +92,7 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	add(textBoxColumn);
     }
 
-    private void updateAccountData() {
+    private void fillAccountData() {
 	if (savedAccount != null) {
 	    uuidLabel.setText(savedAccount.getUUID());
 	    timestampLabel.setText(savedAccount.getTimestamp());
@@ -118,14 +118,14 @@ class AccountDataPanel extends JPanel implements FocusListener {
 
     void setSelectedAccount(Account account) {
 	savedAccount = account;
-	updateAccountData();
+	fillAccountData();
 	if (savedAccount == null) {
 	    descriptionText.requestFocusInWindow();
 	}
     }
 
     void restoreSelectedAccount() {
-	updateAccountData();
+	fillAccountData();
 	descriptionText.requestFocusInWindow();
     }
 
@@ -158,7 +158,7 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	    if (valid) {
 		rv |= VALID;
 	    }
-	} else if (account != null) {
+	} else if (savedAccount != null) {
 	    rv |= VALID;
 	}
 	return rv;
