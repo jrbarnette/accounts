@@ -264,6 +264,18 @@ class Account extends AccountData {
     }
 
     /**
+     * Return the number of updates that have been applied to this
+     * account.  This number is one more than the maximum value that
+     * may be passed into {@link #getUpdateData}.
+     *
+     * @return The total number of times <code>update()</code> has been
+     *     called on this account.
+     */
+    public int getUpdateCount() {
+	return myHistory.size();
+    }
+
+    /**
      * Return account data from the update history.  The update history
      * is accessed by an index, which counts the number of calls to
      * {@link #update} back in time to go.  Thus, index 0 refers to
@@ -273,7 +285,7 @@ class Account extends AccountData {
      * @param index The number of updates back in time to go.
      * @return Account data as it was <code>index</code> updates ago.
      */
-    public AccountData getAccountUpdateEntry(int index) {
+    public AccountData getUpdateData(int index) {
 	return myHistory.get(myHistory.size() - index - 1);
     }
 

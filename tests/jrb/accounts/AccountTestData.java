@@ -4,26 +4,61 @@
 
 package jrb.accounts;
 
-class AccountTestData {
+import java.util.Date;
+
+class AccountTestData extends AccountData {
+    private String description;
+    private String url;
+    private String username;
+    private String password;
+    private Date timestamp;
+
     private Account myAccount;
 
-    AccountTestData(Account acct) {
-	myAccount = acct;
+    AccountTestData(String description, String url,
+		    String username, String password,
+		    Date timestamp) {
+	myAccount = new Account(description, url, username, password);
+	this.description = description;
+	this.url = url;
+	this.username = username;
+	this.password = password;
+	this.timestamp = timestamp;
     }
 
     AccountTestData(String description, String url,
 		    String username, String password) {
-	this(new Account(description, url, username, password));
+	this(description, url, username, password, new Date());
     }
 
-    boolean matches(Account acct) {
-	return myAccount.getDescription().equals(acct.getDescription())
-		&& myAccount.getUrl().equals(acct.getUrl())
-		&& myAccount.getUsername().equals(acct.getUsername())
-		&& myAccount.getPassword().equals(acct.getPassword());
+    public String getDescription() {
+	return description;
+    }
+
+    public String getUrl() {
+	return url;
+    }
+
+    public String getUsername() {
+	return username;
+    }
+
+    public String getPassword() {
+	return password;
+    }
+
+    public Date getTimestamp() {
+	return timestamp;
     }
 
     Account getAccount() {
 	return myAccount;
+    }
+
+    boolean matches(AccountData acct) {
+	return description.equals(acct.getDescription())
+		&& url.equals(acct.getUrl())
+		&& username.equals(acct.getUsername())
+		&& password.equals(acct.getPassword());
     }
 }
