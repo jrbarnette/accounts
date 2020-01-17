@@ -15,9 +15,8 @@ import java.util.Vector;
 /**
  * A class representing one account in an account store.  An
  * <code>Account</code> contains a time-ordered sequence of
- * <code>AccountData</code> objects assigned to the account since
- * its creation.  The history is appended to by calls to
- * {@link #update()}.
+ * <code>AccountData</code> objects assigned to the account since its
+ * creation.  The history is appended to by calls to {@link #update}.
  *<p>
  * As an instance of <code>AccountData</code>, an <code>Account</code>
  * returns the values of its account data properties as of the most
@@ -105,8 +104,6 @@ class Account extends AccountData {
      * different save files have an account with the same UUID, the two
      * files describe the same account, although the histories may have
      * diverged.
-     *
-     * @return This account's current UUID in canonical text format.
      */
     private UUID myUUID;
 
@@ -269,10 +266,11 @@ class Account extends AccountData {
     /**
      * Return account data from the update history.  The update history
      * is accessed by an index, which counts the number of calls to
-     * {@link #update()} back in time to go.  Thus, index 0 refers to
+     * {@link #update} back in time to go.  Thus, index 0 refers to
      * the current data, index 1 refers to the data just before the most
      * recent call to <code>update()</code>, and so on.
      *
+     * @param index The number of updates back in time to go.
      * @return Account data as it was <code>index</code> updates ago.
      */
     public AccountData getAccountUpdateEntry(int index) {
@@ -319,7 +317,7 @@ class Account extends AccountData {
     }
 
     /**
-     * Return the timestamp on the latest log entry, as a string.
+     * Return the timestamp of the most recent update to this account.
      *
      * @return The current timestamp of this account's data.
      */
@@ -328,6 +326,9 @@ class Account extends AccountData {
     }
 
     /**
+     * Returns a string representation of this account.  The account's
+     * current description is used as its representation.
+     *
      * @return This account's current description.
      */
     public String toString() {
@@ -335,6 +336,9 @@ class Account extends AccountData {
     }
 
     /**
+     * Indicates whether this <code>Account</code> is equal to some
+     * arbitrary object.
+     *
      * @return True if <code>o</code> is an <code>Account</code> object
      *     and its UUID and history are equal.
      */

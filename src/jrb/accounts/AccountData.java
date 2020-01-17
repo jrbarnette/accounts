@@ -22,7 +22,7 @@ import java.util.UUID;
  *<dt>Password</dt>
  *<dd> The password to use when logging in.
  *<dt>Timestamp</dt>
- *<dd> The time (as a <code>Date</code>) when this data was created.
+ *<dd> The time (as a <code>Date</code>) when the data was created.
  *</dl>
  */
 abstract class AccountData {
