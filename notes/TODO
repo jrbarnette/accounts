@@ -1,24 +1,11 @@
--- Current status
-Ready to implement support for displaying account history logs.
-Roughly, I think that means these things:
-  * Update Account with methods for fetching history entries by
-    index.  That could mean ditching the TreeSet for a Vector.
-  * Update AccountDataPanel with a current history index; at
-    selection, the index is set to 0 for "latest entry".
-  * Add methods for basic operations:
-      + Move back in time, and update the display from the log
-	entry.
-      + Move forward in time, and update the display from the log
-	entry.
-      + Answer whether we're at the first/last entry.
-  * Update AccountStorePanel with buttons to use the new
-    AccountDataPanel methods.
-
-N.B. Editing data fields should be disabled if we're not at the
-latest entry.  Going back in time should be disabled if there are
-field edits that need to be saved or reverted.
-
 -- Current needs
+The various buttons and fields have properties (text, enabled) that
+depend on the account data panel in complicated ways.  The logic
+can't really be simplified or changed:  it's driven by preventing
+human error and improving usability.  But... The way we update the
+buttons based on changes in the account data panel is _also_
+complicated, and _that_ is probably something we could fix...
+
 Unit tests currently only partly cover saving files with an Account
 that has more than one history entry; we cover Account objects, but
 not complete AccountStore files.  Want to add more coverage before

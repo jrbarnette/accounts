@@ -36,6 +36,18 @@ class AccountStorePanel extends JPanel
 	implements ActionListener, ListSelectionListener,
 		   DocumentListener {
     /**
+     * Text for the button used to move earlier in account update
+     * history.
+     */
+    static private final String EARLIER = "<";
+
+    /**
+     * Text for the button used to move later in account update
+     * history.
+     */
+    static private final String LATER = ">";
+
+    /**
      * Text for the button used to delete the currently selected
      * account.
      */
@@ -79,9 +91,12 @@ class AccountStorePanel extends JPanel
     private AccountDataPanel accountDataPanel;
     private PasswordGenPanel passwordPanel;
 
+    private JButton earlierButton = new JButton(EARLIER);
+    private JButton laterButton = new JButton(LATER);
     private JButton deleteButton = new JButton(DELETE);
     private JButton clearButton = new JButton(CLEAR);
     private JButton updateButton = new JButton(CREATE);
+    private JButton generateButton = new JButton(GENERATE);
     private JButton copyButton = new JButton(COPY);
 
     private boolean accountsChanged;
@@ -101,14 +116,31 @@ class AccountStorePanel extends JPanel
     }
 
     private JComponent createAccountButtons() {
-	JPanel combinedPanel = new JPanel(new GridLayout(0, 1));
+	earlierButton.setEnabled(false);
+	earlierButton.addActionListener(this);
+	laterButton.setEnabled(false);
+	laterButton.addActionListener(this);
 
+	JPanel combinedPanel = new JPanel(new GridLayout(0, 2));
+	JPanel tPanel;
+	tPanel = new JPanel(new GridLayout(1, 0));
+	tPanel.add(new JPanel());
+	tPanel.add(new JPanel());
+	tPanel.add(earlierButton);
+	combinedPanel.add(tPanel);
+	tPanel = new JPanel(new GridLayout(1, 0));
+	tPanel.add(laterButton);
+	tPanel.add(new JPanel());
+	tPanel.add(new JPanel());
+	combinedPanel.add(tPanel);
+
+	combinedPanel.add(new JPanel());
 	JButton[] accountButtons = {
 	    deleteButton, clearButton, updateButton
 	};
 	combinedPanel.add(createButtonPanel(accountButtons));
 
-	JButton generateButton = new JButton(GENERATE);
+	combinedPanel.add(new JPanel());
 	JButton[] passwordButtons = { generateButton, copyButton };
 	combinedPanel.add(createButtonPanel(passwordButtons));
 
@@ -211,6 +243,10 @@ class AccountStorePanel extends JPanel
 	updateButton.setEnabled(changed && valid);
 	copyButton.setEnabled(deleteButton.isEnabled());
 	accountList.setEnabled(!changed);
+	laterButton.setEnabled(!changed
+			       && !accountDataPanel.isLatestUpdate());
+	earlierButton.setEnabled(!changed
+				 && !accountDataPanel.isEarliestUpdate());
     }
 
     public void insertUpdate(DocumentEvent e) {
@@ -313,6 +349,16 @@ class AccountStorePanel extends JPanel
 	} else if (actionName.equals(GENERATE)) {
 	    accountDataPanel.setPassword(
 		    passwordPanel.generatePassword());
+	} else if (actionName.equals(LATER)) {
+	    accountDataPanel.selectLaterUpdate();
+	    laterButton.setEnabled(!accountDataPanel.isLatestUpdate());
+	    earlierButton.setEnabled(true);
+	    generateButton.setEnabled(accountDataPanel.isEditable());
+	} else if (actionName.equals(EARLIER)) {
+	    accountDataPanel.selectEarlierUpdate();
+	    laterButton.setEnabled(true);
+	    earlierButton.setEnabled(!accountDataPanel.isEarliestUpdate());
+	    generateButton.setEnabled(accountDataPanel.isEditable());
 	} else if (actionName.equals(updateButton.getText())) {
 	    updateAccountStore();
 	}
@@ -323,6 +369,9 @@ class AccountStorePanel extends JPanel
 	    return;
 	accountDataPanel.setSelectedAccount(
 		accountList.getSelectedValue());
+	laterButton.setEnabled(!accountDataPanel.isLatestUpdate());
+	earlierButton.setEnabled(!accountDataPanel.isEarliestUpdate());
+	generateButton.setEnabled(accountDataPanel.isEditable());
 	accountList.requestFocusInWindow();
     }
 

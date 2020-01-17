@@ -39,6 +39,7 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	    = new JPasswordField(FIELD_COLUMNS);
 
     private Account savedAccount;
+    private int updateIndex;
 
     private void initializeTextFields(DocumentListener listener) {
 	JTextField[] fields = {
@@ -74,7 +75,7 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	String[] names = {
 	    "Account UUID",
 	    "Description", "URL", "User Name", "Password",
-	    "Timestamp",
+	    "Entry Creation Date",
 	};
 
 	for (int i = 0; i < names.length; i++) {
@@ -95,15 +96,21 @@ class AccountDataPanel extends JPanel implements FocusListener {
     private void fillAccountData() {
 	if (savedAccount != null) {
 	    uuidLabel.setText(savedAccount.getUUID());
+	    AccountData data = savedAccount.getUpdateData(updateIndex);
+
 	    timestampLabel.setText(
-		    savedAccount.getTimestamp().toString());
+		    data.getTimestamp().toString());
 
 	    // These changes will trigger DocumentEvent notifications
 	    // that will update the button states.
-	    descriptionText.setText(savedAccount.getDescription());
-	    urlText.setText(savedAccount.getUrl());
-	    usernameText.setText(savedAccount.getUsername());
-	    passwordText.setText(savedAccount.getPassword());
+	    descriptionText.setText(data.getDescription());
+	    descriptionText.setEnabled(updateIndex == 0);
+	    urlText.setText(data.getUrl());
+	    urlText.setEnabled(updateIndex == 0);
+	    usernameText.setText(data.getUsername());
+	    usernameText.setEnabled(updateIndex == 0);
+	    passwordText.setText(data.getPassword());
+	    passwordText.setEnabled(updateIndex == 0);
 	} else {
 	    uuidLabel.setText("");
 	    timestampLabel.setText("");
@@ -119,6 +126,7 @@ class AccountDataPanel extends JPanel implements FocusListener {
 
     void setSelectedAccount(Account account) {
 	savedAccount = account;
+	updateIndex = 0;
 	fillAccountData();
 	if (savedAccount == null) {
 	    descriptionText.requestFocusInWindow();
@@ -128,6 +136,29 @@ class AccountDataPanel extends JPanel implements FocusListener {
     void restoreSelectedAccount() {
 	fillAccountData();
 	descriptionText.requestFocusInWindow();
+    }
+
+    boolean isEarliestUpdate() {
+	return savedAccount == null
+		|| updateIndex == savedAccount.getUpdateCount() - 1;
+    }
+
+    boolean isLatestUpdate() {
+	return updateIndex == 0;
+    }
+
+    boolean isEditable() {
+	return updateIndex == 0;
+    }
+
+    void selectEarlierUpdate() {
+	updateIndex++;
+	fillAccountData();
+    }
+
+    void selectLaterUpdate() {
+	updateIndex--;
+	fillAccountData();
     }
 
     int getFieldState() {
@@ -140,10 +171,11 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	boolean changed;
 	if (savedAccount != null) {
 	    rv |= EXISTING;
-	    changed = !description.equals(savedAccount.getDescription())
-		    || !url.equals(savedAccount.getUrl())
-		    || !username.equals(savedAccount.getUsername())
-		    || !password.equals(savedAccount.getPassword());
+	    AccountData data = savedAccount.getUpdateData(updateIndex);
+	    changed = !description.equals(data.getDescription())
+		    || !url.equals(data.getUrl())
+		    || !username.equals(data.getUsername())
+		    || !password.equals(data.getPassword());
 	} else {
 	    changed = !description.isEmpty()
 		    || !url.isEmpty()
