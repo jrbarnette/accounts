@@ -10,6 +10,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import java.io.File;
+import java.util.Arrays;
 
 class AccountFileDialog extends JDialog implements ActionListener {
     private static final String OPEN = "Open";
@@ -19,25 +20,24 @@ class AccountFileDialog extends JDialog implements ActionListener {
 
     private static final int PASSWORD_COLUMNS = 24;
 
-    public static final int APPROVE_OPTION = JFileChooser.APPROVE_OPTION;
-    public static final int CANCEL_OPTION = JFileChooser.CANCEL_OPTION;
-    public static final int ERROR_OPTION = JFileChooser.ERROR_OPTION;
+    static final int APPROVE_OPTION = JFileChooser.APPROVE_OPTION;
+    static final int CANCEL_OPTION = JFileChooser.CANCEL_OPTION;
+    static final int ERROR_OPTION = JFileChooser.ERROR_OPTION;
 
     private JFileChooser fileChooser;
+
+    private JPanel labelColumn = new JPanel(new GridLayout(0, 1));
+    private JComponent passwordLabel;
+    private JComponent confirmLabel;
+
+    private JPanel fieldColumn = new JPanel(new GridLayout(0, 1));
     private JPasswordField passwordText;
+    private JPasswordField confirmText;
 
     private File selectedFile;
     private char[] selectedPassword;
 
-    private static final InputVerifier PASSWORD_ENFORCER =
-        new InputVerifier() {
-            public boolean verify(JComponent c) {
-                char[] password = ((JPasswordField) c).getPassword();
-                return (password != null && password.length != 0);
-            }
-        };
-
-    private JFileChooser makeFileChooser() {
+    private JFileChooser createFileChooser() {
 	JFileChooser aChooser = new JFileChooser();
 	aChooser.setMultiSelectionEnabled(false);
 	aChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -45,36 +45,51 @@ class AccountFileDialog extends JDialog implements ActionListener {
 	return aChooser;
     }
 
-    private JComponent makePasswordPanel() {
-	JPanel pwdPanel = new JPanel();
-	JLabel pwdLabel = new JLabel("File password");
-	pwdPanel.add(pwdLabel);
+    private JPasswordField createPasswordField() {
+	JPasswordField field = new JPasswordField(PASSWORD_COLUMNS);
+	field.setActionCommand(SET_PASSWORD);
+	field.addActionListener(this);
+	return field;
+    }
 
-	passwordText = new JPasswordField(PASSWORD_COLUMNS);
-	passwordText.setActionCommand(SET_PASSWORD);
-	passwordText.addActionListener(this);
-	pwdLabel.setLabelFor(passwordText);
-	pwdPanel.add(passwordText);
-	return pwdPanel;
+    private JPanel createLabelPanel(String text, JComponent target) {
+	JPanel aPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+	JLabel aLabel = new JLabel(text);
+	aLabel.setLabelFor(target);
+	aPanel.add(aLabel);
+	return aPanel;
     }
 
     AccountFileDialog(JFrame parent) {
 	super(parent, "Choose a file and password");
-	fileChooser = makeFileChooser();
+
+	fileChooser = createFileChooser();
+	passwordText = createPasswordField();
+	confirmText = createPasswordField();
+	passwordLabel = createLabelPanel("File Password",
+					 passwordText);
+	confirmLabel = createLabelPanel("Confirm File Password",
+					confirmText);
+
+	JPanel pwdPanel = new JPanel();
+	pwdPanel.add(labelColumn);
+	pwdPanel.add(fieldColumn);
+	add(pwdPanel, BorderLayout.NORTH);
+
 	add(fileChooser, BorderLayout.CENTER);
-	add(makePasswordPanel(), BorderLayout.NORTH);
+
 	pack();
     }
 
-    public char[] getPassword() {
+    char[] getPassword() {
 	return selectedPassword;
     }
 
-    public File getSelectedFile() {
+    File getSelectedFile() {
 	return fileChooser.getSelectedFile();
     }
 
-    public void setSelectedFile(char[] password, File f) {
+    void setSelectedFile(char[] password, File f) {
 	selectedPassword = password;
 	fileChooser.setSelectedFile(f);
     }
@@ -86,6 +101,12 @@ class AccountFileDialog extends JDialog implements ActionListener {
 	    return;
 	}
 
+	if (fileChooser.getDialogType() == JFileChooser.SAVE_DIALOG
+		&& !Arrays.equals(password, confirmText.getPassword())) {
+	    confirmText.requestFocusInWindow();
+	    return;
+	}
+
 	File f = fileChooser.getSelectedFile();
 	if (f == null || f.isDirectory()) {
 	    fileChooser.requestFocusInWindow();
@@ -94,6 +115,13 @@ class AccountFileDialog extends JDialog implements ActionListener {
 
 	selectedPassword = password;
 	setVisible(false);
+    }
+
+    private void addPasswordPanel() {
+	labelColumn.removeAll();
+	fieldColumn.removeAll();
+	labelColumn.add(passwordLabel);
+	fieldColumn.add(passwordText);
     }
 
     private int showDialog(int fileDialogType) {
@@ -109,13 +137,16 @@ class AccountFileDialog extends JDialog implements ActionListener {
 	}
     }
 
-    public int showOpenDialog() {
-	passwordText.setInputVerifier(null);
+    int showOpenDialog() {
+	addPasswordPanel();
 	return showDialog(JFileChooser.OPEN_DIALOG);
     }
 
-    public int showSaveDialog() {
-	passwordText.setInputVerifier(PASSWORD_ENFORCER);
+    int showSaveDialog() {
+	addPasswordPanel();
+	confirmText.setText(new String(passwordText.getPassword()));
+	labelColumn.add(confirmLabel);
+	fieldColumn.add(confirmText);
 	return showDialog(JFileChooser.SAVE_DIALOG);
     }
 
