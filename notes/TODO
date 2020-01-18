@@ -6,6 +6,13 @@ human error and improving usability.  But... The way we update the
 buttons based on changes in the account data panel is _also_
 complicated, and _that_ is probably something we could fix...
 
+The AccountFileDialog widget has undesirable keyboard focus
+behaviors for showSaveDialog().  Basically, clicking 'Save' puts the
+focus in the file list, and keystrokes can't get it out; you have to
+use a mouse click.  This happens even when you specifically request
+focus in one of the password text fields.  I don't know the fix, but
+probably it requires learning more about the focus subsystem.
+
 Unit tests currently only partly cover saving files with an Account
 that has more than one history entry; we cover Account objects, but
 not complete AccountStore files.  Want to add more coverage before
