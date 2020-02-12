@@ -23,7 +23,7 @@
 	description="compile the sources"
 	depends="source-list">
     <mkdir dir="${classes}"/>
-    <javac srcdir="${basedir}" includesfile="${source.list}"
+    <javac srcdir="${basedir}/src" includesfile="${source.list}"
 	destdir="${classes}" includeantruntime="false"/>
   </target>
 
@@ -31,7 +31,7 @@
 	description="compile the tests"
 	depends="tests-list,jarfile">
     <mkdir dir="${test.classes}"/>
-    <javac srcdir="${basedir}" includesfile="${tests.list}"
+    <javac srcdir="${basedir}/tests" includesfile="${tests.list}"
 	    destdir="${test.classes}" includeantruntime="false">
 	<classpath>
 	    <pathelement location="${classes}"/>
@@ -50,24 +50,24 @@
 	depends="source-list">
     <delete dir="${javadoc}"/>
     <javadoc destdir="${javadoc}" private="true" noqualifier="all">
-	<fileset dir="${basedir}" includesfile="${source.list}"/>
-	<fileset dir="${basedir}" includesfile="${tests.list}"/>
+	<fileset dir="${basedir}/src" includesfile="${source.list}"/>
+	<fileset dir="${basedir}/tests" includesfile="${tests.list}"/>
     </javadoc>
   </target>
 
   <target name="source-list"
           description="find all Java sources under source control">
-    <exec executable="git" output="${source.list}">
+    <exec executable="git" output="${source.list}" dir="src">
       <arg value="ls-files"/>
-      <arg value="src/jrb"/>
+      <arg value="jrb"/>
     </exec>
   </target>
 
   <target name="tests-list"
           description="find all Java tests under hg">
-    <exec executable="git" output="${tests.list}">
+    <exec executable="git" output="${tests.list}" dir="tests">
       <arg value="ls-files"/>
-      <arg value="tests/jrb"/>
+      <arg value="jrb"/>
     </exec>
   </target>
 
