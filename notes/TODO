@@ -27,6 +27,10 @@ Need to handle operations that could create duplicate descriptions:
     couldn't be merged."
 
 -- Bugs
+The Save As... dialog asks for two passwords to allow comparison
+of the two passwords, but then doesn't actually _fail_ if the
+passwords are different.  AAAAAAUGH!
+
 For several classes, we override equals(), but don't override
 hashCode().  The Java API spec says that that's rude; we'll have to
 fix it if we ever need/want to use a hash-based collection
@@ -40,6 +44,17 @@ focus in one of the password text fields.  I don't know the fix, but
 probably it requires learning more about the focus subsystem.
 
 -- Current needs
+Unit tests currently only partly cover saving files with an Account
+that has more than one history entry; we cover Account objects, but
+not complete AccountStore files.  Want to add more coverage before
+we go much further.
+
+The chain of trust for the unit tests asserts that we know that
+save/restore cycles work because of the result of comparing two
+AccountStore objects with equals().  However, our tests for equals()
+don't prove very much for AccountStore, and prove even less for
+Account.
+
 The various buttons and fields have properties (text, enabled) that
 depend on the account data panel in complicated ways.  The logic
 can't really be simplified or changed:  it's driven by preventing
@@ -51,17 +66,6 @@ Duplicate descriptions are disallowed for add/create/update in
 AccountStore.  However, the UI doesn't handle this failure.  Need to
 pop up a modal dialog that says that it's a duplicate and then goes
 back to editing.
-
-Unit tests currently only partly cover saving files with an Account
-that has more than one history entry; we cover Account objects, but
-not complete AccountStore files.  Want to add more coverage before
-we go much further.
-
-The chain of trust for the unit tests asserts that we know that
-save/restore cycles work because of the result of comparing two
-AccountStore objects with equals().  However, our tests for equals()
-don't prove very much for AccountStore, and prove even less for
-Account.
 
 There was a bug fixed at commit 536967f.  Need to add a unit test
 that could catch the bug.  In practice, that means we need two tests:
