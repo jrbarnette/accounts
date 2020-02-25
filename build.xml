@@ -1,3 +1,5 @@
+<--!  Copyright 2018, by J. Richard Barnette.  All Rights Reserved.  -->
+
 <project name="Account Manager" default="jarfile">
     <description>
         Account Manager
@@ -23,16 +25,18 @@
 	description="compile the sources"
 	depends="source-list">
     <mkdir dir="${classes}"/>
-    <javac srcdir="${basedir}/src" includesfile="${source.list}"
-	destdir="${classes}" includeantruntime="false"/>
+    <javac sourcepath="" srcdir="${basedir}/src"
+	includesfile="${source.list}" destdir="${classes}"
+	includeantruntime="false"/>
   </target>
 
   <target name="tests"
 	description="compile the tests"
 	depends="tests-list,jarfile">
     <mkdir dir="${test.classes}"/>
-    <javac srcdir="${basedir}/tests" includesfile="${tests.list}"
-	    destdir="${test.classes}" includeantruntime="false">
+    <javac sourcepath="" srcdir="${basedir}/tests"
+	    includesfile="${tests.list}" destdir="${test.classes}"
+	    includeantruntime="false">
 	<classpath>
 	    <pathelement location="${classes}"/>
 	    <pathelement path="${env.CLASSPATH}"/>
