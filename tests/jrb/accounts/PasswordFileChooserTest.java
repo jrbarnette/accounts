@@ -4,60 +4,80 @@
 
 package jrb.accounts;
 
+import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
 import javax.swing.*;
 
-class PasswordFileChooserTest implements Runnable {
-    JFrame frame;
-    String key;
+class PasswordFileChooserTest extends JFrame {
+    AccountFileDialog dialog;
+    JTextArea logText;
 
-    PasswordFileChooserTest(JFrame aFrame, String aKey) {
-	frame = aFrame;
-	key = aKey;
+    private void createDialog() {
+	dialog = new AccountFileDialog(this);
     }
 
-    public void run() {
-	AccountFileDialog dialog = new AccountFileDialog(frame);
-
-	for (char c : key.toCharArray()) {
-	    boolean useOpenDialog;
-	    if (c == 'o') {
-		useOpenDialog = true;
-	    } else if (c == 's') {
-		useOpenDialog = false;
-	    } else {
-		continue;
-	    }
-
-	    int option;
-	    if (useOpenDialog) {
-		option = dialog.showOpenDialog();
-	    } else {
-		option = dialog.showSaveDialog();
-	    }
-	    if (option == JFileChooser.APPROVE_OPTION) {
-		System.out.println(dialog.getSelectedFile().toString());
-		System.out.println(new String(dialog.getPassword()));
-	    } else if (option == JFileChooser.CANCEL_OPTION) {
-		System.out.println("Canceled");
-	    } else {
-		System.out.println("Error");
-	    }
+    private void logDialogAction(int option, String operation) {
+	if (option == JFileChooser.APPROVE_OPTION) {
+	    logText.append(operation);
+	    logText.append(": ");
+	    logText.append(dialog.getSelectedFile().toString());
+	    logText.append("\nPassword: ");
+	    logText.append(new String(dialog.getPassword()));
+	    logText.append("\n");
+	} else if (option == JFileChooser.CANCEL_OPTION) {
+	    logText.append("Canceled\n");
+	} else {
+	    logText.append("Error\n");
 	}
-	System.exit(0);
+    }
+
+    PasswordFileChooserTest() {
+	super("Test Password FileChooser");
+	createDialog();
+
+	JPanel buttons = new JPanel();
+
+	buttons.add(new JButton(new AbstractAction("Open") {
+	    public void actionPerformed(ActionEvent evt) {
+		logDialogAction(dialog.showOpenDialog(), "Open");
+	    }
+	}));
+
+	buttons.add(new JButton(new AbstractAction("Save") {
+	    public void actionPerformed(ActionEvent evt) {
+		logDialogAction(dialog.showSaveDialog(), "Save as");
+	    }
+	}));
+
+	buttons.add(new JButton(new AbstractAction("New") {
+	    public void actionPerformed(ActionEvent evt) {
+		createDialog();
+		logText.append("Reset dialog\n");
+	    }
+	}));
+
+	add(buttons, BorderLayout.SOUTH);
+
+	logText = new JTextArea(15, 45);
+	logText.setEditable(false);
+	JScrollPane scrollPane = new JScrollPane(logText);
+	scrollPane.setHorizontalScrollBarPolicy(
+		ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+	add(scrollPane, BorderLayout.CENTER);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	pack();
     }
 
     public static void main(String[] argv) {
         JFrame.setDefaultLookAndFeelDecorated(true);
 
-	String key;
-	if (argv.length > 0) {
-	    key = argv[0];
-	} else {
-	    key = "soos";
-	}
-	EventQueue.invokeLater(
-		new PasswordFileChooserTest(new JFrame("Fubar"), key));
-
+	EventQueue.invokeLater(new Runnable() {
+	    public void run() {
+		JFrame app = new PasswordFileChooserTest();
+		app.setVisible(true);
+	    }
+	});
     }
 }
