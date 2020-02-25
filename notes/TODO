@@ -1,3 +1,31 @@
+-- Current state
+Ready to implement file merge.  Basic goal:
+  * There are two files, each with possibly duplicated account data.
+  * Load both files, and create a single account store with the
+    duplicates removed.
+
+Implementation idea:
+  * Read both files independently, creating two AccountStore
+    objects.
+  * Provide a "merge" method on the first (target) using the other
+    (source) as a parameter; the target object adds in all
+    non-duplicate account entries from the source.
+  * For each account in the source object, if there's an account in
+    the target with the same UUID, merge the histories.  Otherwise,
+    add the account as new to the target.
+  * Merging account histories means joining the two update entry
+    lists into a single list, sorting, and removing duplicates.
+
+Need to handle operations that could create duplicate descriptions:
+  * A new account in the target could have the same description as
+    an existing account.
+  * Merging histories could turn an existing account into a
+    duplicate.
+  * Rule:  If an account in the source would create a duplicate,
+    merge nothing.
+  * Return value should be something like "all the accounts that
+    couldn't be merged."
+
 -- Bugs
 For several classes, we override equals(), but don't override
 hashCode().  The Java API spec says that that's rude; we'll have to
@@ -18,6 +46,11 @@ can't really be simplified or changed:  it's driven by preventing
 human error and improving usability.  But... The way we update the
 buttons based on changes in the account data panel is _also_
 complicated, and _that_ is probably something we could fix...
+
+Duplicate descriptions are disallowed for add/create/update in
+AccountStore.  However, the UI doesn't handle this failure.  Need to
+pop up a modal dialog that says that it's a duplicate and then goes
+back to editing.
 
 Unit tests currently only partly cover saving files with an Account
 that has more than one history entry; we cover Account objects, but
