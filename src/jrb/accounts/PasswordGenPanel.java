@@ -95,7 +95,7 @@ public class PasswordGenPanel extends JPanel {
 	allowedList = addCharacterList(
 		selectorPanel, "Allowed special characters", allowed);
 
-	JPanel xferButtonPanel = new JPanel();
+	JPanel xferButtonPanel = new JPanel(new GridLayout(1, 0));
 	xferButtonPanel.add(new JButton(new AbstractAction("allow") {
 	    public void actionPerformed(ActionEvent e) {
 		transferChars(prohibited,
@@ -111,7 +111,9 @@ public class PasswordGenPanel extends JPanel {
 			      allowedList.getSelectedValuesList());
 	    }
 	}));
-	selectorPanel.add(xferButtonPanel);
+	JPanel wrapper = new JPanel();
+	wrapper.add(xferButtonPanel);
+	selectorPanel.add(wrapper);
 
 	prohibitedList = addCharacterList(
 		selectorPanel, "Prohibited special characters", prohibited);
