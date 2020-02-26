@@ -27,9 +27,16 @@ Need to handle operations that could create duplicate descriptions:
     couldn't be merged."
 
 -- Bugs
-The Save As... dialog asks for two passwords to allow comparison
-of the two passwords, but then doesn't actually _fail_ if the
-passwords are different.  AAAAAAUGH!
+In save dialogs, changes to the "Save As" file name text don't become
+the file name if you merely transfer focus out; you must click "Save"
+or press <return> in the text box.  That means this sequence fails:
+  * Fill in the "Save As" file name.
+  * Click "Save".  Focus goes to the password fields.
+  * Fill in the password fields.
+  * Change the "Save As" file name.
+  * Click on the password fields, and press <return>
+At the end of the this, the file name will be the name first entered,
+not the edited name.
 
 For several classes, we override equals(), but don't override
 hashCode().  The Java API spec says that that's rude; we'll have to
@@ -39,9 +46,13 @@ fix it if we ever need/want to use a hash-based collection
 The AccountFileDialog widget has undesirable keyboard focus
 behaviors for showSaveDialog().  Basically, clicking 'Save' puts the
 focus in the file list, and keystrokes can't get it out; you have to
-use a mouse click.  This happens even when you specifically request
-focus in one of the password text fields.  I don't know the fix, but
-probably it requires learning more about the focus subsystem.
+use a mouse click.  It happens because of these lines:
+	if (f == null || f.isDirectory()) {
+	    fileChooser.requestFocusInWindow();
+	    return;
+	}
+There's no obvious way to persuade the file chooser to select the
+text box over the file list...
 
 -- Current needs
 Unit tests currently only partly cover saving files with an Account
