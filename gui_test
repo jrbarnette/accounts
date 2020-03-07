@@ -1,0 +1,31 @@
+#!/bin/bash
+
+usage() {
+    echo "usage: $(basename $0) [ -o ] test-class-name" >&2
+    exit 1
+}
+
+export CLASSPATH=test-classes:accounts.jar:$CLASSPATH
+FULL=true
+while getopts o OPT
+do
+    case "$OPT" in
+    o) FULL=false ;;
+    \?) usage ;;
+    esac
+done
+shift $(( OPTIND - 1 ))
+if [ $# -ne 1 ]
+then
+    usage
+fi
+
+CLASS="$1"
+if $FULL
+then
+    ant tests
+else
+    SOURCE="tests/jrb/accounts/$CLASS.java"
+    javac -sourcepath tests:src -d test-classes "$SOURCE"
+fi || exit
+java "jrb.accounts.$CLASS"
