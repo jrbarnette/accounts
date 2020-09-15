@@ -1,3 +1,7 @@
+-- Small features
+  - Give up File->Save; automatically save every change.
+    - Still need "Save As" to change file name and/or password.
+
 -- Current state
 Ready to implement file merge.  Basic goal:
   * There are two files, each with possibly duplicated account data.
@@ -78,8 +82,8 @@ AccountStore.  However, the UI doesn't handle this failure.  Need to
 pop up a modal dialog that says that it's a duplicate and then goes
 back to editing.
 
-There was a bug fixed at commit 536967f.  Need to add a unit test
-that could catch the bug.  In practice, that means we need two tests:
+There was a bug fixed at commit 536967f.  Need to add a unit test that
+could catch the bug.  In practice, that means we need two tests:
   * Construct an AccountStore object from program data, save it, and
     then construct a second object from the saved image.  Assert that
     the two objects are equal.
@@ -97,9 +101,6 @@ Bugs/risks:
 Implement support to show/manipulate stored account data history.
 
 Implement support for merging accounts files together.
-
-Skip the whole "save file" option, and automatically write back after
-any change is committed.
 
 Think about making AccountStore implement Collection, or some
 subinterface.  (Maybe too much trouble?  Collection has a lot of
