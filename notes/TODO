@@ -1,6 +1,11 @@
--- Small features
+-- Small features/Refactorin
   - Give up File->Save; automatically save every change.
     - Still need "Save As" to change file name and/or password.
+  - Consider refactoring around AccountData in unit tests:
+    - Most bits of Account.UpdateEntry and AccountTestData are common;
+      extract them into a new class, say "ConcreteAccountData".
+    - Some test methods in TestAccount are against those common bits;
+      extract them to a new test class.
 
 -- Current state
 Ready to implement file merge.  Basic goal:
@@ -114,7 +119,7 @@ list.
 
 Save password generation parameters with the account.
 
---
+-- Feature Ideas
 Change Icon/naming so that the running program can be distinguished
 from other Java programs.
 
