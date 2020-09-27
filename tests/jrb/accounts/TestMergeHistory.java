@@ -4,24 +4,12 @@
 
 package jrb.accounts;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Test for <code>Account</code> methods relating to examining
- * account update histories.
  */
-public class TestAccountHistory {
+public class TestMergeHistory {
     // N.B. not "static", because then getAccount() on the elements
     // would return a shared Account that was reused across tests.
     private final AccountTestData[] TEST_DATA = {
@@ -50,30 +38,23 @@ public class TestAccountHistory {
 	return acct;
     }
 
-    /**
-     * Test the {@link Account#getUpdateData} method.
-     */
-    @Test
-    public void testGetUpdateData() {
-	for (int count = 1; count < TEST_DATA.length; count++) {
-	    Account acct = createAccountWithUpdates(count);
-	    for (int i = 0; i < count; i++) {
-		AccountData update = acct.getUpdateData(i);
-		assertTrue("Update record doesn't match its data",
-			   TEST_DATA[count - i - 1].matches(update));
-	    }
-	}
-    }
+    // merge cases:
+	// 0 <- 1
+	// A, B
+	// 1 <- 0
+	// B, A
 
-    /**
-     * Test the {@link Account#getUpdateCount} method.
-     */
-    @Test
-    public void testGetUpdateCount() {
-	for (int count = 1; count < TEST_DATA.length; count++) {
-	    Account acct = createAccountWithUpdates(count);
-	    assertEquals("Account's update count doesn't match",
-			 count, acct.getUpdateCount());
-	}
-    }
+	// 1, 2 <- 0
+	// B, A, A
+	// 0, 2 <- 1
+	// A, B, A
+	// 0, 1 <- 2
+	// A, A, B
+
+	// 0 <- 1, 2
+	// A, B, B
+	// 1 <- 0, 2
+	// B, A, B
+	// 2 <- 0, 1
+	// B, B, A
 }
