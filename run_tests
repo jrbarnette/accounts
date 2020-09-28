@@ -6,10 +6,13 @@
 ant tests || exit $?
 echo
 export CLASSPATH=test-classes:accounts.jar:$CLASSPATH
-SED='
-    /\/Test[^/]*\.java$/ !d
+SRC_TO_CLASS='
     s=tests/==
     s=\.java$==
     s=/=.=g
 '
-java -ea org.junit.runner.JUnitCore $(sed "$SED" <tests-list)
+TESTS=( $(sed 's=^=tests/=' tests-list |
+		xargs grep -l '^import org.junit.Test;' |
+		xargs grep -l '^    @Test' |
+		sed "${SRC_TO_CLASS}") )
+java -ea org.junit.runner.JUnitCore "${TESTS[@]}"
