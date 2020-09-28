@@ -253,14 +253,14 @@ class Account extends AccountData {
     }
 
     /**
-     * Return this account's UUID as a string. The UUID is permanently
-     * assigned when the account is first created, and is preserved
-     * across both history updates and file save/restore cycles.
+     * Return this account's UUID. The UUID is permanently assigned when
+     * the account is first created, and is preserved across both
+     * history updates and file save/restore cycles.
      *
-     * @return This account's current UUID in canonical text format.
+     * @return This account's current UUID.
      */
-    public String getUUID() {
-	return myUUID.toString();
+    public UUID getUUID() {
+	return myUUID;
     }
 
     /**

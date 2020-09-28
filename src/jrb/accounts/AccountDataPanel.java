@@ -95,7 +95,7 @@ class AccountDataPanel extends JPanel implements FocusListener {
 
     private void fillAccountData() {
 	if (savedAccount != null) {
-	    uuidLabel.setText(savedAccount.getUUID());
+	    uuidLabel.setText(savedAccount.getUUID().toString());
 	    AccountData data = savedAccount.getUpdateData(updateIndex);
 
 	    timestampLabel.setText(
