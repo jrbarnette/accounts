@@ -37,7 +37,6 @@ public class TestAccountHistory {
      * updates are applied from the remaining elements.
      *
      * @param num The number of updates to apply out of TEST_DATA.
-     * @return The newly created <code>Account</code> object.
      */
     private Account createAccountWithUpdates(int num) {
 	Account acct = TEST_DATA[0].getAccount();
