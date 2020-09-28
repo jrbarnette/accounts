@@ -26,17 +26,17 @@ class Account extends AccountData {
     /**
      * One entry in the update history of an <code>Account</code>.
      */
-    private static class UpdateEntry extends AccountData
-	    implements Comparable<UpdateEntry> {
+    private static class HistoryEntry extends AccountData
+	    implements Comparable<HistoryEntry> {
 	private String description;
 	private String url;
 	private String username;
 	private String password;
 	private Date timestamp;
 
-	UpdateEntry(String description, String url,
-		    String username, String password,
-		    Date timestamp) {
+	HistoryEntry(String description, String url,
+		     String username, String password,
+		     Date timestamp) {
 	    this.description = description;
 	    this.url = url;
 	    this.username = username;
@@ -44,8 +44,8 @@ class Account extends AccountData {
 	    this.timestamp = timestamp;
 	}
 
-	UpdateEntry(String description, String url,
-		    String username, String password) {
+	HistoryEntry(String description, String url,
+		     String username, String password) {
 	    this(description, url, username, password, new Date());
 	}
 
@@ -71,10 +71,10 @@ class Account extends AccountData {
 
 	@Override
 	public boolean equals(Object o) {
-	    if (!(o instanceof UpdateEntry)) {
+	    if (!(o instanceof HistoryEntry)) {
 		return false;
 	    }
-	    UpdateEntry data = (UpdateEntry) o;
+	    HistoryEntry data = (HistoryEntry) o;
 	    return description.equals(data.description)
 		    && url.equals(data.url)
 		    && username.equals(data.username)
@@ -83,7 +83,7 @@ class Account extends AccountData {
 	}
 
 	@Override
-	public int compareTo(UpdateEntry data) {
+	public int compareTo(HistoryEntry data) {
 	    int rv = timestamp.compareTo(data.timestamp);
 	    if (rv != 0) return rv;
 	    rv = description.compareTo(data.description);
@@ -111,7 +111,7 @@ class Account extends AccountData {
      * The history of <code>AccountData</code> entries created by
      * updates to this account.
      */
-    private List<UpdateEntry> myHistory;
+    private List<HistoryEntry> myHistory;
 
     /**
      * Create a new account object from initial data values.  The given
@@ -124,9 +124,9 @@ class Account extends AccountData {
      */
     public Account(String description, String url,
 		   String username, String password) {
-	myHistory = new Vector<UpdateEntry>();
+	myHistory = new Vector<HistoryEntry>();
 	myUUID = UUID.randomUUID();
-	UpdateEntry data = new UpdateEntry(
+	HistoryEntry data = new HistoryEntry(
 		description, url, username, password);
 	myHistory.add(data);
     }
@@ -144,7 +144,7 @@ class Account extends AccountData {
      * @throws IOException Indicates a failure reading account data.
      */
     Account(DataInput in, int formatVersion) throws IOException {
-	myHistory = new Vector<UpdateEntry>();
+	myHistory = new Vector<HistoryEntry>();
 	readAccount(in, formatVersion);
     }
 
@@ -159,9 +159,9 @@ class Account extends AccountData {
      */
     public void update(String description, String url,
 		       String username, String password) {
-	UpdateEntry data = new UpdateEntry(
+	HistoryEntry data = new HistoryEntry(
 		description, url, username, password);
-	UpdateEntry prevData = myHistory.get(myHistory.size() - 1);
+	HistoryEntry prevData = myHistory.get(myHistory.size() - 1);
 	// The unit tests will fail without this loop, and I'm pretty
 	// sure this is a fix, not a hack.
 	while (data.timestamp.compareTo(prevData.timestamp) <= 0) {
@@ -180,7 +180,7 @@ class Account extends AccountData {
      *<p>
      * XXX - It seems like there's no legitimate reason for both this
      * method and the constructor, and that this method should be
-     * deleted...
+     * deleted, or at least made private...
      *
      * @param in The data input stream from which to read the account's
      *     data.
@@ -221,7 +221,7 @@ class Account extends AccountData {
 			"Account history not in time order");
 	    }
 	    prevTimestamp = timestamp;
-	    UpdateEntry data = new UpdateEntry(
+	    HistoryEntry data = new HistoryEntry(
 		    description, url, username, password, timestamp);
 	    myHistory.add(data);
 	    size--;
@@ -243,7 +243,7 @@ class Account extends AccountData {
     void writeAccount(DataOutput out) throws IOException {
 	out.writeUTF(myUUID.toString());
 	out.writeInt(myHistory.size());
-	for (UpdateEntry data : myHistory) {
+	for (HistoryEntry data : myHistory) {
 	    out.writeUTF(data.description);
 	    out.writeUTF(data.url);
 	    out.writeUTF(data.username);
