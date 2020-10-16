@@ -21,6 +21,7 @@ import javax.swing.*;
 class AccountStoreUI extends JFrame {
     private static final String NEW = "New";
     private static final String OPEN = "Open";
+    private static final String MERGE = "Merge";
     private static final String SAVE = "Save";
     private static final String SAVE_AS = "Save As ...";
     private static final String EXIT = "Exit";
@@ -71,6 +72,13 @@ class AccountStoreUI extends JFrame {
 	    act = new AbstractAction(OPEN) {
 		public void actionPerformed(ActionEvent ae) {
 		    openAccountsDialog();
+		}
+	    };
+	    fileMenu.add(act);
+
+	    act = new AbstractAction(MERGE) {
+		public void actionPerformed(ActionEvent ae) {
+		    mergeAccountsDialog();
 		}
 	    };
 	    fileMenu.add(act);
@@ -158,7 +166,7 @@ class AccountStoreUI extends JFrame {
 	    JOptionPane.showMessageDialog(
 		this,
 		"Unable to open '"
-		    + newFile.getName() +"': "
+		    + newFile.getName() + "': "
 		    + e.getMessage(),
 		"Unable to Open Accounts",
 		JOptionPane.WARNING_MESSAGE);
@@ -234,6 +242,32 @@ class AccountStoreUI extends JFrame {
 	char[] password = fileChooser.getPassword();
 
 	openAccounts(newFile, password);
+    }
+
+    /**
+     * Merge accounts from a user selected file for the <i>Merge</i>
+     * file-menu choice.
+     */
+    private void mergeAccountsDialog() {
+	checkFileChooser();
+	int option = fileChooser.showOpenDialog();
+	if (option != AccountFileDialog.APPROVE_OPTION)
+	    return;
+
+	File newFile = fileChooser.getSelectedFile();
+	char[] password = fileChooser.getPassword();
+
+	try {
+	    accountsPanel.mergeAccounts(newFile, password);
+	} catch (Exception e) {
+	    JOptionPane.showMessageDialog(
+		this,
+		"Unable to merge from '"
+		    + newFile.getName() + "': "
+		    + e.getMessage(),
+		"Unable to Merge Accounts",
+		JOptionPane.WARNING_MESSAGE);
+	}
     }
 
     /**

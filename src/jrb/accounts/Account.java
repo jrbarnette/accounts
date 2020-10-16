@@ -22,7 +22,7 @@ import java.util.Vector;
  * returns the values of its account data properties as of the most
  * recent update.
  */
-class Account extends AccountData {
+class Account extends AccountData implements Cloneable {
     /**
      * One entry in the update history of an <code>Account</code>.
      */
@@ -168,6 +168,58 @@ class Account extends AccountData {
 	    data.timestamp = new Date();
 	}
 	myHistory.add(data);
+    }
+
+    /**
+     * Merge in history entries from another account.  Any history
+     * entry present in the source account object is added into this
+     * object's history, except for entries that are already present.
+     * Additions are made to ensure that the list stays sorted by
+     * timestamp.
+     *
+     * @param source The account from which to merge history.
+     */
+    public void mergeHistory(Account source) {
+	List<HistoryEntry> sourceHistory = source.myHistory;
+	int myIndex = 0;
+	int sourceIndex = 0;
+	HistoryEntry myEntry = myHistory.get(myIndex);
+	HistoryEntry newEntry = sourceHistory.get(sourceIndex);
+	for (;;) {
+	    if (newEntry.equals(myEntry)) {
+		myIndex++;
+		sourceIndex++;
+		if (myIndex >= myHistory.size()
+			|| sourceIndex >= sourceHistory.size()) {
+		    break;
+		}
+		myEntry = myHistory.get(myIndex);
+		newEntry = sourceHistory.get(sourceIndex);
+		continue;
+	    }
+	    Date myTimestamp = myEntry.timestamp;
+	    if (newEntry.timestamp.compareTo(myTimestamp) < 0) {
+		myHistory.add(myIndex, newEntry);
+		sourceIndex++;
+		if (sourceIndex >= sourceHistory.size()) {
+		    break;
+		}
+		newEntry = sourceHistory.get(sourceIndex);
+		myIndex++;
+	    } else {
+		myIndex++;
+		if (myIndex >= myHistory.size()) {
+		    myHistory.add(newEntry);
+		    sourceIndex++;
+		    break;
+		}
+		myEntry = myHistory.get(myIndex);
+	    }
+	}
+	while (sourceIndex < sourceHistory.size()) {
+	    myHistory.add(sourceHistory.get(sourceIndex));
+	    sourceIndex++;
+	}
     }
 
     /**
@@ -345,6 +397,17 @@ class Account extends AccountData {
      */
     public String toString() {
 	return getDescription();
+    }
+
+    @Override
+    protected Account clone() {
+	try {
+	    Account acct = (Account) super.clone();
+	    acct.myHistory = new Vector<HistoryEntry>(myHistory);
+	    return acct;
+	} catch (CloneNotSupportedException ex) {
+	    return null;
+	}
     }
 
     /**

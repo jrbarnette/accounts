@@ -387,19 +387,39 @@ class AccountStorePanel extends JPanel
     /**
      * Read account data as for the "File-&gt;Open" menu option.
      *
-     * @param accountsFile File from which to read our new account
-     *     data.
-     * @param password Password for decrypting the account data in the
-     *     file.
+     * @param accountsFile File from which to read our new account data.
+     * @param password Password for decrypting the file.
      * @throws GeneralSecurityException Indicates a failure relating to
-     *     file decryption.
-     * @throws IOException Indicates a failure reading from the file.
+     *     decrypting the file.
+     * @throws IOException Indicates a failure opening or reading from
+     *     the file.
      */
     void openAccounts(File accountsFile, char[] password)
 	    throws IOException, GeneralSecurityException {
 	myAccountStore.readAccounts(
 	    new FileInputStream(accountsFile), password);
 	accountsChanged = false;
+	refillAccountList();
+    }
+
+    /**
+     * Merge entries from an alternate accounts file as for the
+     * "File-&gt;Merge" menu option.
+     *
+     * @param mergeFile File containing additional account data to be
+     *     merged into <code>myAccountStore</code>.
+     * @param password Password for decrypting the file.
+     * @throws GeneralSecurityException Indicates a failure relating to
+     *     decrypting the file.
+     * @throws IOException Indicates a failure opening or reading from
+     *     the file.
+     */
+    void mergeAccounts(File mergeFile, char[] password)
+	    throws IOException, GeneralSecurityException {
+	AccountStore merge = new AccountStore(
+	    new FileInputStream(mergeFile), password);
+	myAccountStore.mergeAccounts(merge);
+	accountsChanged = true;
 	refillAccountList();
     }
 

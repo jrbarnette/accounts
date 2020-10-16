@@ -18,8 +18,9 @@ import javax.crypto.*;
 import javax.crypto.spec.*;
 
 import java.net.URL;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.UUID;
 
 /**
  * A set of accounts that can be saved to or read from a file.
@@ -94,6 +95,13 @@ class AccountStore implements Iterable<Account> {
     private TreeMap<String, Account> myAccounts;
 
     /**
+     * A map containing all accounts in the store.  The account
+     * UUID is used as the key to the map to facilitate finding matching
+     * accounts during merge operations.
+     */
+    private HashMap<UUID, Account> uuidMap;
+
+    /**
      * Construct an empty account store.
      */
     public AccountStore() {
@@ -123,6 +131,7 @@ class AccountStore implements Iterable<Account> {
      */
     private void initialize() {
 	myAccounts = new TreeMap<String, Account>();
+	uuidMap = new HashMap<UUID, Account>();
 	fileCipher = null;
     }
 
@@ -132,6 +141,7 @@ class AccountStore implements Iterable<Account> {
      * @param newAccount The account to be added to the account store.
      */
     public void addAccount(Account newAccount) {
+	assert !uuidMap.containsKey(newAccount.getUUID());
 	assert !myAccounts.containsKey(newAccount.getDescription());
 	myAccounts.put(newAccount.getDescription(), newAccount);
     }
@@ -150,7 +160,7 @@ class AccountStore implements Iterable<Account> {
 			      String username, String password) {
 	myAccounts.remove(account.getDescription());
 	account.update(description, url, username, password);
-	addAccount(account);
+	myAccounts.put(account.getDescription(), account);
     }
 
     /**
@@ -172,12 +182,28 @@ class AccountStore implements Iterable<Account> {
 	return account;
     }
 
+    public void mergeAccounts(AccountStore mergeSource) {
+	for (Account account : mergeSource) {
+	    Account existing = uuidMap.get(account.getUUID());
+	    // FIXME: These operations will fail if it tries to create
+	    // a duplicate description.
+	    if (existing == null) {
+		addAccount(account);
+	    } else {
+		myAccounts.remove(existing.getDescription());
+		existing.mergeHistory(account);
+		myAccounts.put(existing.getDescription(), existing);
+	    }
+	}
+    }
+
     /**
      * Delete an account from the account store.
      *
      * @param account The account to be deleted from the account store.
      */
     public void deleteAccount(Account account) {
+	uuidMap.remove(account.getUUID());
 	myAccounts.remove(account.getDescription());
     }
 
