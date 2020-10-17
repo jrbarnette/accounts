@@ -82,12 +82,6 @@ class AccountStore implements Iterable<Account> {
     private PBEKeySpec fileKey;
 
     /**
-     * The <code>Cipher</code> object used for encrypting and decrypting
-     * account data files.
-     */
-    private Cipher fileCipher;
-
-    /**
      * A map containing all accounts in the store.  The account
      * description is used as the key to the map to facilitate iteration
      * order and to prevent duplicate descriptions.
@@ -132,7 +126,6 @@ class AccountStore implements Iterable<Account> {
     private void initialize() {
 	myAccounts = new TreeMap<String, Account>();
 	uuidMap = new HashMap<UUID, Account>();
-	fileCipher = null;
     }
 
     /**
@@ -309,6 +302,7 @@ class AccountStore implements Iterable<Account> {
 	    throws GeneralSecurityException, IOException {
 	raw.read(passwordSalt);
 	raw.read(ivBlock);
+	Cipher fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 	fileCipher.init(Cipher.DECRYPT_MODE,
 			makeKey(password),
 			new IvParameterSpec(ivBlock));
@@ -340,6 +334,7 @@ class AccountStore implements Iterable<Account> {
 	randomSource.nextBytes(ivBlock);
 	raw.write(passwordSalt);
 	raw.write(ivBlock);
+	Cipher fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 	fileCipher.init(Cipher.ENCRYPT_MODE,
 			makeKey(password),
 			new IvParameterSpec(ivBlock));
@@ -371,7 +366,6 @@ class AccountStore implements Iterable<Account> {
 		    "File format V" + formatVersion
 		    + " is not supported");
 	}
-	fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 	in = makeInput(raw, password);
 	int nElements = in.readInt();
 	for (int i = 0; i < nElements; i++) {
@@ -395,7 +389,6 @@ class AccountStore implements Iterable<Account> {
      */
     public void writeAccounts(OutputStream raw, char[] password)
 	    throws GeneralSecurityException, IOException {
-	fileCipher = Cipher.getInstance(CIPHER_ALGORITHM);
 	raw.write(FILEMAGIC.getBytes());
 	DataOutputStream out = makeOutput(raw, password);
 	out.writeInt(myAccounts.size());
