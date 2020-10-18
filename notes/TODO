@@ -1,4 +1,4 @@
--- Small features/Refactorin
+-- Small features/Refactoring
   - Give up File->Save; automatically save every change.
     - Still need "Save As" to change file name and/or password.
   - Consider refactoring around AccountData in unit tests:
@@ -6,24 +6,14 @@
       extract them into a new class, say "ConcreteAccountData".
     - Some test methods in TestAccount are against those common bits;
       extract them to a new test class.
+  - The File->Merge menu option shouldn't be enabled when there's no
+    currently open file.
+  - The Merge file chooser dialog uses "Open" for its button text.
+    It should say "Merge" instead.
 
 -- Current state
-Ready to implement file merge.  Basic goal:
-  * There are two files, each with possibly duplicated account data.
-  * Load both files, and create a single account store with the
-    duplicates removed.
-
-Implementation idea:
-  * Read both files independently, creating two AccountStore
-    objects.
-  * Provide a "merge" method on the first (target) using the other
-    (source) as a parameter; the target object adds in all
-    non-duplicate account entries from the source.
-  * For each account in the source object, if there's an account in
-    the target with the same UUID, merge the histories.  Otherwise,
-    add the account as new to the target.
-  * Merging account histories means joining the two update entry
-    lists into a single list, sorting, and removing duplicates.
+File merge is done; think about making it better:
+  * Want to be able to review changes after merge.
 
 Need to handle operations that could create duplicate descriptions:
   * A new account in the target could have the same description as
@@ -64,6 +54,10 @@ There's no obvious way to persuade the file chooser to select the
 text box over the file list...
 
 -- Current needs
+Unit test naming is a bit inconsistent now:  Sometimes "*Test.java",
+sometimes "Test*.java".  The "run_tests" script may be more
+forgiving, but the human brain isn't...
+
 Unit tests currently only partly cover saving files with an Account
 that has more than one history entry; we cover Account objects, but
 not complete AccountStore files.  Want to add more coverage before
