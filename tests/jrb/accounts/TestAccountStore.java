@@ -85,10 +85,7 @@ public class TestAccountStore extends AccountStoreSupport {
     @Test
     public void testAccountEquality() {
 	AccountStore origAccounts = createTestStore();
-	AccountStore newAccounts = createTestStore(0);
-	for (Account acct : origAccounts) {
-	    newAccounts.addAccount(acct);
-	}
+	AccountStore newAccounts = origAccounts.clone();;
 	assertEquals("Identical AccountStore objects not equal",
 		     origAccounts, newAccounts);
     }

@@ -30,7 +30,7 @@ import java.util.UUID;
  * set of accounts can be saved in a file, encrypted, and later read
  * back to reconstruct the saved account store.
  */
-class AccountStore implements Iterable<Account> {
+class AccountStore implements Iterable<Account>, Cloneable {
     static int FORMAT_V1 = 1;
 
     static int FORMAT_V2 = 2;
@@ -133,10 +133,11 @@ class AccountStore implements Iterable<Account> {
      *
      * @param newAccount The account to be added to the account store.
      */
-    public void addAccount(Account newAccount) {
+    private void addAccount(Account newAccount) {
 	assert !uuidMap.containsKey(newAccount.getUUID());
 	assert !myAccounts.containsKey(newAccount.getDescription());
 	myAccounts.put(newAccount.getDescription(), newAccount);
+	uuidMap.put(newAccount.getUUID(), newAccount);
     }
 
     /**
@@ -175,6 +176,13 @@ class AccountStore implements Iterable<Account> {
 	return account;
     }
 
+    /**
+     * Merge account entries from another account store, adding anything
+     * not already in this account store.
+     *
+     * @param mergeSource The source account store to be merged into
+     *     this account store.
+     */
     public void mergeAccounts(AccountStore mergeSource) {
 	for (Account account : mergeSource) {
 	    Account existing = uuidMap.get(account.getUUID());
@@ -414,6 +422,20 @@ class AccountStore implements Iterable<Account> {
     public void writeAccounts(OutputStream outStream)
 	    throws GeneralSecurityException, IOException {
 	writeAccounts(outStream, fileKey.getPassword());
+    }
+
+    @Override
+    protected AccountStore clone() {
+	try {
+	    AccountStore accts = (AccountStore) super.clone();
+	    accts.passwordSalt = passwordSalt.clone();
+	    accts.ivBlock = ivBlock.clone();
+	    accts.myAccounts = new TreeMap<String, Account>(myAccounts);
+	    accts.uuidMap = new HashMap<UUID, Account>(uuidMap);
+	    return accts;
+	} catch (CloneNotSupportedException ex) {
+	    return null;
+	}
     }
 
     @Override

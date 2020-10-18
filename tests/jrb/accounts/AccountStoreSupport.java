@@ -32,9 +32,25 @@ abstract class AccountStoreSupport {
 	    } else {
 		index = num - i - 1;
 	    }
-	    accounts.addAccount(testData[index].getAccount());
+	    accounts.createAccount(
+		    testData[index].getDescription(),
+		    testData[index].getUrl(),
+		    testData[index].getUsername(),
+		    testData[index].getPassword());
 	}
 	return accounts;
+    }
+
+    void extendTestStore(AccountStore accounts, int num) {
+	int numAccounts = accounts.size();
+	for (int i = 0; i < num; i++) {
+	    int index = i + numAccounts;
+	    accounts.createAccount(
+		    testData[index].getDescription(),
+		    testData[index].getUrl(),
+		    testData[index].getUsername(),
+		    testData[index].getPassword());
+	}
     }
 
     AccountStore createTestStore(int num) {
