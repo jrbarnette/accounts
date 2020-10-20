@@ -53,7 +53,7 @@
         description="generate javadoc for all code"
 	depends="source-list">
     <delete dir="${javadoc}"/>
-    <javadoc destdir="${javadoc}" private="true" noqualifier="all">
+    <javadoc destdir="${javadoc}" access="package" noqualifier="all">
 	<fileset dir="${basedir}/src" includesfile="${source.list}"/>
 	<fileset dir="${basedir}/tests" includesfile="${tests.list}"/>
     </javadoc>
