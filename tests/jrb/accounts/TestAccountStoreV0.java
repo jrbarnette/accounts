@@ -10,6 +10,11 @@ import java.security.GeneralSecurityException;
 
 import org.junit.Test;
 
+/**
+ * Tests to confirm reading V0 format files works as expected.
+ * N.B. Support for the V0 file format has been removed, so the tests
+ * are designed to detect appropriate failure.
+ */
 public class TestAccountStoreV0 extends AccountStoreSupport {
     private static final AccountTestData[] TEST_DATA = {};
 
@@ -21,6 +26,11 @@ public class TestAccountStoreV0 extends AccountStoreSupport {
 	super(TEST_DATA, PASSWORD);
     }
 
+    /**
+     * Test reading the sample V0 file. Reading a V0 file is expected to
+     * raise an exception, so the test fail if the read operation
+     * succeeds, and succeed if the expected exception is raised.
+     */
     @Test
     public void testSampleFile()
 	    throws IOException, GeneralSecurityException {

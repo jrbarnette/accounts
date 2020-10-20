@@ -10,7 +10,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Tests for the {@link Account#mergeHistory()} method.
+ * Tests for the {@link Account#mergeHistory} method.
  */
 public class MergeHistoryTest {
     // N.B. not "static", because then getAccount() on the elements

@@ -8,7 +8,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Tests for the {@link AccountStore#mergeAccounts()} method.
+ * Tests for the {@link AccountStore#mergeAccounts} method.
  */
 public class MergeStoreTest extends AccountStoreSupport {
     private static final AccountTestData[] TEST_DATA = {
