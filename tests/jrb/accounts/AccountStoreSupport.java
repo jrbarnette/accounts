@@ -88,14 +88,18 @@ abstract class AccountStoreSupport {
 	return createFromStream(input);
     }
 
-    void validateContent(AccountStore accounts) {
+    void validateContent(AccountStore accounts, int expectedSize) {
 	int i = 0;
 	for (Account acct : accounts) {
 	    assertTrue("Account data wrong or out of order",
 		       testData[i].matches(acct));
 	    i++;
 	}
-	assertEquals("Number of items seen by account iterator",
-		     accounts.size(), i);
+	assertEquals("Reported size of test AccountStore",
+		     expectedSize, accounts.size());
+    }
+
+    void validateContent(AccountStore accounts) {
+	validateContent(accounts, testData.length);
     }
 }

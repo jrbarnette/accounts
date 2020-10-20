@@ -56,7 +56,7 @@ public class TestAccountStore extends AccountStoreSupport {
 
     private void validateOrdering(boolean createInOrder) {
 	for (int num = 0; num <= testData.length; num++) {
-	    validateContent(createTestStore(num, createInOrder));
+	    validateContent(createTestStore(num, createInOrder), num);
 	}
     }
 
@@ -76,9 +76,7 @@ public class TestAccountStore extends AccountStoreSupport {
 	for (int num = 0; num < testData.length; num++) {
 	    int idx = testData.length - num - 1;
 	    accounts.deleteAccount(testData[idx].getAccount());
-	    validateContent(accounts);
-	    assertEquals("Account data size after delete",
-			 idx, accounts.size());
+	    validateContent(accounts, idx);
 	}
     }
 
