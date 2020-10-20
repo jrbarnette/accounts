@@ -30,6 +30,11 @@ public class TestAccountStoreV0 extends AccountStoreSupport {
      * Test reading the sample V0 file. Reading a V0 file is expected to
      * raise an exception, so the test fail if the read operation
      * succeeds, and succeed if the expected exception is raised.
+     *
+     * @throws IOException The test should fail because of an unexpected
+     *     error reading or opening the sample file.
+     * @throws GeneralSecurityException The test should fail because of
+     *     an unexpected error decrypting the sample file.
      */
     @Test
     public void testSampleFile()

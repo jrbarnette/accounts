@@ -48,6 +48,11 @@ public class TestAccountStoreV1 extends AccountStoreSupport {
      * Test that we can read the given V1 file sample. Read the accounts
      * from the sample file, and assert that the resulting object
      * matches <code>TEST_DATA</code>.
+     *
+     * @throws IOException The test should fail because of an unexpected
+     *     error reading or opening the sample file.
+     * @throws GeneralSecurityException The test should fail because of
+     *     an unexpected error decrypting the sample file.
      */
     @Test
     public void testSampleFile()
