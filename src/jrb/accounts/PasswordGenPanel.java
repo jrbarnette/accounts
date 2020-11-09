@@ -29,7 +29,7 @@ public class PasswordGenPanel extends JPanel {
 	"Special characters",
     };
 
-    JToggleButton[] categoryRequired = new JToggleButton[CATEGORIES.length];
+    JSpinner[] categorySpinners = new JSpinner[CATEGORIES.length];
 
     Vector<Character> allowed;
     Vector<Character> prohibited;
@@ -41,7 +41,7 @@ public class PasswordGenPanel extends JPanel {
     JSpinner maxLength;
 
     private void createAllowedSpecialCharacters() {
-	String specials = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+	String specials = PasswordCharSpec.SPECIAL;
 	int len = specials.length();
 	allowed = new Vector<Character>();
 	for (int i = 0; i < len; i++) {
@@ -57,9 +57,9 @@ public class PasswordGenPanel extends JPanel {
 	for (String category : CATEGORIES) {
 	    JPanel aPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 	    aPanel.add(new JLabel(category));
-	    categoryRequired[index] = new JCheckBox("Required");
-	    categoryRequired[index].setSelected(true);
-	    aPanel.add(categoryRequired[index]);
+	    categorySpinners[index] =
+		    new JSpinner(new SpinnerNumberModel(1, 0, 3, 1));
+	    aPanel.add(categorySpinners[index]);
 	    contentPanel.add(aPanel);
 	    index++;
 	}
@@ -194,17 +194,28 @@ public class PasswordGenPanel extends JPanel {
 
 	PasswordGenerator gen = new PasswordGenerator(min, max);
 
-	if (categoryRequired[UPPER].isSelected()) {
-	    gen.addCharSpec(PasswordCharSpec.createUppercaseCharSpec(1));
+	int categoryCount =
+		((Integer) categorySpinners[UPPER].getValue()).intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(
+		    PasswordCharSpec.createUppercaseCharSpec(categoryCount));
 	}
-	if (categoryRequired[LOWER].isSelected()) {
-	    gen.addCharSpec(PasswordCharSpec.createLowercaseCharSpec(1));
+	categoryCount =
+		((Integer) categorySpinners[LOWER].getValue()).intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(
+		    PasswordCharSpec.createLowercaseCharSpec(categoryCount));
 	}
-	if (categoryRequired[DIGITS].isSelected()) {
-	    gen.addCharSpec(PasswordCharSpec.createDigitCharSpec(1));
+	categoryCount =
+		((Integer) categorySpinners[DIGITS].getValue()).intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(
+		    PasswordCharSpec.createDigitCharSpec(categoryCount));
 	}
-	if (categoryRequired[SPECIAL].isSelected()) {
-	    gen.addCharSpec(new PasswordCharSpec(allowed, 1));
+	categoryCount =
+		((Integer) categorySpinners[SPECIAL].getValue()).intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(new PasswordCharSpec(allowed, categoryCount));
 	}
 
 	return gen.generatePassword();

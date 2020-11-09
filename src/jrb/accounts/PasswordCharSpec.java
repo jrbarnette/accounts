@@ -10,10 +10,11 @@ import java.util.Collection;
 /**
  */
 class PasswordCharSpec {
+    public static final String SPECIAL = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+
     private static final String UPPERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String LOWERS = "abcdefghijklmnopqrstuvwxyz";
     private static final String DIGITS = "0123456789";
-    private static final String SPECIAL = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
     private static String LETTERS = UPPERS + LOWERS;
     private static String ALPHANUMERIC = LETTERS + DIGITS;
