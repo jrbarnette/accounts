@@ -1,6 +1,8 @@
 -- Small features/Refactoring
   - Give up File->Save; automatically save every change.
     - Still need "Save As" to change file name and/or password.
+  - Block "Save" when not needed, or at least, make it some sort of
+    no-op (e.g. don't change the IV stuff unless the content changes.
   - Consider refactoring around AccountData in unit tests:
     - Most bits of Account.UpdateEntry and AccountTestData are common;
       extract them into a new class, say "ConcreteAccountData".
@@ -10,10 +12,15 @@
     currently open file.
   - The Merge file chooser dialog uses "Open" for its button text.
     It should say "Merge" instead.
+  - Allow multiple frames to have different files open at once.
+  - Allow saving individual accounts to create a new file, or records
+    from one file to another.
 
 -- Current state
 File merge is done; think about making it better:
   * Want to be able to review changes after merge.
+  * Want to be able to see differences between two files.
+  * Want to be able to delete unneeded account records.
 
 Need to handle operations that could create duplicate descriptions:
   * A new account in the target could have the same description as
@@ -97,7 +104,8 @@ Bugs/risks:
   * The various file dialogs shouldn't enable the action button
     until there's a valid password.
 
-Implement support to show/manipulate stored account data history.
+Implement support to manipulate (e.g. delete) stored account data
+history rather than merely showing it.
 
 Implement support for merging accounts files together.
 
