@@ -366,15 +366,14 @@ class AccountStore implements Iterable<Account>, Cloneable {
      */
     public void readAccounts(InputStream raw, char[] password)
 	    throws GeneralSecurityException, IOException {
-	initialize();
-	DataInputStream in;
 	int formatVersion = readMagic(raw);
 	if (formatVersion < FORMAT_V1) {
 	    throw new AccountFileFormatException(
 		    "File format V" + formatVersion
 		    + " is not supported");
 	}
-	in = makeInput(raw, password);
+	initialize();
+	DataInputStream in = makeInput(raw, password);
 	int nElements = in.readInt();
 	for (int i = 0; i < nElements; i++) {
 	    addAccount(new Account(in, formatVersion));
@@ -430,6 +429,9 @@ class AccountStore implements Iterable<Account>, Cloneable {
 	    AccountStore accts = (AccountStore) super.clone();
 	    accts.passwordSalt = passwordSalt.clone();
 	    accts.ivBlock = ivBlock.clone();
+	    // FIXME: These constructors presumably create shallow
+	    // copies, so changes in the original accounts will show up
+	    // in the clone as well, and vice versa.
 	    accts.myAccounts = new TreeMap<String, Account>(myAccounts);
 	    accts.uuidMap = new HashMap<UUID, Account>(uuidMap);
 	    return accts;
