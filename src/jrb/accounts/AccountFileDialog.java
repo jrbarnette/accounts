@@ -38,7 +38,8 @@ class AccountFileDialog extends JDialog implements ActionListener {
     private char[] selectedPassword;
 
     private JFileChooser createFileChooser() {
-	JFileChooser aChooser = new JFileChooser();
+	JFileChooser aChooser = new JFileChooser(
+	    new File(System.getProperty("user.dir")));
 	aChooser.setMultiSelectionEnabled(false);
 	aChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	aChooser.addActionListener(this);
