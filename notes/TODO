@@ -46,6 +46,16 @@ or press <return> in the text box.  That means this sequence fails:
 At the end of the this, the file name will be the name first entered,
 not the edited name.
 
+In save dialogs, checking that the password confirmation matches is
+flaky.  It's possible to make the two fields mismatch and still save
+successfully:
+  * If both match, and then you change the main box, the match isn't
+    tested.
+  * If both match, and the confirm box changes, the match isn't
+    tested.
+  * Maybe other problems; I haven't fully characterized the
+    behavior.
+
 For several classes, we override equals(), but don't override
 hashCode().  The Java API spec says that that's rude; we'll have to
 fix it if we ever need/want to use a hash-based collection
@@ -100,16 +110,8 @@ could catch the bug.  In practice, that means we need two tests:
     second object.  Assert that the two objects are equal.
 Currently. we have only the first test.
 
-Bugs/risks:
-  * The Save As dialog should ask for the password twice, to
-    guarantee that it's not mis-typed.
-  * The various file dialogs shouldn't enable the action button
-    until there's a valid password.
-
-Implement support to manipulate (e.g. delete) stored account data
+Implement support to manipulate (esp. delete) stored account data
 history rather than merely showing it.
-
-Implement support for merging accounts files together.
 
 Think about making AccountStore implement Collection, or some
 subinterface.  (Maybe too much trouble?  Collection has a lot of
