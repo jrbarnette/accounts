@@ -1,0 +1,26 @@
+paths by which AccountStorePanel.autosaveAccountStore() can be invoked
+
+click on "Delete" button ->
+    deleteAccount()
+click on updateButton (either text state) ->
+    updateAccountStore()
+
+at start-up, need to disable
+    account data text fields
+    "Generate" button
+... only options available should be "File->New" and "File->Open"
+
+File menu & account store panel are in one of these states (same state must
+apply to both of them):
+  * open - after "File->New" or "File->Open"
+	AccountStoreUI: all file operations allowed
+	AccountStorePanel: all operations enabled
+  * startup - at startup when no file is provided
+	AccountStoreUI: enable "File->New" "File->Open"
+	AccountStoreUI: disable "File->Save As" "File->Merge"
+	AccountStorePanel: all disabled
+  * error - after autosave exception
+	AccountStoreUI: enable "File->New" "File->Open" "File->Save As"
+	    (optional: require user confirm for New or Open)
+	AccountStoreUI: disable "File->Merge"
+	AccountStorePanel: disable all except EARLIER/LATER (and COPY?)

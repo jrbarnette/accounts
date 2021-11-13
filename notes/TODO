@@ -1,8 +1,10 @@
 -- Small features/Refactoring
   - Give up File->Save; automatically save every change.
     - Still need "Save As" to change file name and/or password.
+    - This has impacts on the UX, especially at startup.
   - Block "Save" when not needed, or at least, make it some sort of
-    no-op (e.g. don't change the IV stuff unless the content changes.
+    no-op (i.e. don't change the IV stuff unless the content
+    changes).
   - Consider refactoring around AccountData in unit tests:
     - Most bits of Account.UpdateEntry and AccountTestData are common;
       extract them into a new class, say "ConcreteAccountData".
