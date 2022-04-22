@@ -1,0 +1,17 @@
+Design issue:
+  - For autosave to work, there should be a backing file at all
+    times.  At startup, we don't have a file (unless it was given on
+    the command line), so we have to get one.
+  - There are two ways to get the file:
+      - "File->New", to create a new file.
+      - "File->Open", to open an existing file.
+
+Options:
+  - At startup, present the user with a small dialog to choose
+    between a new or existing file.
+  - Until the backing file is chosen, block all operations except the
+    "File->New" or "File->Open" menu options.
+  - Ignore the problem?  In current code, until the backing file is
+    chosen, it uses an anonymous account store that exists in memory
+    only.  This means "New" and "Open" will throw away the in-memory
+    copy (so, maybe, block these operations?).
