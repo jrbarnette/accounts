@@ -5,6 +5,8 @@ Design issue:
   - There are two ways to get the file:
       - "File->New", to create a new file.
       - "File->Open", to open an existing file.
+    The UI for these two options isn't interchangeable; the user
+    must somehow choose one or the other.
 
 Options:
   - At startup, present the user with a small dialog to choose

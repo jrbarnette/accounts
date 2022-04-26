@@ -1,10 +1,8 @@
 -- Small features/Refactoring
-  - Give up File->Save; automatically save every change.
-    - Still need "Save As" to change file name and/or password.
-    - This has impacts on the UX, especially at startup.
-  - Block "Save" when not needed, or at least, make it some sort of
-    no-op (i.e. don't change the IV stuff unless the content
-    changes).
+  - If you save an AccountStore twice in a row, you get different bytes
+    even though the content is the same.  This happens because the
+    IV and password salt are unconditionally re-generated every time.
+    Maybe consider regenerating only if something changes?
   - Consider refactoring around AccountData in unit tests:
     - Most bits of Account.UpdateEntry and AccountTestData are common;
       extract them into a new class, say "ConcreteAccountData".
@@ -35,6 +33,12 @@ Need to handle operations that could create duplicate descriptions:
     couldn't be merged."
 
 -- Bugs
+After "File->Merge", the merged file become the new default for
+"Save As".
+  - This problem hasn't been fully scoped, but it looks like it
+    may affect the target for "Save" as well...
+  - The problem should go away with the code changes for autosave...
+
 In save dialogs, changes to the "Save As" file name text don't become
 the file name if you merely transfer focus out; you must click "Save"
 or press <return> in the text box.  That means this sequence fails:
