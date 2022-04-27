@@ -47,6 +47,7 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	};
 
 	for (JTextField f : fields) {
+	    f.setEnabled(false);
 	    f.addFocusListener(this);
 	    f.getDocument().addDocumentListener(listener);
 	}
@@ -117,10 +118,14 @@ class AccountDataPanel extends JPanel implements FocusListener {
 
 	    // These changes will trigger DocumentEvent notifications
 	    // that will update the button states.
-	    descriptionText.setText("");
-	    urlText.setText("");
-	    usernameText.setText("");
-	    passwordText.setText("");
+	    JTextField[] fields = {
+		descriptionText, urlText, usernameText, passwordText,
+	    };
+
+	    for (JTextField f : fields) {
+		f.setText("");
+		f.setEnabled(true);
+	    }
 	}
     }
 

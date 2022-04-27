@@ -19,18 +19,17 @@ import javax.swing.*;
 /**
  */
 class AccountStoreUI extends JFrame {
-    private static final String NEW = "New";
-    private static final String OPEN = "Open";
-    private static final String MERGE = "Merge";
-    private static final String SAVE = "Save";
-    private static final String SAVE_AS = "Save As ...";
+    private static final String NEW = "New ...";
+    private static final String OPEN = "Open ...";
+    private static final String MERGE = "Merge ...";
+    private static final String SAVE = "Save ...";
     private static final String EXIT = "Exit";
 
-    private AccountFileDialog		fileChooser;
-    private Action			saveAction;
-    private File			saveFile;
-    private AccountStorePanel		accountsPanel;
+    private Action saveFileAction;
+    private Action mergeFileAction;
 
+    private AccountFileDialog		fileChooser;
+    private AccountStorePanel		accountsPanel;
 
     /**
      * Initialize all the UI elements in the application.
@@ -40,9 +39,10 @@ class AccountStoreUI extends JFrame {
 
 	setJMenuBar(new JMenuBar());
 	getJMenuBar().add(makeFileMenu());
-	saveFile = null;
 	accountsPanel = new AccountStorePanel();
 	add(accountsPanel);
+
+	fileChooser = new AccountFileDialog(this);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	pack();
@@ -59,12 +59,7 @@ class AccountStoreUI extends JFrame {
 
 	    act = new AbstractAction(NEW) {
 		public void actionPerformed(ActionEvent ae) {
-		    if (!checkSaveAccounts())
-			return;
-
-		    accountsPanel.clearAccounts();
-		    saveFile = null;
-		    saveAction.setEnabled(false);
+		    newAccountsDialog();
 		}
 	    };
 	    fileMenu.add(new JMenuItem(act));
@@ -76,35 +71,27 @@ class AccountStoreUI extends JFrame {
 	    };
 	    fileMenu.add(act);
 
-	    act = new AbstractAction(MERGE) {
+	    mergeFileAction = new AbstractAction(MERGE) {
 		public void actionPerformed(ActionEvent ae) {
 		    mergeAccountsDialog();
 		}
 	    };
-	    fileMenu.add(act);
+	    mergeFileAction.setEnabled(false);
+	    fileMenu.add(mergeFileAction);
 
-	    saveAction = new AbstractAction(SAVE) {
-		public void actionPerformed(ActionEvent ae) {
-		    if (saveFile != null)
-			saveAccounts(saveFile, null);
-		}
-	    };
-	    saveAction.setEnabled(false);
-	    fileMenu.add(saveAction);
-
-	    act = new AbstractAction(SAVE_AS) {
+	    saveFileAction = new AbstractAction(SAVE) {
 		public void actionPerformed(ActionEvent ae) {
 		    saveAccountsDialog();
 		}
 	    };
-	    fileMenu.add(act);
+	    saveFileAction.setEnabled(false);
+	    fileMenu.add(saveFileAction);
 
 	    fileMenu.addSeparator();
 
 	    act = new AbstractAction(EXIT) {
 		public void actionPerformed(ActionEvent ae) {
-		    if (checkSaveAccounts())
-			System.exit(0);
+		    System.exit(0);
 		}
 	    };
 	    fileMenu.add(act);
@@ -112,56 +99,9 @@ class AccountStoreUI extends JFrame {
 	return fileMenu;
     }
 
-    /**
-     * Ensure that our cached <code>JFileChooser</code> object
-     * is initialized.
-     */
-    private void checkFileChooser() {
-	if (fileChooser != null)
-	    return;
-
-	fileChooser = new AccountFileDialog(this);
-    }
-
-    /**
-     * Allow the user an opportunity to save the current accounts.  Does
-     * nothing if nothing has changed since the last save.  The user
-     * is allowed to choose saving the accounts, continuing without
-     * saving, or canceling the operation.
-     *
-     * @return <code>true</code> indicates the operation may
-     *     continue.  <code>false</code> indicates that the user
-     *     chose to cancel the operation.
-     */
-    private boolean checkSaveAccounts() {
-	if (!accountsPanel.needSave())
-	    return true;
-
-	Object[] options = { "Save ...", "Don't Save", "Cancel" };
-	int choice = JOptionPane.showOptionDialog(
-	    this,
-	    "Accounts file has not been saved.  Save it now?",
-	    "Accounts Not Saved",
-	    JOptionPane.DEFAULT_OPTION,
-	    JOptionPane.QUESTION_MESSAGE,
-	    null, options, options[0]);
-
-	switch (choice) {
-	case 0: // Save
-	    saveAccountsDialog();
-	    return !accountsPanel.needSave();
-	case 1: // Don't Save
-	    return true;
-	default: // Cancel, closed dialog, or otherwise
-	    return false;
-	}
-    }
-
     private void openAccounts(File newFile, char[] password) {
 	try {
-	    accountsPanel.openAccounts(newFile, password);
-	    saveFile = newFile;
-	    saveAction.setEnabled(true);
+	    accountsPanel.openAccountStore(newFile, password);
 	} catch (Exception e) {
 	    JOptionPane.showMessageDialog(
 		this,
@@ -171,6 +111,8 @@ class AccountStoreUI extends JFrame {
 		"Unable to Open Accounts",
 		JOptionPane.WARNING_MESSAGE);
 	}
+	saveFileAction.setEnabled(true);
+	mergeFileAction.setEnabled(true);
     }
 
     private void openAccountsPasswordDialog(String filename) {
@@ -230,10 +172,6 @@ class AccountStoreUI extends JFrame {
      * file if there are changes.
      */
     private void openAccountsDialog() {
-	if (!checkSaveAccounts())
-	    return;
-
-	checkFileChooser();
 	int option = fileChooser.showOpenDialog();
 	if (option != AccountFileDialog.APPROVE_OPTION)
 	    return;
@@ -249,7 +187,6 @@ class AccountStoreUI extends JFrame {
      * file-menu choice.
      */
     private void mergeAccountsDialog() {
-	checkFileChooser();
 	int option = fileChooser.showOpenDialog();
 	if (option != AccountFileDialog.APPROVE_OPTION)
 	    return;
@@ -258,7 +195,7 @@ class AccountStoreUI extends JFrame {
 	char[] password = fileChooser.getPassword();
 
 	try {
-	    accountsPanel.mergeAccounts(newFile, password);
+	    accountsPanel.mergeAccountStore(newFile, password);
 	} catch (Exception e) {
 	    JOptionPane.showMessageDialog(
 		this,
@@ -266,48 +203,21 @@ class AccountStoreUI extends JFrame {
 		    + newFile.getName() + "': "
 		    + e.getMessage(),
 		"Unable to Merge Accounts",
-		JOptionPane.WARNING_MESSAGE);
+		JOptionPane.ERROR_MESSAGE);
 	}
     }
 
     /**
-     * Save accounts for the <i>Save</i> and <i>Save As</i> file-menu
-     * choices.
+     * Return whether we're allowed to overwrite a given file with our
+     * <code>AccountStore</code>. If the file exists, present a modal
+     * dialog asking the user for permission to overwrite the file.
      *
-     * @param newFile Identifies the file where the accounts should be
-     *     saved.
-     * @param password The password to be used to encrypt the data.
+     * @param file The file that will be created or overwritten.
+     * @return True if the file doesn't exist or the user has approved
+     *     overwriting it.
      */
-    private void saveAccounts(File newFile, char[] password) {
-	try {
-	    accountsPanel.saveAccounts(newFile, password);
-	    saveFile = newFile;
-	    saveAction.setEnabled(true);
-	} catch (Exception e) {
-	    JOptionPane.showMessageDialog(
-		this,
-		"Unable to save '"
-		    + newFile.getName() +"': "
-		    + e.getMessage(),
-		"Unable to Save Accounts",
-		JOptionPane.WARNING_MESSAGE);
-	}
-    }
-
-    /**
-     * Save accounts to a user-selected file for the <i>Save As</i>
-     * file-menu choice. If we're requested to overwrite a file, and
-     * it's not the file we read from, confirm it with the user.
-     */
-    private void saveAccountsDialog() {
-	checkFileChooser();
-	int option = fileChooser.showSaveDialog();
-	if (option != AccountFileDialog.APPROVE_OPTION)
-	    return;
-
-	File file = fileChooser.getSelectedFile();
-	char[] password = fileChooser.getPassword();
-	if (!file.equals(saveFile) && file.exists()) {
+    private boolean canSaveAs(File file) {
+	if (file.exists()) {
 	    Object[] options = { "OK", "Cancel" };
 	    int choice = JOptionPane.showOptionDialog(
 		this,
@@ -318,23 +228,65 @@ class AccountStoreUI extends JFrame {
 		JOptionPane.DEFAULT_OPTION,
 		JOptionPane.QUESTION_MESSAGE,
 		null, options, options[1]);
-	    if (choice != 0)
-		return;
+	    return choice == 0;
 	}
-
-	saveAccounts(file, password);
+	return true;
     }
 
     /**
-     * Handle "window closing" events so we can ask the user what to
-     * do with unsaved accounts.  Forward all other events to our
-     * superclass.
+     * Create a new <code>AccountStore</code> and its backing file
+     * in support of the <i>New</i> file-menu choice.  If we're
+     * requested to overwrite a file, confirm it with the user.
      */
-    protected void processWindowEvent(WindowEvent we) {
-	if (we.getID() == WindowEvent.WINDOW_CLOSING &&
-		!checkSaveAccounts())
+    private void newAccountsDialog() {
+	int option = fileChooser.showSaveDialog();
+	if (option != AccountFileDialog.APPROVE_OPTION)
 	    return;
-	super.processWindowEvent(we);
+
+	File file = fileChooser.getSelectedFile();
+	char[] password = fileChooser.getPassword();
+	if (canSaveAs(file)) {
+	    try {
+		accountsPanel.createAccountStore(file, password);
+	    } catch (Exception e) {
+		JOptionPane.showMessageDialog(
+		    this,
+		    "Unable to create '"
+			+ file.getName() +"': "
+			+ e.getMessage(),
+		    "Unable to Create Accounts",
+		    JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	saveFileAction.setEnabled(true);
+	mergeFileAction.setEnabled(true);
+    }
+
+    /**
+     * Save accounts to a user-selected file for the <i>Save As</i>
+     * file-menu choice. If we're requested to overwrite a file, confirm
+     * it with the user.
+     */
+    private void saveAccountsDialog() {
+	int option = fileChooser.showSaveDialog();
+	if (option != AccountFileDialog.APPROVE_OPTION)
+	    return;
+
+	File file = fileChooser.getSelectedFile();
+	char[] password = fileChooser.getPassword();
+	if (canSaveAs(file)) {
+	    try {
+		accountsPanel.saveAccountStore(file, password);
+	    } catch (Exception e) {
+		JOptionPane.showMessageDialog(
+		    this,
+		    "Unable to save '"
+			+ file.getName() +"': "
+			+ e.getMessage(),
+		    "Unable to Save Accounts",
+		    JOptionPane.ERROR_MESSAGE);
+	    }
+	}
     }
 
     /**

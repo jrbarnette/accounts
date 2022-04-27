@@ -88,9 +88,6 @@ class AccountStorePanel extends JPanel
      */
     static private final String COPY = "Copy";
 
-    private AccountDataPanel accountDataPanel;
-    private PasswordGenPanel passwordPanel;
-
     private JButton earlierButton = new JButton(EARLIER);
     private JButton laterButton = new JButton(LATER);
     private JButton deleteButton = new JButton(DELETE);
@@ -99,10 +96,12 @@ class AccountStorePanel extends JPanel
     private JButton generateButton = new JButton(GENERATE);
     private JButton copyButton = new JButton(COPY);
 
-    private boolean accountsChanged;
+    private AccountDataPanel accountDataPanel;
+    private PasswordGenPanel passwordPanel;
 
     private JList<Account> accountList;
 
+    private File myAccountsFile;
     private AccountStore myAccountStore;
 
     private JPanel createButtonPanel(JButton[] buttons) {
@@ -116,9 +115,7 @@ class AccountStorePanel extends JPanel
     }
 
     private JComponent createAccountButtons() {
-	earlierButton.setEnabled(false);
 	earlierButton.addActionListener(this);
-	laterButton.setEnabled(false);
 	laterButton.addActionListener(this);
 
 	JPanel combinedPanel = new JPanel(new GridLayout(0, 2));
@@ -175,13 +172,8 @@ class AccountStorePanel extends JPanel
 	outer.add(passwordPanel, BorderLayout.SOUTH);
 	add(outer, BorderLayout.CENTER);
 
-	clearAccounts();
-	// XXX Usually, clearAccounts() triggers field changes that
-	// invoke validateAccountFields().  But the call here doesn't.
-	// I'm not sure why; best guess is because the fields are
-	// already all empty.  So, we call to validate the fields
-	// manually.
 	validateAccountFields();
+	generateButton.setEnabled(false);
     }
 
     /**
@@ -242,11 +234,13 @@ class AccountStorePanel extends JPanel
 	clearButton.setEnabled(existing || changed);
 	updateButton.setEnabled(changed && valid);
 	copyButton.setEnabled(deleteButton.isEnabled());
-	accountList.setEnabled(!changed);
+
 	laterButton.setEnabled(!changed
 			       && !accountDataPanel.isLatestUpdate());
 	earlierButton.setEnabled(!changed
 				 && !accountDataPanel.isEarliestUpdate());
+
+	accountList.setEnabled(!changed);
     }
 
     public void insertUpdate(DocumentEvent e) {
@@ -258,8 +252,19 @@ class AccountStorePanel extends JPanel
     }
 
     public void changedUpdate(DocumentEvent e) {
-	// I _think_ this is for non-text property changes
+	// I _think_ this event is for non-text property changes
 	// validateAccountFields();
+    }
+
+    /**
+     * Update buttons and fields after changing the account selection.
+     */
+    private void setSelectedAccount() {
+	accountDataPanel.setSelectedAccount(
+		accountList.getSelectedValue());
+	laterButton.setEnabled(!accountDataPanel.isLatestUpdate());
+	earlierButton.setEnabled(!accountDataPanel.isEarliestUpdate());
+	generateButton.setEnabled(accountDataPanel.isEditable());
     }
 
     /**
@@ -269,6 +274,8 @@ class AccountStorePanel extends JPanel
      * selection will have been cleared.
      */
     private void refillAccountList() {
+	boolean noPriorSelection
+	    = accountList.getSelectedValue() == null;
 	Vector<Account> v = new Vector<Account>();
 	for (Account acct : myAccountStore) {
 	    v.add(acct);
@@ -276,7 +283,34 @@ class AccountStorePanel extends JPanel
 	// This call leaves the current selection cleared.  If there was
 	// a selection prior to the call, this will also trigger a call
 	// to `valueChanged()`.
+	//
+	// Note that if there was no selection prior to entry, there
+	// will be no selection event to trigger `valueChanged()`. In
+	// that case, we trigger the relevant handling manually.  This
+	// is currently only needed at startup when we first set
+	// `myAccountsFile` in `createAccountStore()` or
+	// `openAccountStore()`.
+
 	accountList.setListData(v);
+	if (noPriorSelection) {
+	    setSelectedAccount();
+	}
+    }
+
+    private void autosaveAccountStore() {
+	try {
+	    myAccountStore.writeAccounts(
+		new FileOutputStream(myAccountsFile));
+	} catch (Exception e) {
+	    JOptionPane.showMessageDialog(
+		this,
+		"Unable to save '"
+		    + myAccountsFile.getName() +"': "
+		    + e.getMessage(),
+		"Automatic Save Failed",
+		JOptionPane.ERROR_MESSAGE);
+	}
+	refillAccountList();
     }
 
     /**
@@ -287,19 +321,18 @@ class AccountStorePanel extends JPanel
 	// validateAccountFields() guarantees that there's an account
 	// selection in this case.
 	myAccountStore.deleteAccount(accountList.getSelectedValue());
-	accountsChanged = true;
-	refillAccountList();
+	autosaveAccountStore();
     }
 
     /**
-     * Update the account store with current data from the account
+     * Update the account store with edited data from the account
      * panel.  If there is an account currently selected, the data is
      * used to update the selected account.  Otherwise, a new account is
      * created from the data.  After the call, the new or updated
      * account will be the current selection.
      */
     private void updateAccountStore() {
-	// error check: creating a duplicate.
+	// XXX: error check: creating a duplicate.
 	Account account;
 	if (!accountList.isSelectionEmpty()) {
 	    account = accountList.getSelectedValue();
@@ -316,8 +349,7 @@ class AccountStorePanel extends JPanel
 		accountDataPanel.getUsername(),
 		accountDataPanel.getPassword());
 	}
-	accountsChanged = true;
-	refillAccountList();
+	autosaveAccountStore();
 	accountList.setSelectedValue(account, true);
     }
 
@@ -367,20 +399,27 @@ class AccountStorePanel extends JPanel
     public void valueChanged(ListSelectionEvent e) {
 	if (e.getValueIsAdjusting())
 	    return;
-	accountDataPanel.setSelectedAccount(
-		accountList.getSelectedValue());
-	laterButton.setEnabled(!accountDataPanel.isLatestUpdate());
-	earlierButton.setEnabled(!accountDataPanel.isEarliestUpdate());
-	generateButton.setEnabled(accountDataPanel.isEditable());
+	setSelectedAccount();
 	accountList.requestFocusInWindow();
     }
 
     /**
-     * Clear our account data as for the "File-&gt;New" menu option.
+     * Create a new account store as for the "File-&gt;New" menu option.
+     *
+     * @param accountsFile File to which to write our new account store.
+     * @param password Password for encrypting the file.
+     *
+     * @throws GeneralSecurityException Indicates a failure relating to
+     *     encrypting the file.
+     * @throws IOException Indicates a failure creating or writing to
+     *     the file.
      */
-    void clearAccounts() {
+    void createAccountStore(File accountsFile, char[] password)
+	    throws IOException, GeneralSecurityException {
 	myAccountStore = new AccountStore();
-	accountsChanged = false;
+	myAccountsFile = accountsFile;
+	myAccountStore.writeAccounts(
+	    new FileOutputStream(myAccountsFile), password);
 	refillAccountList();
     }
 
@@ -389,17 +428,22 @@ class AccountStorePanel extends JPanel
      *
      * @param accountsFile File from which to read our new account data.
      * @param password Password for decrypting the file.
+     *
      * @throws GeneralSecurityException Indicates a failure relating to
      *     decrypting the file.
      * @throws IOException Indicates a failure opening or reading from
      *     the file.
      */
-    void openAccounts(File accountsFile, char[] password)
+    void openAccountStore(File accountsFile, char[] password)
 	    throws IOException, GeneralSecurityException {
+	if (myAccountStore == null) {
+	    myAccountStore = new AccountStore();
+	}
+	myAccountsFile = accountsFile;
 	myAccountStore.readAccounts(
-	    new FileInputStream(accountsFile), password);
-	accountsChanged = false;
+	    new FileInputStream(myAccountsFile), password);
 	refillAccountList();
+	accountList.requestFocusInWindow();
     }
 
     /**
@@ -408,19 +452,22 @@ class AccountStorePanel extends JPanel
      *
      * @param mergeFile File containing additional account data to be
      *     merged into <code>myAccountStore</code>.
-     * @param password Password for decrypting the file.
+     * @param password Password for decrypting the merge file.
+     *
      * @throws GeneralSecurityException Indicates a failure relating to
-     *     decrypting the file.
-     * @throws IOException Indicates a failure opening or reading from
-     *     the file.
+     *     decrypting the merge file or encrypting the accounts file.
+     * @throws IOException Indicates a failure reading from the merge
+     *     file, or writing to the accounts file.
      */
-    void mergeAccounts(File mergeFile, char[] password)
+    void mergeAccountStore(File mergeFile, char[] password)
 	    throws IOException, GeneralSecurityException {
 	AccountStore merge = new AccountStore(
 	    new FileInputStream(mergeFile), password);
 	myAccountStore.mergeAccounts(merge);
-	accountsChanged = true;
+	myAccountStore.writeAccounts(
+	    new FileOutputStream(myAccountsFile));
 	refillAccountList();
+	accountList.requestFocusInWindow();
     }
 
     /**
@@ -430,29 +477,16 @@ class AccountStorePanel extends JPanel
      *     data.
      * @param password Password for encrypting the account data in the
      *     file.
+     *
      * @throws GeneralSecurityException Indicates a failure relating to
      *     file encryption.
-     * @throws IOException Indicates a failure writing to the file.
+     * @throws IOException Indicates a failure creating or writing to
+     *     the file.
      */
-    void saveAccounts(File accountsFile, char[] password)
+    void saveAccountStore(File accountsFile, char[] password)
 	    throws IOException, GeneralSecurityException {
-	if (password != null)
-	    myAccountStore.writeAccounts(
-		new FileOutputStream(accountsFile), password);
-	else
-	    myAccountStore.writeAccounts(
-		new FileOutputStream(accountsFile));
-	accountsChanged = false;
-    }
-
-    /**
-     * Return whether the account store has changes that have not been
-     * written out.
-     *
-     * @return True if any changes have not been written out by
-     *     saveAccounts().
-     */
-    boolean needSave() {
-	return accountsChanged;
+	myAccountsFile = accountsFile;
+	myAccountStore.writeAccounts(
+	    new FileOutputStream(myAccountsFile), password);
     }
 }
