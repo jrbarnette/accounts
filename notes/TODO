@@ -8,13 +8,15 @@
       extract them into a new class, say "ConcreteAccountData".
     - Some test methods in TestAccount are against those common bits;
       extract them to a new test class.
-  - The File->Merge menu option shouldn't be enabled when there's no
-    currently open file.
   - The Merge file chooser dialog uses "Open" for its button text.
-    It should say "Merge" instead.
+    It should say "Merge" instead.  Analagous problem for the "New
+    file" dialog.
+      - Problem is that the Java widget effectively only allows
+	customizing the button for "SAVE" dialogs...
   - Allow multiple frames to have different files open at once.
-  - Allow saving individual accounts to create a new file, or records
-    from one file to another.
+  - Allow saving individual accounts to create a new file, or moving
+    records from one file to another. (To be enabled by multiple
+    frames per App).
 
 -- Current state
 File merge is done; think about making it better:
@@ -33,12 +35,6 @@ Need to handle operations that could create duplicate descriptions:
     couldn't be merged."
 
 -- Bugs
-After "File->Merge", the merged file become the new default for
-"Save As".
-  - This problem hasn't been fully scoped, but it looks like it
-    may affect the target for "Save" as well...
-  - The problem should go away with the code changes for autosave...
-
 In save dialogs, changes to the "Save As" file name text don't become
 the file name if you merely transfer focus out; you must click "Save"
 or press <return> in the text box.  That means this sequence fails:
