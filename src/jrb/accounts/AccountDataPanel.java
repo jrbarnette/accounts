@@ -41,13 +41,16 @@ class AccountDataPanel extends JPanel implements FocusListener {
     private Account savedAccount;
     private int updateIndex;
 
-    private void initializeTextFields(DocumentListener listener) {
+    private JTextField[] allTextFields() {
 	JTextField[] fields = {
 	    descriptionText, urlText, usernameText, passwordText,
 	};
+	return fields;
+    }
 
-	for (JTextField f : fields) {
-	    f.setEnabled(false);
+    private void initializeTextFields(DocumentListener listener) {
+	for (JTextField f : allTextFields()) {
+	    f.setEditable(false);
 	    f.addFocusListener(this);
 	    f.getDocument().addDocumentListener(listener);
 	}
@@ -105,26 +108,22 @@ class AccountDataPanel extends JPanel implements FocusListener {
 	    // These changes will trigger DocumentEvent notifications
 	    // that will update the button states.
 	    descriptionText.setText(data.getDescription());
-	    descriptionText.setEnabled(updateIndex == 0);
 	    urlText.setText(data.getUrl());
-	    urlText.setEnabled(updateIndex == 0);
 	    usernameText.setText(data.getUsername());
-	    usernameText.setEnabled(updateIndex == 0);
 	    passwordText.setText(data.getPassword());
-	    passwordText.setEnabled(updateIndex == 0);
+
+	    for (JTextField f : allTextFields()) {
+		f.setEditable(updateIndex == 0);
+	    }
 	} else {
 	    uuidLabel.setText("");
 	    timestampLabel.setText("");
 
 	    // These changes will trigger DocumentEvent notifications
 	    // that will update the button states.
-	    JTextField[] fields = {
-		descriptionText, urlText, usernameText, passwordText,
-	    };
-
-	    for (JTextField f : fields) {
+	    for (JTextField f : allTextFields()) {
 		f.setText("");
-		f.setEnabled(true);
+		f.setEditable(true);
 	    }
 	}
     }
