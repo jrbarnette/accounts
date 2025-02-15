@@ -5,11 +5,17 @@
         Account Manager
     </description>
 
+  <property name="jarfile" location="accounts.jar"/>
+
+  <property name="libdir" location="${user.home}/lib"/>
+  <fileset id="lib" dir="${libdir}">
+      <include name="*.jar"/>
+  </fileset>
+
   <property environment="env"/>
 
   <property name="classes" location="classes"/>
   <property name="source.list" location="source-list"/>
-  <property name="jarfile" location="accounts.jar"/>
 
   <property name="test.classes" location="test-classes"/>
   <property name="tests.list" location="tests-list"/>
@@ -39,7 +45,7 @@
 	    includeantruntime="false">
 	<classpath>
 	    <pathelement location="${classes}"/>
-	    <pathelement path="${env.CLASSPATH}"/>
+	    <fileset refid="lib"/>
 	</classpath>
     </javac>
     <copy todir="${test.classes}">
@@ -51,7 +57,7 @@
 
   <target name="javadoc"
         description="generate javadoc for all code"
-	depends="source-list">
+	depends="source-list,tests-list">
     <delete dir="${javadoc}"/>
     <javadoc destdir="${javadoc}" access="package" noqualifier="all">
 	<fileset dir="${basedir}/src" includesfile="${source.list}"/>
