@@ -7,11 +7,6 @@
 
   <property name="jarfile" location="accounts.jar"/>
 
-  <property name="libdir" location="${user.home}/lib"/>
-  <fileset id="lib" dir="${libdir}">
-      <include name="*.jar"/>
-  </fileset>
-
   <property environment="env"/>
 
   <property name="classes" location="classes"/>
@@ -45,7 +40,7 @@
 	    includeantruntime="false">
 	<classpath>
 	    <pathelement location="${classes}"/>
-	    <fileset refid="lib"/>
+	    <pathelement path="${env.CLASSPATH}"/>
 	</classpath>
     </javac>
     <copy todir="${test.classes}">
