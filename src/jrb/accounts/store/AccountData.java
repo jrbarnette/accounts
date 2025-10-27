@@ -2,7 +2,7 @@
  * Copyright 2020, by J. Richard Barnette.  All Rights Reserved.
  */
 
-package jrb.accounts;
+package jrb.accounts.store;
 
 import java.util.Date;
 import java.util.UUID;

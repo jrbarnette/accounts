@@ -2,7 +2,7 @@
  * Copyright 2019, by J. Richard Barnette.  All Rights Reserved.
  */
 
-package jrb.accounts;
+package jrb.accounts.password;
 
 import org.junit.Test;
 import static org.junit.Assert.*;

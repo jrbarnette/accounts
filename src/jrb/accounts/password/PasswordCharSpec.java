@@ -2,7 +2,7 @@
  * Copyright 2019, by J. Richard Barnette.  All Rights Reserved.
  */
 
-package jrb.accounts;
+package jrb.accounts.password;
 
 import java.util.Random;
 import java.util.Collection;

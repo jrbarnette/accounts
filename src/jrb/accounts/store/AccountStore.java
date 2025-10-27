@@ -2,7 +2,7 @@
  * Copyright 2018, by J. Richard Barnette.  All Rights Reserved.
  */
 
-package jrb.accounts;
+package jrb.accounts.store;
 
 import java.io.DataInput;
 import java.io.DataInputStream;

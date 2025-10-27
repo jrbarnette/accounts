@@ -4,8 +4,8 @@
 
 package jrb.accounts.swingui;
 
-import jrb.accounts.PasswordCharSpec;
-import jrb.accounts.PasswordGenerator;
+import jrb.accounts.password.PasswordCharSpec;
+import jrb.accounts.password.PasswordGenerator;
 
 import java.util.List;
 import java.util.Vector;

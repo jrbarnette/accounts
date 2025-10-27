@@ -4,8 +4,8 @@
 
 package jrb.accounts.swingui;
 
-import jrb.accounts.Account;
-import jrb.accounts.AccountData;
+import jrb.accounts.store.Account;
+import jrb.accounts.store.AccountData;
 
 import java.util.Vector;
 
