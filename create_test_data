@@ -42,5 +42,5 @@ usage() {
 ant tests || exit $?
 OUTFILE=$1
 export CLASSPATH=test-classes:accounts.jar:$CLASSPATH
-GENERATOR=jrb.accounts.TestAccountStore
+GENERATOR=jrb.accounts.store.TestAccountStore
 java $GENERATOR "$OUTFILE"
