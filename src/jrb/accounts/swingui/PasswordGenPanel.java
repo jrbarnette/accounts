@@ -2,7 +2,10 @@
  * Copyright 2019, by J. Richard Barnette.  All Rights Reserved.
  */
 
-package jrb.accounts;
+package jrb.accounts.swingui;
+
+import jrb.accounts.PasswordCharSpec;
+import jrb.accounts.PasswordGenerator;
 
 import java.util.List;
 import java.util.Vector;

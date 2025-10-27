@@ -25,7 +25,7 @@ import java.util.UUID;
  *<dd> The time (as a <code>Date</code>) when the data was created.
  *</dl>
  */
-abstract class AccountData {
+public abstract class AccountData {
     /**
      * Return the account's description property.
      *

@@ -30,7 +30,7 @@ import java.util.UUID;
  * set of accounts can be saved in a file, encrypted, and later read
  * back to reconstruct the saved account store.
  */
-class AccountStore implements Iterable<Account>, Cloneable {
+public class AccountStore implements Iterable<Account>, Cloneable {
     static int FORMAT_V1 = 1;
 
     static int FORMAT_V2 = 2;

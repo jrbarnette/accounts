@@ -9,7 +9,7 @@ import java.util.Collection;
 
 /**
  */
-class PasswordCharSpec {
+public class PasswordCharSpec {
     public static final String SPECIAL = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
 
     private static final String UPPERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -32,7 +32,7 @@ class PasswordCharSpec {
 	this(chars.toCharArray(), mult);
     }
 
-    PasswordCharSpec(Collection<Character> chars, int mult) {
+    public PasswordCharSpec(Collection<Character> chars, int mult) {
 	allowableChars = new char[chars.size()];
 	int index = 0;
 	for (Character c : chars) {
@@ -42,19 +42,19 @@ class PasswordCharSpec {
 	multiplicity = mult;
     }
 
-    static PasswordCharSpec createUppercaseCharSpec(int multiplicity) {
+    public static PasswordCharSpec createUppercaseCharSpec(int multiplicity) {
 	return new PasswordCharSpec(UPPERS, multiplicity);
     }
 
-    static PasswordCharSpec createLowercaseCharSpec(int multiplicity) {
+    public static PasswordCharSpec createLowercaseCharSpec(int multiplicity) {
 	return new PasswordCharSpec(LOWERS, multiplicity);
     }
 
-    static PasswordCharSpec createDigitCharSpec(int multiplicity) {
+    public static PasswordCharSpec createDigitCharSpec(int multiplicity) {
 	return new PasswordCharSpec(DIGITS, multiplicity);
     }
 
-    static PasswordCharSpec createLetterCharSpec(int multiplicity) {
+    public static PasswordCharSpec createLetterCharSpec(int multiplicity) {
 	return new PasswordCharSpec(LETTERS, multiplicity);
     }
 

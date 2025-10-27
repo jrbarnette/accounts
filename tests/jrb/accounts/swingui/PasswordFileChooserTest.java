@@ -2,7 +2,7 @@
  * Copyright 2020, by J. Richard Barnette.  All Rights Reserved.
  */
 
-package jrb.accounts;
+package jrb.accounts.swingui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;

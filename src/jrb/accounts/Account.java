@@ -22,7 +22,7 @@ import java.util.Vector;
  * returns the values of its account data properties as of the most
  * recent update.
  */
-class Account extends AccountData implements Cloneable {
+public class Account extends AccountData implements Cloneable {
     /**
      * One entry in the update history of an <code>Account</code>.
      */

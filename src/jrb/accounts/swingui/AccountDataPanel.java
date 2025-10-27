@@ -2,7 +2,10 @@
  * Copyright 2020, by J. Richard Barnette.  All Rights Reserved.
  */
 
-package jrb.accounts;
+package jrb.accounts.swingui;
+
+import jrb.accounts.Account;
+import jrb.accounts.AccountData;
 
 import java.util.Vector;
 
