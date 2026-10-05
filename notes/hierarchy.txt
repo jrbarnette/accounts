@@ -1,0 +1,20 @@
+Relevant methods in AccountStore
+    createAccount()
+    updateAccount()
+    deleteAccount()
+    mergeAccounts()
+
+Relevant methods to be implemented for TreeNode
+    children()
+    getAllowsChildren()
+    getChildAt()
+    getChildCount()
+    getIndex()
+    getParent()
+    isLeaf()
+Further methods to be implemented for MutableTreeNode
+    insert()
+    remove() - by index or node value
+    removeFromParent()
+    setParent()
+    setUserObject()

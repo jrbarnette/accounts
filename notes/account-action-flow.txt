@@ -1,0 +1,139 @@
+ Name        | X | C | V | E | L | New/Rev | Upd/Add | N | U | D | < | > | S |
+-------------+---+---+---+---+---+---------+---------+---+---+---+---+---+---+
+ New         | F | F | F | F | T | Revert  | Add     | F | F | F | F | F | T |
+ Selected    | T | F | T | F | T | New     | Update  | T | F | T | T | F | T |
+ Prior       | T | F | T | F | F | New     | Update  | T | F | T | T | T | T |
+ First       | T | F | T | T | F | New     | Update  | T | F | T | F | T | T |
+ New/Invalid | F | T | F | F | T | Revert  | Add     | T | F | F | F | F | F |
+ New/Valid   | F | T | T | F | T | Revert  | Add     | T | T | F | F | F | F |
+ Sel/Invalid | T | T | F | F | T | Revert  | Update  | T | F | F | F | F | F |
+ Sel/Valid   | T | T | T | F | T | Revert  | Update  | T | T | F | F | F | F |
+
+operations:
+N - new | revert
+U - update | add
+D - delete
+< - earlier
+> - later
+S - select
+  - edit, generate
+  - copy
+
+
+ X | C | V | E | L |
+---+---+---+---+---+
+ F | F | F | F | F | not valid
+ F | F | F | T | F | not valid
+ F | F | F | T | T | not valid
+ F | F | T | F | F | not valid
+ F | F | T | F | T | not valid
+ F | F | T | T | F | not valid
+ F | F | T | T | T | not valid
+ F | T | F | F | F | not valid
+ F | T | F | T | F | not valid
+ F | T | F | T | T | not valid
+ F | T | T | F | F | not valid
+ F | T | T | T | F | not valid
+ F | T | T | T | T | not valid
+ T | F | F | F | F | not valid
+ T | F | F | F | T | not valid
+ T | F | F | T | F | not valid
+ T | F | F | T | T | not valid
+ T | F | T | T | T | not valid
+ T | T | F | F | F | not valid
+ T | T | F | T | F | not valid
+ T | T | F | T | T | not valid
+ T | T | T | F | F | not valid
+ T | T | T | T | F | not valid
+ T | T | T | T | T | not valid
+
+
+--
+Data
+
+Account list (account store) widget (JList; want to be JTree)
+    selected account
+    event: new selection
+account data index
+Account fields (AccountDataPanel)
+    collection of JTextField elements with account data
+    event: changed field
+
+edit state (CHANGED, VALID) <
+    JTextField contents
+
+edit state (EXISTING, EARLIEST, LATEST) <
+    selected account
+    account data index
+
+--
+select account -> ListSelectionListener valueChanged
+    state: not CHANGED
+    set account data index to 0
+    update account data fields from selected account data
+	-> DocumentListener insertUpdate, removeUpdate
+	state -> EXISTING, not CHANGED, VALID, LATEST
+
+earlier history -> ActionListener actionPerformed: EARLIER
+    state: EXISTING, not CHANGED, not EARLIEST
+    increment account data index
+    update account data fields from selected account data
+	-> DocumentListener insertUpdate, removeUpdate
+	state -> EXISTING, not CHANGED, VALID, not LATEST
+
+later history -> ActionListener actionPerformed: LATER
+    state: EXISTING, not CHANGED, not LATEST
+    decrement account data index
+    update account data fields from selected account data
+	-> DocumentListener insertUpdate, removeUpdate
+	state -> EXISTING, not CHANGED, VALID, not EARLIEST
+
+new account (clear fields) -> ActionListener actionPerformed: CLEAR
+    state: not CHANGED
+    clear selected account in account list
+	-> ListSelectionListener valueChanged
+
+delete account -> ActionListener actionPerformed: DELETE
+    assert: an account is selected
+    assert: no fields have changed
+    get selected account from account list
+    delete selected account from account store
+    update account list from account store
+	(implicitly clear list selection)
+	-> ListSelectionListener valueChanged
+
+update account -> ActionListener actionPerformed: UPDATE
+    assert: an account is selected
+    assert: some fields have changed
+    assert: all fields are valid
+    get selected account from account list
+    update selected account in account store with account data from fields
+	(text for "latest change" will be updated)
+
+add account -> ActionListener actionPerformed: ADD
+    assert: no selected account
+    assert: some fields have changed
+    assert: all fields are valid
+    create account in account store with account data from fields
+    update account list from account store
+	(update list selection to new account)
+	-> ListSelectionListener valueChanged
+
+revert edits -> ActionListener actionPerformed: REVERT
+    assert: some fields have changed
+    restore account data fields from selected account
+	-> DocumentListener insertUpdate, removeUpdate
+
+copy password -> ActionListener actionPerformed: COPY
+    assert: an account is selected
+    assert: no fields have changed
+    copy contents of password field
+	(or password from selected account data)
+    (no changes)
+
+generate password -> ActionListener actionPerformed: GENERATE
+    set password field to generated content
+    -> DocumentListener insertUpdate, removeUpdate
+
+edit field -> DocumentListener insertUpdate, removeUpdate
+    update button/control states from field states

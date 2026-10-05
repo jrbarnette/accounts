@@ -1,0 +1,17 @@
+creation/initialization in constructor
+    including placement in scroll pane, and adding to top frame
+
+enable/disable in validateAccountFields()
+    invoked after changes to text fields in account data
+
+get current selection
+    when updating an existing account, if the selection exists
+
+Re-fill after changes to content:
+  * Creating a new store
+  * Opening an existing store
+  * Merging content from another store
+  * Deleting an account from the current store
+	(happens in conjunction w/ autosave)
+  * Adding or updating and account within the current store
+	(happens in conjunction w/ autosave)
