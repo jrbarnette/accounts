@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.Spinner?>
-<?import javafx.scene.control.SpinnerValueFactory?>
 <?import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
@@ -15,123 +14,127 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
-
-<HBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
-      maxHeight="-Infinity" maxWidth="-Infinity"
-      minHeight="-Infinity" minWidth="-Infinity">
-   <children>
-      <ListView />
-      <VBox>
-         <TitledPane text="Account Information"> <VBox spacing="5.0">
+<HBox xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+   <ListView/>
+   <VBox spacing="5.0">
+      <TitledPane text="Account Information">
+         <VBox spacing="5.0">
             <GridPane hgap="5.0">
-            <columnConstraints>
-               <ColumnConstraints halignment="RIGHT" />
-               <ColumnConstraints halignment="LEFT" />
-            </columnConstraints>
-            <Label text="Account UUIID"
-                   GridPane.rowIndex="0" GridPane.columnIndex="0" />
-            <Label text="Replace with UUID"
-                   GridPane.rowIndex="0" GridPane.columnIndex="1" />
-
-            <Label text="Description"
-                   GridPane.rowIndex="1" GridPane.columnIndex="0" />
-            <TextField prefColumnCount="35"
-                   GridPane.rowIndex="1" GridPane.columnIndex="1" />
-
-            <Label text="URL"
-                   GridPane.rowIndex="2" GridPane.columnIndex="0" />
-            <TextField prefColumnCount="35"
-                   GridPane.rowIndex="2" GridPane.columnIndex="1" />
-
-            <Label text="User Name"
-                   GridPane.rowIndex="3" GridPane.columnIndex="0" />
-            <TextField prefColumnCount="35"
-                   GridPane.rowIndex="3" GridPane.columnIndex="1" />
-
-            <Label text="Password"
-                   GridPane.rowIndex="4" GridPane.columnIndex="0" />
-            <TextField prefColumnCount="35"
-                   GridPane.rowIndex="4" GridPane.columnIndex="1" />
-
-            <Label text="Entry Creation Date"
-                   GridPane.rowIndex="5" GridPane.columnIndex="0" />
-            <Label text="Replace with timestamp"
-                   GridPane.rowIndex="5" GridPane.columnIndex="1" />
+               <columnConstraints>
+                  <ColumnConstraints halignment="RIGHT"/>
+                  <ColumnConstraints halignment="LEFT"/>
+               </columnConstraints>
+               <Label text="Account UUIID" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+               <Label text="Replace with UUID" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+               <Label text="Description" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+               <TextField prefColumnCount="35" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+               <Label text="URL" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+               <TextField prefColumnCount="35" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+               <Label text="User Name" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+               <TextField prefColumnCount="35" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+               <Label text="Password" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+               <PasswordField prefColumnCount="35" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+               <Label text="Entry Creation Date" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+               <Label text="Replace with timestamp" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+               <rowConstraints>
+                  <RowConstraints/>
+                  <RowConstraints/>
+                  <RowConstraints/>
+                  <RowConstraints/>
+                  <RowConstraints/>
+                  <RowConstraints/>
+               </rowConstraints>
             </GridPane>
-
             <FlowPane alignment="CENTER" hgap="10.0">
-            <children>
-               <Button mnemonicParsing="false" text=" &lt; " />
-               <Button mnemonicParsing="false" text=" &gt; " />
-            </children>
+               <Button mnemonicParsing="false" text=" &lt; "/>
+               <Button mnemonicParsing="false" text=" &gt; "/>
             </FlowPane>
-         </VBox> </TitledPane>
-
-         <TitledPane animated="false" text="Password Parameters">
+         </VBox>
+      </TitledPane>
+      <FlowPane alignment="CENTER_RIGHT" hgap="10.0">
+         <Button mnemonicParsing="false" text="Delete"/>
+         <Button mnemonicParsing="false" text="Revert"/>
+         <Button mnemonicParsing="false" text="Add"/>
+      </FlowPane>
+      <FlowPane alignment="CENTER_RIGHT" hgap="10.0">
+         <Button mnemonicParsing="false" text="Generate"/>
+         <Button mnemonicParsing="false" text="Copy"/>
+      </FlowPane>
+      <TitledPane animated="false" text="Password Parameters">
          <BorderPane>
             <top>
-            <FlowPane alignment="CENTER" hgap="3.0">
-               <Label text="Minimum length" />
-               <Spinner>
-                  <editor>
-                     <TextField prefColumnCount="3" />
-                  </editor>
-               <!--
-                  <valueFactory>
-                     <SpinnerValueFactory.IntegerSpinnerValueFactory
-                        min="1" max="20" amountToStepBy="1" />
-                  </valueFactory>
-               -->
-               </Spinner>
-               <Label text="Maximum length" />
-               <Spinner />
-            </FlowPane>
+               <FlowPane alignment="CENTER" hgap="3.0">
+                  <Label text="Minimum length"/>
+                  <Spinner fx:id="minPassword" prefWidth="54.0">
+                     <valueFactory>
+                        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="20" min="1"/>
+                     </valueFactory>
+                  </Spinner>
+                  <Label text="Maximum length"/>
+                  <Spinner fx:id="maxPassword" prefWidth="54.0">
+                     <valueFactory>
+                        <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="20" min="1"/>
+                     </valueFactory>
+                  </Spinner>
+               </FlowPane>
             </top>
+            <left>
+               <GridPane>
+                  <columnConstraints>
+                     <ColumnConstraints hgrow="SOMETIMES"/>
+                     <ColumnConstraints hgrow="SOMETIMES"/>
+                  </columnConstraints>
+                  <rowConstraints>
+                     <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES"/>
+                     <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES"/>
+                     <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES"/>
+                     <RowConstraints minHeight="-Infinity" vgrow="SOMETIMES"/>
+                  </rowConstraints>
+                  <children>
+                     <Label text="Lowercase letters"/>
+                     <Spinner fx:id="numUppercase" prefWidth="54.0" GridPane.columnIndex="1">
+                        <valueFactory>
+                           <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="20" min="1"/>
+                        </valueFactory>
+                     </Spinner>
+                     <Label text="Uppercase letters" GridPane.rowIndex="1"/>
+                     <Label text="Digits" GridPane.rowIndex="2"/>
+                     <Label text="Special characters" GridPane.rowIndex="3"/>
+                     <Spinner fx:id="numLowercase" layoutX="111.0" layoutY="10.0" prefWidth="54.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <valueFactory>
+                           <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="20" min="1"/>
+                        </valueFactory>
+                     </Spinner>
+                     <Spinner fx:id="numDigit" layoutX="111.0" layoutY="36.0" prefWidth="54.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <valueFactory>
+                           <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="20" min="1"/>
+                        </valueFactory>
+                     </Spinner>
+                     <Spinner fx:id="numSpecial" layoutX="111.0" layoutY="62.0" prefWidth="54.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        <valueFactory>
+                           <SpinnerValueFactory.IntegerSpinnerValueFactory amountToStepBy="1" max="20" min="1"/>
+                        </valueFactory>
+                     </Spinner>
+                  </children>
+               </GridPane>
+            </left>
+            <center>
+               <VBox alignment="TOP_CENTER" spacing="5.0" BorderPane.alignment="CENTER">
+                  <children>
+                     <Label text="Allowed special  characters"/>
+                     <ListView fixedCellSize="1.0" orientation="HORIZONTAL" prefHeight="17.0"/>
+                     <HBox alignment="TOP_CENTER" spacing="10.0">
+                        <children>
+                           <Button mnemonicParsing="false" text="prohibit"/>
+                           <Button mnemonicParsing="false" text="allow"/>
+                        </children>
+                     </HBox>
+                     <Label layoutX="133.0" layoutY="10.0" text="Prohibited special  characters"/>
+                     <ListView fixedCellSize="1.0" layoutX="10.0" layoutY="32.0" orientation="HORIZONTAL" prefHeight="17.0"/>
+                  </children>
+               </VBox>
+            </center>
          </BorderPane>
-         </TitledPane>
-
-<!--
-            <GridPane vgap="3.0">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints vgrow="SOMETIMES" />
-                <RowConstraints vgrow="SOMETIMES" />
-                <RowConstraints vgrow="SOMETIMES" />
-              </rowConstraints>
-
-               <children>
-                  <FlowPane alignment="CENTER_RIGHT" columnHalignment="CENTER" hgap="10.0" GridPane.rowIndex="1">
-                     <children>
-                        <Button mnemonicParsing="false" text="Delete" />
-                        <Button mnemonicParsing="false" text="Revert" />
-                        <Button mnemonicParsing="false" text="Add" />
-                     </children>
-                  </FlowPane>
-                  <FlowPane alignment="CENTER_RIGHT" columnHalignment="CENTER" hgap="10.0" GridPane.rowIndex="2">
-                     <children>
-                        <Button mnemonicParsing="false" text="Generate" />
-                        <Button mnemonicParsing="false" text="Copy" />
-                     </children>
-                  </FlowPane>
-               </children>
-            </GridPane>
-
--->
-<!--
-               <content>
-                     </top>
-                     <left>
-                        <VBox BorderPane.alignment="CENTER" />
-                     </left>
-                     <center>
-                        <VBox BorderPane.alignment="CENTER" />
-                     </center>
-                  </BorderPane>
-               </content>
-         </children>
--->
-      </VBox>
-    </children>
+      </TitledPane>
+   </VBox>
 </HBox>
