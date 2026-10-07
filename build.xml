@@ -7,6 +7,22 @@
 
   <property name="jarfile" location="accounts.jar"/>
 
+  <property id="main.swing" name="main.swing"
+            value="jrb.accounts.swingui.AccountStoreUI"/>
+  <property id="main.jfx" name="main.jfx"
+            value="jrb.accounts.jfxui.AccountStoreApp"/>
+
+  <!-- can override ui on the commandline w/ -D -->
+  <property name="ui" value="swing"/>
+  <property name="main" refid="main.${ui}"/>
+
+  <property name="modules" location="${user.home}/lib"/>
+  <path id="lib">
+    <fileset dir="${modules}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
   <property environment="env"/>
 
   <property name="classes" location="classes"/>
@@ -18,8 +34,12 @@
   <property name="javadoc" location="javadoc"/>
 
   <target name="jarfile" depends="compile">
-    <jar destfile="${jarfile}" basedir="${classes}"
-	 manifest="manifest.mf"/>
+    <jar destfile="${jarfile}" basedir="${classes}"/>
+    <exec executable="jar">
+      <arg value="-ufe"/>
+      <arg value="${jarfile}"/>
+      <arg value="${main}"/>
+    </exec>
   </target>
 
   <target name="compile"
@@ -27,8 +47,13 @@
 	depends="source-list">
     <mkdir dir="${classes}"/>
     <javac sourcepath="" srcdir="${basedir}/src"
-	includesfile="${source.list}" destdir="${classes}"
-	includeantruntime="false"/>
+        modulepath="${modules}"
+        includesfile="${source.list}" destdir="${classes}"
+        includeantruntime="false"
+        classpathref="lib"/>
+    <copy todir="${classes}/resources">
+      <fileset dir="${basedir}/resources"/>
+    </copy>
   </target>
 
   <target name="tests"
@@ -36,6 +61,7 @@
 	depends="tests-list,jarfile">
     <mkdir dir="${test.classes}"/>
     <javac sourcepath="" srcdir="${basedir}/tests"
+            modulepath="${modules}"
 	    includesfile="${tests.list}" destdir="${test.classes}"
 	    includeantruntime="false">
 	<classpath>
@@ -64,7 +90,7 @@
           description="find all Java sources under source control">
     <exec executable="git" output="${source.list}" dir="src">
       <arg value="ls-files"/>
-      <arg value="jrb"/>
+      <arg value="."/>
     </exec>
   </target>
 
