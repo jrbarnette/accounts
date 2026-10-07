@@ -28,6 +28,8 @@
   <property name="classes" location="classes"/>
   <property name="source.list" location="source-list"/>
 
+  <property name="resources.list" location="resources-list"/>
+
   <property name="test.classes" location="test-classes"/>
   <property name="tests.list" location="tests-list"/>
 
@@ -44,15 +46,15 @@
 
   <target name="compile"
 	description="compile the sources"
-	depends="source-list">
+	depends="source-list,resources-list">
     <mkdir dir="${classes}"/>
     <javac sourcepath="" srcdir="${basedir}/src"
         modulepath="${modules}"
         includesfile="${source.list}" destdir="${classes}"
         includeantruntime="false"
         classpathref="lib"/>
-    <copy todir="${classes}/resources">
-      <fileset dir="${basedir}/resources"/>
+    <copy todir="${classes}">
+      <fileset dir="${basedir}" includesfile="${resources.list}"/>
     </copy>
   </target>
 
@@ -94,6 +96,14 @@
     </exec>
   </target>
 
+  <target name="resources-list"
+          description="find all resource files under source control">
+    <exec executable="git" output="${resources.list}" dir="${basedir}">
+      <arg value="ls-files"/>
+      <arg value="resources"/>
+    </exec>
+  </target>
+
   <target name="tests-list"
           description="find all Java tests under hg">
     <exec executable="git" output="${tests.list}" dir="tests">
@@ -108,6 +118,7 @@
     <delete dir="${javadoc}"/>
     <delete file="${jarfile}"/>
     <delete file="${source.list}"/>
+    <delete file="${resources.list}"/>
     <delete file="${tests.list}"/>
   </target>
 </project>
