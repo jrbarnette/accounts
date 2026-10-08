@@ -12,7 +12,7 @@
   <property id="main.jfx" name="main.jfx"
             value="jrb.accounts.jfxui.AccountStoreApp"/>
 
-  <!-- can override ui on the commandline w/ -D -->
+  <!-- override ui on the commandline w/ -D ui=... -->
   <property name="ui" value="swing"/>
   <property name="main" refid="main.${ui}"/>
 
@@ -82,9 +82,16 @@
         description="generate javadoc for all code"
 	depends="source-list,tests-list">
     <delete dir="${javadoc}"/>
-    <javadoc destdir="${javadoc}" access="package" noqualifier="all">
+    <javadoc destdir="${javadoc}" modulepath="${modules}"
+             access="package" noqualifier="all">
 	<fileset dir="${basedir}/src" includesfile="${source.list}"/>
+        <!--
 	<fileset dir="${basedir}/tests" includesfile="${tests.list}"/>
+	<classpath>
+	    <pathelement location="${classes}"/>
+	    <pathelement path="${env.CLASSPATH}"/>
+	</classpath>
+        -->
     </javadoc>
   </target>
 
