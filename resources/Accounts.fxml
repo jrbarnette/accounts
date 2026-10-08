@@ -121,8 +121,8 @@
             <center>
                <VBox alignment="TOP_CENTER" spacing="5.0" BorderPane.alignment="CENTER">
                   <children>
-                     <Label text="Allowed special  characters"/>
-                     <ListView fixedCellSize="1.0" orientation="HORIZONTAL" prefHeight="17.0"/>
+                     <Label text="Allowed special characters"/>
+                     <ListView fx:id="allowedSpecial" orientation="HORIZONTAL" prefHeight="40.0"/>
                      <HBox alignment="TOP_CENTER" spacing="10.0">
                         <children>
                            <Button mnemonicParsing="false" text="prohibit"/>
@@ -130,7 +130,7 @@
                         </children>
                      </HBox>
                      <Label layoutX="133.0" layoutY="10.0" text="Prohibited special  characters"/>
-                     <ListView fixedCellSize="1.0" layoutX="10.0" layoutY="32.0" orientation="HORIZONTAL" prefHeight="17.0"/>
+                     <ListView fx:id="prohibitedSpecial" orientation="HORIZONTAL" prefHeight="40.0"/>
                   </children>
                </VBox>
             </center>
