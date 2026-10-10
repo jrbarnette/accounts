@@ -10,8 +10,9 @@ import jrb.accounts.password.PasswordGenerator;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.collections.ObservableList;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
@@ -45,8 +46,7 @@ public class AccountStoreController implements Initializable {
     @FXML
     private Spinner<Integer> numSpecial;
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+    private void initializePasswordGeneration() {
 	minPassword.getEditor().setPrefColumnCount(3);
 	minPassword.getValueFactory().setValue(
 	    PasswordGenerator.DEFAULT_MIN_LENGTH);
@@ -71,5 +71,66 @@ public class AccountStoreController implements Initializable {
 	prohibitedSpecial.setItems(prohibitedList);
 	prohibitedSpecial.getSelectionModel()
 	    .setSelectionMode(SelectionMode.MULTIPLE);
+    }
+
+    @FXML
+    private void allowSelectedCharacters(ActionEvent actionEvent) {
+	ObservableList<Character> toBeAllowed
+	    = prohibitedSpecial.getSelectionModel().getSelectedItems();
+	// N.B. removing from the list alters the selection, so must
+	// "add" before "remove".
+	allowedSpecial.getItems().addAll(toBeAllowed);
+	prohibitedSpecial.getItems().removeAll(toBeAllowed);
+    }
+
+    @FXML
+    private void prohibitSelectedCharacters(ActionEvent actionEvent) {
+	ObservableList<Character> toBeProhibited
+	    = allowedSpecial.getSelectionModel().getSelectedItems();
+	// N.B. removing from the list alters the selection, so must
+	// "add" before "remove".
+	prohibitedSpecial.getItems().addAll(toBeProhibited);
+	allowedSpecial.getItems().removeAll(toBeProhibited);
+    }
+
+    @FXML
+    private void generatePassword(ActionEvent actionEvent) {
+	int min = minPassword.getValue().intValue();
+	int max = maxPassword.getValue().intValue();
+
+	if (min > max) {
+	    max = min;
+	}
+
+	PasswordGenerator gen = new PasswordGenerator(min, max);
+
+	int categoryCount = numUppercase.getValue().intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(
+		    PasswordCharSpec.createUppercaseCharSpec(categoryCount));
+	}
+	categoryCount = numLowercase.getValue().intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(
+		    PasswordCharSpec.createLowercaseCharSpec(categoryCount));
+	}
+	categoryCount = numDigit.getValue().intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(
+		    PasswordCharSpec.createDigitCharSpec(categoryCount));
+	}
+	categoryCount = numSpecial.getValue().intValue();
+	if (categoryCount > 0) {
+	    gen.addCharSpec(
+		new PasswordCharSpec(allowedSpecial.getItems(),
+				     categoryCount));
+	}
+
+	// gen.generatePassword();
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
+	initializePasswordGeneration();
     }
 }
